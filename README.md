@@ -15,8 +15,9 @@ Windows does not have Git preinstalled. There are two alternatives to install Gi
 ### 2.0 Get started
 When you have installed Git you need to download the Pumba development git repository. In the terminal, go to the folder you want to download the project in. You could call this folder *repos* for example and clone the repository into that folder. Clone the repository with the following command: `git clone https://github.com/pumpumba/project_TBD.git`.
 
-The first time you use Git it might ask you to set some information such as your name etcetera.
-If you use the Windows 10 Linux Subsystem, make sure that you stand in a folder that is accessible by Windows.
+The first time you use Git it might ask you to set some information such as your name etcetera. You will also have to connect to Github via SSH if you want to be able to push to the repository, here is a guide: https://help.github.com/articles/connecting-to-github-with-ssh/
+
+If you use the Windows 10 Linux Subsystem, make sure that you stand in a folder that is accessible by Windows. 
 
 This is what it could look like after getting started:
 [Getting started MacOS](readme_files/Gettingstartedmac.png)
