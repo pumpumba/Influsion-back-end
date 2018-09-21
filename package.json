@@ -14,10 +14,12 @@
   "author": "Erik Ståhl",
   "license": "ISC",
   "dependencies": {
-    "yo": "^2.0.5",
+    "express": "^4.16.3",
     "generator-machinepack": "^1.0.6",
     "machine": "^15.2.2",
-    "express": "^4.16.3"
+    "machinepack-twitter": "^2.0.1",
+    "sails": "^1.0.2",
+    "yo": "^2.0.5"
   },
   "bugs": {
     "url": "https://github.com/pumpumba/project_TBD/issues"
