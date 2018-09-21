@@ -1,8 +1,9 @@
 const Twitter = require('machinepack-twitter');
-const consumerKeyPumba = 'CDSKGGqFMalwOQWA0oDKEdOG2';
-const consumerSecretPumba = 'CTJWRfhguuwrJcBLz4hBX5hqcPDNI5d0o6YjobODqoev9UQJqL';
-const accessTokenPumba = '988054291767148544-z83ZcCSHjpNYCl6DXW9VLDtzfJJOxTC';
-const accessSecretPumba = 'Uw9Fo5tzjGPMxw7V2W2WxK7eHDNIm0uxBuyZgP6mAg2HT';
+//Enter your authorisation keys below in the following constants
+const consumerKeyPumba = '';
+const consumerSecretPumba = '';
+const accessTokenPumba = '';
+const accessSecretPumba = '';
 
 module.exports = {
   search: function (query) {
