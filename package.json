@@ -4,7 +4,7 @@
   "description": "A platform for enhanced influencer social media content",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "nodemon src/index.js --legacy-watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -17,7 +17,8 @@
     "yo": "^2.0.5",
     "generator-machinepack": "^1.0.6",
     "machine": "^15.2.2",
-    "express": "^4.16.3"
+    "express": "^4.16.3",
+    "nodemon": "^1.18.4"
   },
   "bugs": {
     "url": "https://github.com/pumpumba/project_TBD/issues"
