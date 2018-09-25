@@ -10,9 +10,7 @@ const port = 8080;
 const app = express();
 
 app.get("/", (req, res) => {
-    var obj = twitterNodeMachine.search('hej');
-    console.log("heeejsan");
-    console.log(obj);
+    var obj = twitterNodeMachine.getUserTweets('kembal');
 });
 
 app.listen(port, hostname);
