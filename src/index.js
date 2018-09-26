@@ -10,15 +10,19 @@ const app = express();
 instagram = require("./api/instagram");
 
 app.get("/", (req, res) => {
-  res.send("Hello World\n");
+  res.send(
+    "Hello! For Instagram API, go to ./api/instagram.For Twitter API, go to ./api/twitter"
+  );
 });
 
+//Instagram routing
 app.get("/api/instagram", (req, res) => {
   result = instagram.getInsta(result => {
     res.json(result);
   });
 });
 
+//Twitter routing
 var currentRes;
 
 function myCallback(result) {
@@ -32,9 +36,7 @@ function myCallback(result) {
   currentRes.send(text);
 }
 //var hello = twitterNodeMachine.getUserTweets('elonmusk', 10, myCallback);
-//console.log(hello);
 //var obj2 = twitterNodeMachine.getTweet(44196397, myCallback);
-//console.log(obj);
 
 app.get("/api/twitter", (req, res) => {
   currentRes = res;

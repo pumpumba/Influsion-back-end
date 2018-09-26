@@ -1,12 +1,12 @@
-const twit = require('twit');
+const twit = require("twit");
 //Enter your authorisation keys below in the following constants
-require('dotenv').load();
+require("dotenv").load();
 // We need this to build our post string
-var request = require('request');
-const got = require('got');
+var request = require("request");
+const got = require("got");
 
-var Twitter = require('twitter');
-var TwitterMP = require('machinepack-twitter');
+var Twitter = require("twitter");
+var TwitterMP = require("machinepack-twitter");
 
 const consumerKeyPumba = process.env.TWITTER_CONSUMER_KEY;
 const consumerSecretPumba = process.env.TWITTER_CONSUMER_SECRET;
@@ -22,16 +22,15 @@ var client = new Twitter({
   bearer_token: bearerTokenPumba
 });
 
-
 module.exports = {
-  search: function (query) {
+  search: function(query) {
     return TwitterMP.searchTweets({
       q: query,
       consumerKey: consumerKeyPumba,
       consumerSecret: consumerSecretPumba,
       accessToken: accessTokenPumba,
-      accessSecret: accessSecretPumba,
-    }).exec((err, result)=>{
+      accessSecret: accessSecretPumba
+    }).exec((err, result) => {
       if (err) {
         console.log("Failure at twitter search!");
         console.log(err);
@@ -48,9 +47,13 @@ module.exports = {
       consumer_secret: consumerSecretPumba,
       bearer_token: bearerTokenPumba
     });
-    client.get('/statuses/user_timeline', {screen_name: username, count: tweetsAmount}, function(error, tweets, response) {
-      callback(tweets);
-    });
+    client.get(
+      "/statuses/user_timeline",
+      { screen_name: username, count: tweetsAmount },
+      function(error, tweets, response) {
+        callback(tweets);
+      }
+    );
   },
   getTweet: function(tweet_id, callback) {
     var client = new Twitter({
@@ -59,7 +62,11 @@ module.exports = {
       bearer_token: bearerTokenPumba
     });
 
-    var result = client.get('/statuses/show', {id: tweet_id}, function(error, tweets, response) {
+    var result = client.get("/statuses/show", { id: tweet_id }, function(
+      error,
+      tweets,
+      response
+    ) {
       callback(tweets);
     });
   }
