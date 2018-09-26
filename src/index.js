@@ -2,15 +2,32 @@
 const express = require("express");
 //const fs = require("fs");
 
-
-
 const hostname = "0.0.0.0";
 const port = 8080;
-const googleClientIDPumba = process.env.GOOGLE_CLIENT_ID;
-const googleClientSecretPumba = process.env.GOOGLE_CLIENT_SECRET;
+
+const app = express();
+
+youtube = require("./api/youtube");
+
+app.get("/", (req, res) => {
+  res.send("Hello world!");
+})
+
+app.get("/api/youtube", (req, res) => {
+  //var user = req.params.user;
+  youtube.getYoutube((result) => {
+    //res.json(result);
+    //console.log(result)
+    //res.send(result)
+    //console.log("Klar!");
+    res.send(result);
+  });
+});
+
+app.listen(port, hostname);
+
 
 /*
-const app = express();
 const {google} = require('googleapis');
 const http = require('http');
 const url = require('url');
@@ -20,47 +37,6 @@ const destroyer = require('server-destroy');
 const fs = require('fs');
 const path = require('path');
 */
-
-//let google = require('googleapis');
-const {google} = require('googleapis');
-let privatekey = require("./pumbagoogleprivatekey.json");
-
-// configure a JWT auth client
-let jwtClient = new google.auth.JWT(
-       privatekey.client_email,
-       null,
-       privatekey.private_key,
-       ['https://www.googleapis.com/auth/youtube']);
-
-//authenticate request
-jwtClient.authorize(function (err, tokens) {
- if (err) {
-   console.log(err);
-   return;
- } else {
-   console.log("Successfully connected!");
- }
-});
-
-let youtube = google.youtube('v3');
-
-youtube.search.list({
-   auth: jwtClient,
-   part: 'snippet',
-   order: 'viewCount',
-   q: 'pewdiepie',
-   type: 'video'
-}, function (err, response) {
-   if (err) {
-       console.log('The API returned an error: ' + err);
-   } else {
-       console.log('Video list from Youtube:');
-       for (var i = 0; i < response.data.items.length; i++) {
-         console.log(response.data.items[i].snippet.title);
-       }
-
-   }
-});
 
 /*
 async function runSample() {
