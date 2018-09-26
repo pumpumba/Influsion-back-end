@@ -8,7 +8,9 @@ const port = 8080;
 const app = express();
 
 app.get("/", (req, res) => {
-  res.send("Hello World\n");
+  console.log(process.cwd());
+  res.send("Hello World!");
+  //res.sendFile("index.html");
 });
 
 app.listen(port, hostname);
