@@ -7,6 +7,20 @@ const port = 8080;
 
 const app = express();
 
+
+youtube = require("./api/youtube");
+
+app.get("/api/youtube", (req, res) => {
+  //var user = req.params.user;
+  youtube.getYoutube((result) => {
+    //res.json(result);
+    //console.log(result)
+    //res.send(result)
+    //console.log("Klar!");
+    res.send(result);
+  });
+});
+
 instagram = require("./api/instagram");
 
 app.get("/", (req, res) => {
@@ -24,6 +38,7 @@ app.get("/api/instagram", (req, res) => {
 
 //Twitter routing
 var currentRes;
+
 
 function myCallback(result) {
   len = result.length;
