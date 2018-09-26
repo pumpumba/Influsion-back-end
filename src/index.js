@@ -11,14 +11,18 @@ app.get("/", (req, res) => {
   res.send("Hello World\n");
 });
 
+//function showInsta(res, result) {
+// res.json(result);
+//}
+
 app.get("/api/instagram", (req, res) => {
-  instagram.getInsta((err, obj) => {
-    if (err) {
-      throw err;
-    }
-    res.json(obj);
+  //var result;
+
+  result = instagram.getInsta(result => {
+    res.json(result);
   });
-  res.render(__dirname, "/api/instagram.js");
+  //console.log(result);
+  //res.json(result);
 });
 
 app.listen(port, hostname);
