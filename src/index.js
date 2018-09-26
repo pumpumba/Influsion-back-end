@@ -1,16 +1,21 @@
 const express = require("express");
 const Twitter = require("machinepack-twitter");
 const twitterNodeMachine = require("./api/twitterNodeMachine");
+youtube = require("./api/youtube");
+instagram = require("./api/instagram");
 
 const hostname = "0.0.0.0";
 const port = 8080;
 
 const app = express();
 
+app.get("/", (req, res) => {
+  res.send(
+    "Hello! For Instagram API, go to ./api/instagram.For Twitter API, go to ./api/twitter"
+  );
+});
 
-youtube = require("./api/youtube");
-
-app.get("/api/youtube", (req, res) => {
+/* app.get("/api/youtube", (req, res) => {
   //var user = req.params.user;
   youtube.getYoutube((result) => {
     //res.json(result);
@@ -19,15 +24,7 @@ app.get("/api/youtube", (req, res) => {
     //console.log("Klar!");
     res.send(result);
   });
-});
-
-instagram = require("./api/instagram");
-
-app.get("/", (req, res) => {
-  res.send(
-    "Hello! For Instagram API, go to ./api/instagram.For Twitter API, go to ./api/twitter"
-  );
-});
+}); */
 
 //Instagram routing
 app.get("/api/instagram", (req, res) => {
@@ -38,7 +35,6 @@ app.get("/api/instagram", (req, res) => {
 
 //Twitter routing
 var currentRes;
-
 
 function myCallback(result) {
   len = result.length;
