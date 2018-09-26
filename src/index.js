@@ -6,6 +6,8 @@ const express = require("express");
 
 const hostname = "0.0.0.0";
 const port = 8080;
+const googleClientIDPumba = process.env.GOOGLE_CLIENT_ID;
+const googleClientSecretPumba = process.env.GOOGLE_CLIENT_SECRET;
 
 const app = express();
 const {google} = require('googleapis');
