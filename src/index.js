@@ -9,6 +9,7 @@ const port = 8080;
 const googleClientIDPumba = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecretPumba = process.env.GOOGLE_CLIENT_SECRET;
 
+/*
 const app = express();
 const {google} = require('googleapis');
 const http = require('http');
@@ -18,17 +19,71 @@ const opn = require('opn');
 const destroyer = require('server-destroy');
 const fs = require('fs');
 const path = require('path');
+*/
+
+//let google = require('googleapis');
+const {google} = require('googleapis');
+let privatekey = require("./pumbagoogleprivatekey.json");
+
+// configure a JWT auth client
+let jwtClient = new google.auth.JWT(
+       privatekey.client_email,
+       null,
+       privatekey.private_key,
+       ['https://www.googleapis.com/auth/youtube']);
+
+//authenticate request
+jwtClient.authorize(function (err, tokens) {
+ if (err) {
+   console.log(err);
+   return;
+ } else {
+   console.log("Successfully connected!");
+ }
+});
+
+let youtube = google.youtube('v3');
+
+youtube.search.list({
+   auth: jwtClient,
+   part: 'snippet',
+   order: 'viewCount',
+   q: 'pewdiepie',
+   type: 'video'
+}, function (err, response) {
+   if (err) {
+       console.log('The API returned an error: ' + err);
+   } else {
+       console.log('Video list from Youtube:');
+       for (var i = 0; i < response.data.items.length; i++) {
+         console.log(response.data.items[i].snippet.title);
+       }
+
+   }
+});
+
+/*
+async function runSample() {
+  console.log("We are running a sample");
+  const res = await youtube.search.list({
+    part: 'id,snippet',
+    q: 'Node.js on Google Cloud',
+  });
+  console.log("Here is our response!!");
+  console.log(res.data);
+}
+
+runSample()
+*/
+/*
 
 const keyPath = path.join(__dirname, 'oauth2.keys.json');
+const uri = 'http://localhost:8081/oauth2callback';
 
-let keys = {
-  redirect_uris: ['http://localhost:8081/oauth2callback'],
-};
-const redirectUri = keys.redirect_uris[keys.redirect_uris.length - 1];
 app.oAuth2Client = new google.auth.OAuth2(
-      keys.client_id,
-      keys.client_secret,
-      redirectUri
+      googleClientIDPumba,
+      googleClientSecretPumba,
+      uri
     );
 
 
@@ -48,6 +103,9 @@ app.get("/", (req, res) => {
 app.listen(port, hostname);
 console.log(`Running on http://${hostname}.${port}`);
 
+*/
+
+/*
 async function runSample() {
   console.log("We are running a sample");
   const res = await youtube.search.list({
@@ -57,6 +115,7 @@ async function runSample() {
   console.log("Here is our response!!");
   console.log(res.data);
 }
+
 
 const scopes = ['https://www.googleapis.com/auth/youtube'];
 
@@ -95,6 +154,7 @@ app.authenticate = async function(scopes) {
     console.log("destroyed server!!!");
   });
 }
+
 console.log(app.oAuth2Client);
 app
   .authenticate(scopes)
@@ -102,6 +162,7 @@ app
   .then(runSample)
   .then(console.log("Hejhej"))
   .catch(console.error);
+*/
 
 /* fs.readFile("index.html", (err, html) => {
   if (err) {
