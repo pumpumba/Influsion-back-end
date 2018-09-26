@@ -17,13 +17,15 @@ const bearerTokenPumba = process.env.TWITTER_BEARER_TOKEN;
 var client = new Twitter({
   consumer_key: consumerKeyPumba,
   consumer_secret: consumerSecretPumba,
+  access_token: accessTokenPumba,
+  access_secret: accessSecretPumba,
   bearer_token: bearerTokenPumba
 });
 
 
 module.exports = {
   search: function (query) {
-    return Twitter.searchTweets({
+    return TwitterMP.searchTweets({
       q: query,
       consumerKey: consumerKeyPumba,
       consumerSecret: consumerSecretPumba,
@@ -40,14 +42,25 @@ module.exports = {
       return result;
     });
   },
-  getUserTweets: function(username) {
+  getUserTweets: function(username, tweetsAmount, callback) {
     var client = new Twitter({
       consumer_key: consumerKeyPumba,
       consumer_secret: consumerSecretPumba,
       bearer_token: bearerTokenPumba
     });
-    client.get('users/show', {screen_name: username}, function(error, tweets, response) {
-      console.log(tweets);
+    client.get('/statuses/user_timeline', {screen_name: username, count: tweetsAmount}, function(error, tweets, response) {
+      callback(tweets);
+    });
+  },
+  getTweet: function(tweet_id, callback) {
+    var client = new Twitter({
+      consumer_key: consumerKeyPumba,
+      consumer_secret: consumerSecretPumba,
+      bearer_token: bearerTokenPumba
+    });
+
+    var result = client.get('/statuses/show', {id: tweet_id}, function(error, tweets, response) {
+      callback(tweets);
     });
   }
 };
