@@ -26,7 +26,8 @@
     "twitter": "^1.7.1",
     "yo": "^2.0.5",
     "nodemon": "^1.18.4",
-    "dotenv": "^6.0.0"
+    "dotenv": "^6.0.0",
+    "wrappy": "^1.0.2"
   },
   "bugs": {
     "url": "https://github.com/pumpumba/project_TBD/issues"
