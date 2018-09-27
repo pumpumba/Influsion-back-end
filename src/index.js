@@ -27,22 +27,22 @@ app.get("/", (req, res) => {
 }); */
 
 //Instagram routing
+var currentRes;
 app.get("/api/instagram", (req, res) => {
+  currentRes = res;
   result = instagram.getInsta(result => {
     res.json(result);
   });
 });
 
 //Twitter routing
-var currentRes;
 
 function myCallback(result) {
   len = result.length;
   var i;
   var text = "";
   for (i = 0; i < len; i++) {
-    console.log(i);
-    text += currentRes.json(result[i].text);
+    text += result[i].text + "\n";
   }
   currentRes.send(text);
 }
