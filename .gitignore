@@ -1,5 +1,4 @@
-/src/.env
-/src/api/pumbagoogleprivatekey.json
 .env
-.DS_store
-/src/.DS_Store
+pumbagoogleprivatekey.json
+node_modules
+.DS_Store

@@ -1,4 +1,3 @@
-require("dotenv").config({ path: __dirname + "/./../../.env" });
 const googleClientIDPumba = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecretPumba = process.env.GOOGLE_CLIENT_SECRET;
 const { google } = require("googleapis");
@@ -38,7 +37,6 @@ module.exports = {
         if (err) {
           console.log("The API returned an error: " + err);
         } else {
-          //console.log('Video list from Youtube:');
           callback(res.data.items);
           /*for (var i = 0; i < response.data.items.length; i++) {
              console.log(response.data.items[i].snippet.title);

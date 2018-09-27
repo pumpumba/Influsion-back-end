@@ -23,7 +23,9 @@ app.get("/api/youtube", (req, res) => {
 });
 
 //Instagram routing
+var currentRes;
 app.get("/api/instagram", (req, res) => {
+  currentRes = res;
   result = instagram.getInsta(result => {
     res.json(result);
   });
@@ -36,13 +38,10 @@ function myCallback(result) {
   var i;
   var text = "";
   for (i = 0; i < len; i++) {
-    console.log(i);
-    text += currentRes.json(result[i].text);
+    text += result[i].text + "\n";
   }
   currentRes.send(text);
 }
-//var hello = twitterNodeMachine.getUserTweets('elonmusk', 10, myCallback);
-//var obj2 = twitterNodeMachine.getTweet(44196397, myCallback);
 
 app.get("/api/twitter", (req, res) => {
   currentRes = res;

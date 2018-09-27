@@ -4,9 +4,7 @@ require("dotenv").load();
 // We need this to build our post string
 var request = require("request");
 const got = require("got");
-
 var Twitter = require("twitter");
-var TwitterMP = require("machinepack-twitter");
 
 const consumerKeyPumba = process.env.TWITTER_CONSUMER_KEY;
 const consumerSecretPumba = process.env.TWITTER_CONSUMER_SECRET;
@@ -23,24 +21,6 @@ var client = new Twitter({
 });
 
 module.exports = {
-  search: function(query) {
-    return TwitterMP.searchTweets({
-      q: query,
-      consumerKey: consumerKeyPumba,
-      consumerSecret: consumerSecretPumba,
-      accessToken: accessTokenPumba,
-      accessSecret: accessSecretPumba
-    }).exec((err, result) => {
-      if (err) {
-        console.log("Failure at twitter search!");
-        console.log(err);
-        return res.serverError(err);
-      }
-      console.log("Success at twitter search!");
-      console.log(result);
-      return result;
-    });
-  },
   getUserTweets: function(username, tweetsAmount, callback) {
     var client = new Twitter({
       consumer_key: consumerKeyPumba,
@@ -57,9 +37,9 @@ module.exports = {
   },
   getTweet: function(tweet_id, callback) {
     var client = new Twitter({
-      consumer_key: consumerKeyPumba,
-      consumer_secret: consumerSecretPumba,
-      bearer_token: bearerTokenPumba
+      consumer_key: process.env.TWITTER_CONSUMER_KEY,
+      consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+      bearer_token: process.env.TWITTER_BEARER_TOKEN
     });
 
     var result = client.get("/statuses/show", { id: tweet_id }, function(
