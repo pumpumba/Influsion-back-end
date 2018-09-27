@@ -22,7 +22,6 @@ var client = new Twitter({
 
 module.exports = {
   getUserTweets: function(username, tweetsAmount, callback) {
-    console.log(bearerTokenPumba);
     var client = new Twitter({
       consumer_key: consumerKeyPumba,
       consumer_secret: consumerSecretPumba,
@@ -32,7 +31,6 @@ module.exports = {
       "/statuses/user_timeline",
       { screen_name: username, count: tweetsAmount },
       function(error, tweets, response) {
-        console.log(tweets);
         callback(tweets);
       }
     );

@@ -42,8 +42,6 @@ function myCallback(result) {
   }
   currentRes.send(text);
 }
-//var hello = twitterNodeMachine.getUserTweets('elonmusk', 10, myCallback);
-//var obj2 = twitterNodeMachine.getTweet(44196397, myCallback);
 
 app.get("/api/twitter", (req, res) => {
   currentRes = res;
