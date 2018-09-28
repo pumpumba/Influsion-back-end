@@ -1,9 +1,5 @@
-const twit = require("twit");
 //Enter your authorisation keys below in the following constants
 require("dotenv").load();
-// We need this to build our post string
-var request = require("request");
-const got = require("got");
 var Twitter = require("twitter");
 
 const consumerKeyPumba = process.env.TWITTER_CONSUMER_KEY;

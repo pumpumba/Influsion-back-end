@@ -1,5 +1,4 @@
 const express = require("express");
-const Twitter = require("machinepack-twitter");
 const twitterNodeMachine = require("./api/twitterNodeMachine");
 instagram = require("./api/instagram");
 youtube = require("./api/youtube");
@@ -23,29 +22,25 @@ app.get("/api/youtube", (req, res) => {
 });
 
 //Instagram routing
-var currentRes;
 app.get("/api/instagram", (req, res) => {
-  currentRes = res;
   result = instagram.getInsta(result => {
     res.json(result);
   });
 });
 
 //Twitter routing
-var currentRes;
-function myCallback(result) {
-  len = result.length;
-  var i;
-  var text = "";
-  for (i = 0; i < len; i++) {
-    text += result[i].text + "\n";
-  }
-  currentRes.send(text);
-}
 
 app.get("/api/twitter", (req, res) => {
   currentRes = res;
-  var obj = twitterNodeMachine.getUserTweets("elonmusk", 10, myCallback);
+  var obj = twitterNodeMachine.getUserTweets("elonmusk", 10, (result) => {
+    len = result.length;
+    var i;
+    var text = "";
+    for (i = 0; i < len; i++) {
+      text += result[i].text + "\n";
+    }
+    res.send(text);
+  });
 });
 
 app.listen(port, hostname);
