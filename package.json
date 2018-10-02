@@ -4,8 +4,8 @@
   "description": "A platform for enhanced influencer social media content",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon src/index.js --legacy-watch",
+    "test": "npm build"
   },
   "repository": {
     "type": "git",
@@ -14,10 +14,17 @@
   "author": "Erik Ståhl",
   "license": "ISC",
   "dependencies": {
-    "yo": "^2.0.5",
+    "googleapis": "^33.0.0",
+    "express": "^4.16.3",
     "generator-machinepack": "^1.0.6",
+    "got": "^9.2.2",
     "machine": "^15.2.2",
-    "express": "^4.16.3"
+    "sails": "^1.0.2",
+    "twitter": "^1.7.1",
+    "yo": "^2.0.5",
+    "nodemon": "^1.18.4",
+    "dotenv": "^6.0.0",
+    "wrappy": "^1.0.2"
   },
   "bugs": {
     "url": "https://github.com/pumpumba/project_TBD/issues"
