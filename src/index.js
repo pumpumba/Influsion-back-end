@@ -30,16 +30,18 @@ app.get("/api/instagram", (req, res) => {
 
 //Twitter routing
 
-app.get("/api/twitter", (req, res) => {
+app.get("/api/twitter/search/:username/:count", (req, res) => {
   currentRes = res;
-  var obj = twitterNodeMachine.getUserTweets("elonmusk", 10, (result) => {
-    len = result.length;
-    var i;
+  var data = req.params;
+  var number = req.params;
+  var obj = twitterNodeMachine.getUserTweets(data.username, number.count, (result) => {
     var text = "";
-    for (i = 0; i < len; i++) {
-      text += result[i].text + "\n";
+
+    for (var i = 0; i < result.length; i++) {
+      text = text + result[i].entities.hashtags[0].text;
     }
-    res.send(text);
+    res.json(text);
+    console.log(result);
   });
 });
 

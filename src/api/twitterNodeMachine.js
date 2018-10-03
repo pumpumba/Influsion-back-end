@@ -20,13 +20,4 @@ module.exports = {
       }
     );
   },
-  getTweet: function(tweet_id, callback) {
-    var result = client.get("/statuses/show", { id: tweet_id }, function(
-      error,
-      tweets,
-      response
-    ) {
-      callback(tweets);
-    });
-  }
 };
