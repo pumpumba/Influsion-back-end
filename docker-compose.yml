@@ -6,7 +6,15 @@ services:
     build: .
     ports:
       - "80:8080"
-      - "8081:8081"
-      - "8082:8082"
     volumes:
       - "./src:/usr/src/app/src"
+    links:
+      - db:postgres
+  db:
+    container_name: "postgres"
+    image: "postgres"
+    restart: "always"
+    ports:
+      - "5342:5342"
+    environment:
+      POSTGRES_PASSWORD: "erikandfiliprules987"
