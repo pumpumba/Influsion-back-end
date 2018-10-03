@@ -16,5 +16,7 @@ services:
     restart: "always"
     ports:
       - "5342:5342"
+    volumes:
+      - "./db:usr/src/app/db"
     environment:
       POSTGRES_PASSWORD: "erikandfiliprules987"
