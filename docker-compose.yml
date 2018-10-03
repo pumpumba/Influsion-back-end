@@ -17,6 +17,7 @@ services:
     ports:
       - "5342:5342"
     volumes:
-      - "./db:usr/src/app/db"
+      - "./db:/usr/src/app/db"
+      - "./db/:/docker-entrypoint-initdb.d/"
     environment:
       POSTGRES_PASSWORD: "erikandfiliprules987"
