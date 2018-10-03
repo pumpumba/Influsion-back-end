@@ -35,12 +35,28 @@ app.get("/api/twitter/search/:username/:count", (req, res) => {
   var data = req.params;
   var number = req.params;
   var obj = twitterNodeMachine.getUserTweets(data.username, number.count, (result) => {
-    var text = "";
+
+    
+  var lastTweets = []
 
     for (var i = 0; i < result.length; i++) {
-      text = text + result[i].entities.hashtags[0].text;
+      var tweetObj = {
+        "name": result[i].user.name,
+        "screen_name": result[i].user.screen_name,
+        "text": result[i].text,
+        "favorite_count": result[i].favorite_count,
+        "retweeted_count": result[i].retweeted_count,
+        "created_at": result[i].created_at,
+        "hashtags": [],
+        "platform": "Twitter"
+     };
+     for (var j = 0; j < result[i].entities.hashtags.length; j++){
+        tweetObj.hashtags.push(result[i].entities.hashtags[j].text)
+     }
+
+     lastTweets.push(tweetObj);
     }
-    res.json(text);
+    res.json(lastTweets);
     console.log(result);
   });
 });
