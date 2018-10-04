@@ -74,7 +74,7 @@ function formatJson(tweets) {
     // Add media
     for (var j = 0; j < tweets[i].entities.media.length; j++){
       tweet.media.push(tweets[i].entities.media[j].media_url)
-      console.log(tweets[i].entities.media[j]);
+      console.log(tweets[i].entities.media[j].media_url);
     }
 
     // Get the higher res image
