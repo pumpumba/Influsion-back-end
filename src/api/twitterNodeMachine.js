@@ -11,23 +11,46 @@ var client = new Twitter({
 });
 
 module.exports = {
-  getUserTweets: function(username, tweetsCount, callback) {
-    client.get(
-      "/statuses/user_timeline",
-      { screen_name: username, count: tweetsCount },
-      function(error, tweets, response) {
-        var formatedTweets = formatJson(tweets);
-        callback(formatedTweets);
-      }
-    );
+  getUserTweets: function(username, tweetCount, callback) {
+    getUserTweets(username, tweetCount, callback);
+  },
+  getPopularTweets: function(callback) {
+    var popularTweets = [];
+    var screen_names = ["elonmusk", "justinbieber", "barackobama", "potus"];
+
+    for (name in screen_names) {
+      getUserTweets(name, 1, (result) => {
+        console.log(name);
+        popularTweets.push(result);
+        popularTweetsLoaded(popularTweets, callback);
+      });
+    }
   },
 };
+
+function popularTweetsLoaded(popularTweets, callback) {
+  if (popularTweets.length >= 4) {
+    callback(popularTweets);
+  }
+}
+
+function getUserTweets(username, tweetCount, callback) {
+  client.get(
+    "/statuses/user_timeline",
+    { screen_name: username, count: tweetCount },
+    function(error, tweets, response) {
+      var formatedTweets = formatJson(tweets);
+      callback(formatedTweets);
+    }
+  );
+}
 
 function formatJson(tweets) {
   var formatedTweets = []
 
   for (var i = 0; i < tweets.length; i++) {
     var tweet = {
+      "user_id": tweets[i].user.id,
       "name": tweets[i].user.name,
       "screen_name": tweets[i].user.screen_name,
       "text": tweets[i].text,

@@ -38,13 +38,12 @@ app.get("/api/twitter", (req, res) => {
 
     twitterNodeMachine.getUserTweets(username, tweetCount, (result) => {
       res.json(result);
-      console.log(result);
     });
 
   } else if (reqType === "popular") {
-    res.send(
-      "Error: This request type is not defined yet"
-    );
+    twitterNodeMachine.getPopularTweets((result) => {
+      res.json(result);
+    })
   }
    else {
     res.send(
