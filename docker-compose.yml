@@ -12,7 +12,7 @@ services:
       - "db"
     environment:
       - DATABASE_URL=postgres://pumbapumba:erikandfiliprules987@db:5432/pumbadb
-    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; npm start'
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; echo Waiting for database; npm start'
   db:
     container_name: "postgres"
     image: "postgres"
