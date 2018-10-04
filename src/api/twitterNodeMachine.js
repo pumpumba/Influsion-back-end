@@ -18,9 +18,9 @@ module.exports = {
     var popularTweets = [];
     var screen_names = ["elonmusk", "justinbieber", "barackobama", "potus"];
 
-    for (name in screen_names) {
-      getUserTweets(name, 1, (result) => {
-        console.log(name);
+    for (var i = 0; i < screen_names.length; i++) {
+      getUserTweets(screen_names[i], 1, (result) => {
+        console.log(screen_names[i]);
         popularTweets.push(result);
         popularTweetsLoaded(popularTweets, callback);
       });
@@ -30,6 +30,9 @@ module.exports = {
 
 function popularTweetsLoaded(popularTweets, callback) {
   if (popularTweets.length >= 4) {
+    popularTweets.sort(function(a, b) {
+      return parseFloat(a.favorite_count) - parseFloat(b.favorite_count);
+  });
     callback(popularTweets);
   }
 }
