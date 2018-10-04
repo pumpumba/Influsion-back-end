@@ -10,7 +10,7 @@ const app = express();
 //Main page routing
 app.get("/", (req, res) => {
   res.send(
-    "Hello! For Instagram API, go to ./api/instagram.For Twitter API, go to ./api/twitter"
+    "<h1>Hello! Welcome to Pumba!</h1> <p> For Instagram API, go to ./api/instagram <br>For Twitter API, go to ./api/twitter <br>For Youtube API, go to ./api/youtube </p>"
   );
 });
 
@@ -29,36 +29,28 @@ app.get("/api/instagram", (req, res) => {
 });
 
 //Twitter routing
+app.get("/api/twitter", (req, res) => {
+  var reqType = req["query"]["request_type"];
 
-app.get("/api/twitter/search/:username/:count", (req, res) => {
-  currentRes = res;
-  var data = req.params;
-  var number = req.params;
-  var obj = twitterNodeMachine.getUserTweets(data.username, number.count, (result) => {
+  if (reqType === "get_user_tweets") {
+    var username = req["query"]["username"];
+    var tweetCount = req["query"]["count"];
 
-    
-  var lastTweets = []
+    twitterNodeMachine.getUserTweets(username, tweetCount, (result) => {
+      res.json(result);
+      console.log(result);
+    });
 
-    for (var i = 0; i < result.length; i++) {
-      var tweetObj = {
-        "name": result[i].user.name,
-        "screen_name": result[i].user.screen_name,
-        "text": result[i].text,
-        "favorite_count": result[i].favorite_count,
-        "retweeted_count": result[i].retweeted_count,
-        "created_at": result[i].created_at,
-        "hashtags": [],
-        "platform": "Twitter"
-     };
-     for (var j = 0; j < result[i].entities.hashtags.length; j++){
-        tweetObj.hashtags.push(result[i].entities.hashtags[j].text)
-     }
-
-     lastTweets.push(tweetObj);
-    }
-    res.json(lastTweets);
-    console.log(result);
-  });
+  } else if (reqType === "popular") {
+    res.send(
+      "Error: This request type is not defined yet"
+    );
+  }
+   else {
+    res.send(
+      "Error: This request type is not defined"
+    );
+  }
 });
 
 app.listen(port, hostname);
