@@ -62,12 +62,19 @@ function formatJson(tweets) {
       "created_at": tweets[i].created_at,
       "hashtags": [],
       "profile_image_url": tweets[i].user.profile_image_url,
-      "platform": "Twitter"
+      "platform": "Twitter",
+      "media": []
     };
 
     // Add hashtags
     for (var j = 0; j < tweets[i].entities.hashtags.length; j++){
       tweet.hashtags.push(tweets[i].entities.hashtags[j].text)
+    }
+
+    // Add media
+    for (var j = 0; j < tweets[i].entities.media.length; j++){
+      tweet.media.push(tweets[i].entities.media[j].media_url)
+      console.log(tweets[i].entities.media[j]);
     }
 
     // Get the higher res image
