@@ -72,10 +72,14 @@ function formatJson(tweets) {
     }
 
     // Add media
-    for (var j = 0; j < tweets[i].entities.media.length; j++){
-      tweet.media.push(tweets[i].entities.media[j].media_url)
-      console.log(tweets[i].entities.media[j].media_url);
+    /*
+    if (tweets[i].enteties.media != null) {
+      for (var j = 0; j < tweets[i].entities.media.length; j++){
+        tweet.media.push(tweets[i].entities.media[j].media_url)
+        console.log(tweets[i].entities.media[j].media_url);
+      }
     }
+    */
 
     // Get the higher res image
     var fileType = tweet.profile_image_url.substring(tweet.profile_image_url.length - 4, tweet.profile_image_url.length);
