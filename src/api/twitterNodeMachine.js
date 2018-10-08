@@ -54,8 +54,7 @@ module.exports = {
     })
    /* for (var i = 0; i < screen_names.length; i++) {
       getUserTweets(screen_names[i], 1, (result) => {
-        console.log(screen_names[i]);
-        popularTweets.push(result);
+        popularTweets.push(result[0]);
         popularTweetsLoaded(popularTweets, callback);
       });
     } */
@@ -87,33 +86,44 @@ function formatJson(tweets) {
 
   for (var i = 0; i < tweets.length; i++) {
     var tweet = {
-      "user_id": tweets[i].user.id,
-      "name": tweets[i].user.name,
-      "screen_name": tweets[i].user.screen_name,
-      "text": tweets[i].text,
-      "favorite_count": tweets[i].favorite_count,
-      "retweet_count": tweets[i].retweet_count,
-      "created_at": tweets[i].created_at,
-      "hashtags": [],
-      "profile_image_url": tweets[i].user.profile_image_url,
       "platform": "Twitter",
-      "media": []
+      "user_id": tweets[i].user.id_str,
+      "user_url": "",
+      "user_name": tweets[i].user.name,
+      "user_screen_name": tweets[i].user.screen_name,
+      "user_followers_count": tweets[i].user.followers_count,
+      "user_verified": tweets[i].user.verified,
+      "user_profile_image_url": tweets[i].user.profile_image_url,
+      "tweet_id": tweets[i].id_str,
+      "tweet_url": "",
+      "tweet_text": tweets[i].text,
+      "tweet_created_at": tweets[i].created_at,
+      "tweet_favorite_count": tweets[i].favorite_count,
+      "tweet_retweet_count": tweets[i].retweet_count,
+      "tweet_hashtags": [],
+      "tweet_media": []
     };
+
+    tweet.user_url = "https://twitter.com/" + tweet.user_screen_name;
+    tweet.tweet_url = "https://twitter.com/" + tweet.user_screen_name + "/status/" + tweet.tweet_id;
 
     // Add hashtags
     for (var j = 0; j < tweets[i].entities.hashtags.length; j++){
-      tweet.hashtags.push(tweets[i].entities.hashtags[j].text)
+      tweet.tweet_hashtags.push(tweets[i].entities.hashtags[j].text);
     }
     */
     // Add media
-    /*
-    if (tweets[i].enteties.media != null) {
-      for (var j = 0; j < tweets[i].entities.media.length; j++){
-        tweet.media.push(tweets[i].entities.media[j].media_url)
-        console.log(tweets[i].entities.media[j].media_url);
+    if (tweets[i].entities.media != null) {
+      if (tweets[i].extended_entities != null) { // Multiple pictures/media
+        for (var j = 0; j < tweets[i].extended_entities.media.length; j++){
+          tweet.tweet_media.push(tweets[i].extended_entities.media[j].media_url);
+        }
+      } else { // One picture/media
+        for (var j = 0; j < tweets[i].entities.media.length; j++){
+          tweet.tweet_media.push(tweets[i].entities.media[j].media_url);
+        }
       }
     }
-    */
 
     // Get the higher res image
     /*
