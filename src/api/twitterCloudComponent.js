@@ -73,7 +73,6 @@ module.exports = (function(){
                       success: function(result) {
                         res.json(result); //Shouldn't return json here yet, should do at the end but doesn't work at the moment cause it hangs in the loop for some reason.
                         console.log("Length: " + result.length); // The loops also have to be changed in order for resultObj to contain right objects, because of async functions it won't output the right array of content at the moment.
-                        console.log(result);
                         for(var k = 0; k<result.length;k++) {
                           console.log(k);
                           resultObj.push(result[k]);
