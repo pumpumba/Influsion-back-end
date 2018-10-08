@@ -1,5 +1,4 @@
 const express = require("express");
-const Twitter = require("machinepack-twitter");
 const twitterNodeMachine = require("./api/twitterNodeMachine");
 instagram = require("./api/instagram");
 youtube = require("./api/youtube");
@@ -11,7 +10,7 @@ const app = express();
 //Main page routing
 app.get("/", (req, res) => {
   res.send(
-    "Hello! For Instagram API, go to ./api/instagram.For Twitter API, go to ./api/twitter"
+    "<h1>Hello! Welcome to Pumba!</h1> <p> For Instagram API, go to ./api/instagram <br>For Twitter API, go to ./api/twitter <br>For Youtube API, go to ./api/youtube </p>"
   );
 });
 
@@ -23,29 +22,34 @@ app.get("/api/youtube", (req, res) => {
 });
 
 //Instagram routing
-var currentRes;
 app.get("/api/instagram", (req, res) => {
-  currentRes = res;
   result = instagram.getInsta(result => {
     res.json(result);
   });
 });
 
 //Twitter routing
-var currentRes;
-function myCallback(result) {
-  len = result.length;
-  var i;
-  var text = "";
-  for (i = 0; i < len; i++) {
-    text += result[i].text + "\n";
-  }
-  currentRes.send(text);
-}
-
 app.get("/api/twitter", (req, res) => {
-  currentRes = res;
-  var obj = twitterNodeMachine.getUserTweets("elonmusk", 10, myCallback);
+  var reqType = req["query"]["request_type"];
+
+  if (reqType === "get_user_tweets") {
+    var username = req["query"]["username"];
+    var tweetCount = req["query"]["count"];
+
+    twitterNodeMachine.getUserTweets(username, tweetCount, (result) => {
+      res.json(result);
+    });
+
+  } else if (reqType === "popular") {
+    twitterNodeMachine.getPopularTweets((result) => {
+      res.json(result);
+    })
+  }
+   else {
+    res.send(
+      "Error: This request type is not defined"
+    );
+  }
 });
 
 app.listen(port, hostname);

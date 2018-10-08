@@ -1,5 +1,3 @@
-const googleClientIDPumba = process.env.GOOGLE_CLIENT_ID;
-const googleClientSecretPumba = process.env.GOOGLE_CLIENT_SECRET;
 const { google } = require("googleapis");
 let privatekey = require("./pumbagoogleprivatekey.json");
 
