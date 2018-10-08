@@ -18,8 +18,6 @@ module.exports = (function(){
   app.get("/filters", (req, res) => {
     var filterType = req["query"]["filterType"];
     var assetType = req["query"]["assetType"];
-    console.log(filterType);
-    console.log(assetType);
     switch(assetType) {
       case 'tweet':
         switch(filterType) {
@@ -41,10 +39,7 @@ module.exports = (function(){
   app.use(bodyParser.json());
 
   app.post("/content", (req, res) => {
-    console.log("Type: ");
-    console.log(req.body);
     var inputObj = req.body;
-    console.log('AssetType: ' + inputObj.assetType);
     var filterTypes = inputObj.filterType;
     var assetTypes = inputObj.assetType;
     var filterValue = inputObj.filterValue;
@@ -82,14 +77,12 @@ module.exports = (function(){
                         for(var k = 0; k<result.length;k++) {
                           console.log(k);
                           resultObj.push(result[k]);
-                          console.log(resultObj);
                           console.log(k);
                         }
                       }
                     })
                     break;
                   default:
-                    console.log("Must not come here, errooor");
                     Twitter.getUserTweets({
                       consumerKey: process.env.TWITTER_CONSUMER_KEY,
                       consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
@@ -120,9 +113,6 @@ module.exports = (function(){
           console.log("Shouldn't come here at the moment2");
       }
     }
-    console.log("Finished, result: ");
-    console.log(resultObj[0]);
-    console.log(resultObj);
     //res.json(resultObj);
   
   });
