@@ -77,7 +77,9 @@ module.exports = (function(){
       var limit = parseInt(inputObj.limit, 10);
     }
     console.log("Limit: " + limit);
+    console.log(filterValue);
     var resultObj = [];
+    var successFlag = false;
     for(var i = 0;i<assetTypes.length;i++) {
       switch(assetTypes[i]) {
         case "tweet":
@@ -86,6 +88,7 @@ module.exports = (function(){
               case "user":
                 switch(filterValue) {
                   case 'Popular':
+                    console.log("hello popular");
                     var screenNames = ["elonmusk", "justinbieber", "barackobama", "potus", "billgates"];
                     console.log("Entered Popular case");
                     Twitter.getPopularTweets({
@@ -103,6 +106,7 @@ module.exports = (function(){
                       },
                       success: function(result) {
                         res.json(result); //Shouldn't return json here yet, should do at the end but doesn't work at the moment cause it hangs in the loop for some reason.
+                        successFlag = true;
                         console.log("Length: " + result.length); // The loops also have to be changed in order for resultObj to contain right objects, because of async functions it won't output the right array of content at the moment.
                         for(var k = 0; k<result.length;k++) {
                           resultObj.push(result[k]);
@@ -111,6 +115,7 @@ module.exports = (function(){
                     })
                     break;
                   default:
+                    console.log("Entered this function wooho");
                     Twitter.getUserTweets({
                       consumerKey: process.env.TWITTER_CONSUMER_KEY,
                       consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
@@ -125,24 +130,26 @@ module.exports = (function(){
                         console.log(err);
                       },
                       success: function(result) {
-                        for(var k = 0; k<result.length;k++) {
+                        /*for(var k = 0; k<result.length;k++) {
                           resultObj.push(result[k]);
-                        }
+                        } */
+                        successFlag = true;
+                        res.json(result);
                       }
                     })
                 }
                 break;
               default:
                 console.log("Shouldn't come here at the moment1");
+                res.json({ errorMessage: "The cloud component failed to provide any content" });
             }
           }
           break;
         default:
           console.log("Shouldn't come here at the moment2");
+          res.json({ errorMessage: "The cloud component failed to provide any content" });
       }
     }
-    //res.json(resultObj);
-  
   });
   
   app.get("/search", (req, res) => {
