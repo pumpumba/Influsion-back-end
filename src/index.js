@@ -45,7 +45,7 @@ app.get("/api/twitter", (req, res) => {
     });
 
   } else if (reqType === "popular") {
-    twitterNodeMachine.getPopularTweets(1, (result) => {
+    twitterNodeMachine.getPopularTweets((result) => {
       res.json(result);
     })
   }
