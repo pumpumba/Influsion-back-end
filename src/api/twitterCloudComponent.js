@@ -13,7 +13,7 @@ module.exports = (function(){
 
   app.get("/health", (req, res) => {
     res.status(200);
-    res.json("HTTP response 200 code OK.");
+    res.send("HTTP response 200 code OK.");
   });
   
   app.get("/filters", (req, res) => {
