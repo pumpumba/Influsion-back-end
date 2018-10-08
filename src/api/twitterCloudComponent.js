@@ -42,7 +42,6 @@ module.exports = (function(){
   app.post("/content", (req, res) => {
     var inputObj = req.body;
     var context = inputObj.context;
-    console.log(inputObj.offset);
     if(inputObj.filterType == undefined) {
       res.json({ errorMessage: "You need to provide a filterType" });
     }
@@ -69,15 +68,12 @@ module.exports = (function(){
     else {
       var offset = parseInt(inputObj.offset, 10);
     }
-    console.log("Offset: " + offset);
     if(isNaN(inputObj.limit)) {
       var limit = 5;
     }
     else {
       var limit = parseInt(inputObj.limit, 10);
     }
-    console.log("Limit: " + limit);
-    console.log(filterValue);
     var resultObj = [];
     var successFlag = false;
     for(var i = 0;i<assetTypes.length;i++) {
@@ -88,9 +84,7 @@ module.exports = (function(){
               case "user":
                 switch(filterValue) {
                   case 'Popular':
-                    console.log("hello popular");
                     var screenNames = ["elonmusk", "justinbieber", "barackobama", "potus", "billgates"];
-                    console.log("Entered Popular case");
                     Twitter.getPopularTweets({
                       consumerKey: process.env.TWITTER_CONSUMER_KEY,
                       consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
@@ -107,7 +101,7 @@ module.exports = (function(){
                       success: function(result) {
                         res.json(result); //Shouldn't return json here yet, should do at the end but doesn't work at the moment cause it hangs in the loop for some reason.
                         successFlag = true;
-                        console.log("Length: " + result.length); // The loops also have to be changed in order for resultObj to contain right objects, because of async functions it won't output the right array of content at the moment.
+                        //console.log("Length: " + result.length); // The loops also have to be changed in order for resultObj to contain right objects, because of async functions it won't output the right array of content at the moment.
                         for(var k = 0; k<result.length;k++) {
                           resultObj.push(result[k]);
                         }
@@ -115,7 +109,6 @@ module.exports = (function(){
                     })
                     break;
                   default:
-                    console.log("Entered this function wooho");
                     Twitter.getUserTweets({
                       consumerKey: process.env.TWITTER_CONSUMER_KEY,
                       consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
@@ -140,13 +133,11 @@ module.exports = (function(){
                 }
                 break;
               default:
-                console.log("Shouldn't come here at the moment1");
                 res.json({ errorMessage: "The cloud component failed to provide any content" });
             }
           }
           break;
         default:
-          console.log("Shouldn't come here at the moment2");
           res.json({ errorMessage: "The cloud component failed to provide any content" });
       }
     }
