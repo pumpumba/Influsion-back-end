@@ -54,15 +54,15 @@ function formatJson(tweets) {
   for (var i = 0; i < tweets.length; i++) {
     var tweet = {
       "platform": "Twitter",
-      "user_id": tweets[i].user.id,
-      //"user_url": "",
+      "user_id": tweets[i].user.id_str,
+      "user_url": "",
       "user_name": tweets[i].user.name,
       "user_screen_name": tweets[i].user.screen_name,
       "user_followers_count": tweets[i].user.followers_count,
       "user_verified": tweets[i].user.verified,
       "user_profile_image_url": tweets[i].user.profile_image_url,
-      "tweet_id": tweets[i].id,
-      //"tweet_url": "",
+      "tweet_id": tweets[i].id_str,
+      "tweet_url": "",
       "tweet_text": tweets[i].text,
       "tweet_created_at": tweets[i].created_at,
       "tweet_favorite_count": tweets[i].favorite_count,
@@ -71,9 +71,8 @@ function formatJson(tweets) {
       "tweet_media": []
     };
 
-    // Fungerar ej
-    //tweet.user_url = "https://twitter.com/" + tweet.user_id;
-    //tweet.tweet_url = "https://twitter.com/" + tweet.user_id + "/status/" + tweet.tweet_id;
+    tweet.user_url = "https://twitter.com/" + tweet.user_screen_name;
+    tweet.tweet_url = "https://twitter.com/" + tweet.user_screen_name + "/status/" + tweet.tweet_id;
 
     // Add hashtags
     for (var j = 0; j < tweets[i].entities.hashtags.length; j++){
@@ -82,9 +81,14 @@ function formatJson(tweets) {
 
     // Add media
     if (tweets[i].entities.media != null) {
-      for (var j = 0; j < tweets[i].entities.media.length; j++){
-        tweet.tweet_media.push(tweets[i].entities.media[j].media_url);
-        console.log(tweets[i].entities.media[j].media_url);
+      if (tweets[i].extended_entities != null) { // Multiple pictures/media
+        for (var j = 0; j < tweets[i].extended_entities.media.length; j++){
+          tweet.tweet_media.push(tweets[i].extended_entities.media[j].media_url);
+        }
+      } else { // One picture/media
+        for (var j = 0; j < tweets[i].entities.media.length; j++){
+          tweet.tweet_media.push(tweets[i].entities.media[j].media_url);
+        }
       }
     }
 
