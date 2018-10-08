@@ -25,7 +25,6 @@
     "nodemon": "^1.18.4",
     "dotenv": "^6.0.0",
     "wrappy": "^1.0.2",
-    "machinepack-twitternodemachines": "^1.14.0",
     "body-parser": "^1.18.3"
   },
   "bugs": {
