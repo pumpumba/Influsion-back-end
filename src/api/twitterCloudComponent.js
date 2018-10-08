@@ -1,6 +1,6 @@
 module.exports = (function(){
   var express = require('express');
-  var Twitter = require("machinepack-twitternodemachines");
+  var Twitter = require('../../machinepack-twitternodemachines')
   const bodyParser = require("body-parser");
 
   app = express.Router();
@@ -40,12 +40,42 @@ module.exports = (function(){
 
   app.post("/content", (req, res) => {
     var inputObj = req.body;
-    var filterTypes = inputObj.filterType;
-    var assetTypes = inputObj.assetType;
-    var filterValue = inputObj.filterValue;
     var context = inputObj.context;
-    var offset = parseInt(inputObj.offset, 10);
-    var limit = parseInt(inputObj.limit, 10);
+    console.log(inputObj.offset);
+    if(inputObj.filterType == undefined) {
+      res.json({ errorMessage: "You need to provide a filterType" });
+    }
+    var filterTypes = inputObj.filterType;
+    if(inputObj.assetType == undefined ) {
+      res.json({ errorMessage: "You need to provide an assetType" });
+    }
+    var assetTypes = inputObj.assetType;
+    if(inputObj.filterValue == undefined ) {
+      var filterValue = "";
+    }
+    else {
+      var filterValue = inputObj.filterValue;
+    }
+    if(inputObj.context == undefined ) {
+      var context = "";
+    }
+    else {
+      var context = inputObj.context;
+    }
+    if(isNaN(inputObj.offset)) {
+      var offset = 0;
+    }
+    else {
+      var offset = parseInt(inputObj.offset, 10);
+    }
+    console.log("Offset: " + offset);
+    if(isNaN(inputObj.limit)) {
+      var limit = 5;
+    }
+    else {
+      var limit = parseInt(inputObj.limit, 10);
+    }
+    console.log("Limit: " + limit);
     var resultObj = [];
     for(var i = 0;i<assetTypes.length;i++) {
       switch(assetTypes[i]) {
@@ -74,9 +104,7 @@ module.exports = (function(){
                         res.json(result); //Shouldn't return json here yet, should do at the end but doesn't work at the moment cause it hangs in the loop for some reason.
                         console.log("Length: " + result.length); // The loops also have to be changed in order for resultObj to contain right objects, because of async functions it won't output the right array of content at the moment.
                         for(var k = 0; k<result.length;k++) {
-                          console.log(k);
                           resultObj.push(result[k]);
-                          console.log(k);
                         }
                       }
                     })
