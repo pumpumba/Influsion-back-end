@@ -20,8 +20,7 @@ module.exports = {
 
     for (var i = 0; i < screen_names.length; i++) {
       getUserTweets(screen_names[i], 1, (result) => {
-        console.log(screen_names[i]);
-        popularTweets.push(result);
+        popularTweets.push(result[0]);
         popularTweetsLoaded(popularTweets, callback);
       });
     }
