@@ -90,9 +90,6 @@ module.exports = {
         });
 
         formatFunctions.getTweetsFromUsers(inputs.screenNames, inputs.count, client, (result) => {
-          console.log("Before PopularTweetsLoaded");
-          console.log(result[0]);
-          console.log(result);
           return exits.success(formatFunctions.popularTweetsLoaded(result));
         });
     }

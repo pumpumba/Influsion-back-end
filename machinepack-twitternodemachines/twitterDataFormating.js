@@ -3,8 +3,6 @@ var self = module.exports = {
         popularTweets.sort(function(a, b) {
             return a.favorite_count - b.favorite_count;
         });
-        console.log("Popular: ");
-        console.log(popularTweets[0]);
         return popularTweets;
     },
     formatJson: function(tweets) {
@@ -46,11 +44,7 @@ var self = module.exports = {
           tweet.profile_image_url = tweet.profile_image_url + "bigger" + fileType;
       
           formatedTweets.push(tweet);
-          console.log("One formatted tweet: ");
-          console.log(tweet);
         }
-        console.log('Finished formated tweets list: ');
-        console.log(formatedTweets);
         return formatedTweets;
     },
     getTweetsFromUser: function(username, tweetCount, client, callback) {
@@ -68,15 +62,11 @@ var self = module.exports = {
         var pushedCount = 0;
         for (var i = 0; i < screen_names.length; i++) {
           self.getTweetsFromUser(screen_names[i], tweetCount, client, (result) => {
-            console.log("name: " + screen_names[i]);
-            console.log("Tweets from one user: ");
-            console.log(result);
             for(var j = 0; j < result.length;j++) {
                 popularTweets.push(result[j]);
             }
             pushedCount += 1;
             if(pushedCount == screen_names.length) {
-                console.log(popularTweets);
                 callback(popularTweets);
             }
           });
