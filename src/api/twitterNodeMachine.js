@@ -1,71 +1,37 @@
 //Enter your authorisation keys below in the following constants
 require("dotenv").load();
-//var Twitter = require("twitter");
-var twitter = require('machinepack-twitternodemachines');
+var Twitter = require("twitter");
 
-/* var client = new Twitter({
+var client = new Twitter({
   consumer_key: process.env.TWITTER_CONSUMER_KEY,
   consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
   access_token: process.env.TWITTER_ACCESS_TOKEN,
   access_secret: process.env.TWITTER_ACCESS_SECRET,
   bearer_token: process.env.TWITTER_BEARER_TOKEN
-}); */
+});
 
 module.exports = {
   getUserTweets: function(username, tweetCount, callback) {
-    twitter.getUserTweets({
-      consumerKey: process.env.TWITTER_CONSUMER_KEY,
-      consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
-      accessToken: process.env.TWITTER_ACCESS_TOKEN,
-      accessSecret: process.env.TWITTER_ACCESS_SECRET,
-      bearerToken: process.env.TWITTER_BEARER_TOKEN,
-      screenName: username,
-      count: tweetCount
-    }).exec({
-      error: function(err) {
-        console.log("Error at getPopularTweets");
-        console.log(err);
-      },
-      success: function(result) {
-        callback(result);
-      }
-    });
-    //getUserTweets(username, tweetCount, callback);
+    getUserTweets(username, tweetCount, callback);
   },
-  getPopularTweets: function(tweetPerInfluencer, callback) {
+  getPopularTweets: function(callback) {
+    var popularTweets = [];
     var screen_names = ["elonmusk", "justinbieber", "barackobama", "potus", "billgates"];
 
-    twitter.getPopularTweets({
-      consumerKey: process.env.TWITTER_CONSUMER_KEY,
-      consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
-      accessToken: process.env.TWITTER_ACCESS_TOKEN,
-      accessSecret: process.env.TWITTER_ACCESS_SECRET,
-      bearerToken: process.env.TWITTER_BEARER_TOKEN,
-      screenNames: screen_names,
-      count: tweetPerInfluencer
-    }).exec({
-      error: function(err) {
-        console.log("Error at getPopularTweets");
-        console.log(err);
-      },
-      success: function(result) {
-        callback(result);
-      }
-    })
-   /* for (var i = 0; i < screen_names.length; i++) {
+    for (var i = 0; i < screen_names.length; i++) {
       getUserTweets(screen_names[i], 1, (result) => {
         popularTweets.push(result[0]);
         popularTweetsLoaded(popularTweets, callback);
       });
-    } */
+    }
   },
 };
 
-/*function popularTweetsLoaded(popularTweets, callback) {
+function popularTweetsLoaded(popularTweets, callback) {
   if (popularTweets.length >= 5) {
     popularTweets.sort(function(a, b) {
       return parseFloat(a.favorite_count) - parseFloat(b.favorite_count);
-    });
+  });
     callback(popularTweets);
   }
 }
@@ -111,7 +77,7 @@ function formatJson(tweets) {
     for (var j = 0; j < tweets[i].entities.hashtags.length; j++){
       tweet.tweet_hashtags.push(tweets[i].entities.hashtags[j].text);
     }
-    */
+
     // Add media
     if (tweets[i].entities.media != null) {
       if (tweets[i].extended_entities != null) { // Multiple pictures/media
@@ -126,12 +92,11 @@ function formatJson(tweets) {
     }
 
     // Get the higher res image
-    /*
-    var fileType = tweet.profile_image_url.substring(tweet.profile_image_url.length - 4, tweet.profile_image_url.length);
-    tweet.profile_image_url = tweet.profile_image_url.substring(0, tweet.profile_image_url.length - 10);
-    tweet.profile_image_url = tweet.profile_image_url + "bigger" + fileType;
+    var fileType = tweet.user_profile_image_url.substring(tweet.user_profile_image_url.length - 4, tweet.user_profile_image_url.length);
+    tweet.user_profile_image_url = tweet.user_profile_image_url.substring(0, tweet.user_profile_image_url.length - 10);
+    tweet.user_profile_image_url = tweet.user_profile_image_url + "bigger" + fileType;
 
     formatedTweets.push(tweet);
   }
   return formatedTweets;
-} */
+}
