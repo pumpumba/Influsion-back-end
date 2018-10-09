@@ -93,8 +93,8 @@ function formatJson(tweets) {
 
     // Get the higher res image
     var fileType = tweet.user_profile_image_url.substring(tweet.user_profile_image_url.length - 4, tweet.user_profile_image_url.length);
-    tweet.user_profile_image_url = tweet.user_profile_image_url.substring(0, tweet.user_profile_image_url.length - 10);
-    tweet.user_profile_image_url = tweet.user_profile_image_url + "bigger" + fileType;
+    tweet.user_profile_image_url = tweet.user_profile_image_url.substring(0, tweet.user_profile_image_url.length - 11);
+    tweet.user_profile_image_url = tweet.user_profile_image_url + fileType;
 
     formatedTweets.push(tweet);
   }
