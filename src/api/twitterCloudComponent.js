@@ -1,6 +1,7 @@
 module.exports = (function(){
   var express = require('express');
-  var Twitter = require('../../machinepack-twitternodemachines')
+  //var Twitter = require('../../machinepack-twitternodemachines')
+  var Twitter = require('machinepack-twitternodemachines');
   const bodyParser = require("body-parser");
 
   app = express.Router();
