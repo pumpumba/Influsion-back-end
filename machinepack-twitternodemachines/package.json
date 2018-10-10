@@ -1,0 +1,32 @@
+{
+  "name": "machinepack-twitternodemachines",
+  "version": "1.17.0",
+  "description": "Gets content from twitter.",
+  "scripts": {
+    "test": "node ./node_modules/test-machinepack-mocha/bin/testmachinepack-mocha.js"
+  },
+  "keywords": [
+    "TwitterNodeMachines",
+    "machines",
+    "machinepack"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "machine": "^12.2.5"
+  },
+  "devDependencies": {
+    "test-machinepack-mocha": "^2.1.5",
+    "lodash": "^4.17.11",
+    "util": "^0.11.0",
+    "twitter": "^1.7.1"
+  },
+  "machinepack": {
+    "friendlyName": "TwitterNodeMachines",
+    "machineDir": "machines/",
+    "machines": [
+      "getPopularTweets",
+      "getUserTweets"
+    ]
+  }
+}
