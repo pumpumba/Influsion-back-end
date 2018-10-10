@@ -38,7 +38,7 @@ client.connect();
 
 client.query("SELECT NOW()", (err, res) => {
   console.log(err, res);
-  client.end();
+  //client.end();
 });
 var twitterCloudComponent = require("./api/twitterCloudComponent");
 app.use("/twitter", twitterCloudComponent);
@@ -70,6 +70,29 @@ app.get("/api/youtube", (req, res) => {
 app.get("/api/instagram", (req, res) => {
   result = instagram.getInsta(result => {
     res.json(result);
+  });
+});
+
+app.get("/db/get_influencer", (req, res) => {
+  dbRequest = "SELECT * FROM INFLUENCER";
+
+  client.query(dbRequest, (err, dbResult) => {
+    //console.log(err, res);
+    res.json(dbResult);
+    //client.end();
+  });
+});
+
+//TODO: THIS ONE SHOULD NOT BE GET, IT SHOULD BE POST, RIGHT?
+app.get("/db/add_influencer", (req, res) => {
+  //db/get_influencer?realname=FilipCornell&Influencer_name=FilipCornell&age=24
+
+  //dbRequest = "INSERT INTO INFLUENCER (INFLUENCERNAME, REALNAME, AGE) VALUES ("++"'Jockiboi', 'Joakim Lundell', 33);";
+  dbRequest = "INSERT INTO INFLUENCER (INFLUENCERNAME, REALNAME, AGE) VALUES ('Jockiboi', 'Joakim Lundell', 33);";
+  client.query(dbRequest, (err, dbResult) => {
+    //console.log(err, res);
+    res.json(dbResult);
+    //client.end();
   });
 });
 
