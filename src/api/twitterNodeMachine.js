@@ -16,11 +16,13 @@ module.exports = {
   },
   getPopularTweets: function(callback) {
     var popularTweets = [];
-    var screen_names = ["elonmusk", "justinbieber", "barackobama", "potus", "billgates"];
+    var screen_names = ["elonmusk", "justinbieber", "barackobama", "potus", "billgates", "beyonce"];
 
     for (var i = 0; i < screen_names.length; i++) {
-      getUserTweets(screen_names[i], 1, (result) => {
-        popularTweets.push(result[0]);
+      getUserTweets(screen_names[i], 3, (result) => {
+        for (var j = 0; j < result.length; j++) {
+          popularTweets.push(result[j]);
+        }
         popularTweetsLoaded(popularTweets, callback);
       });
     }
@@ -28,7 +30,7 @@ module.exports = {
 };
 
 function popularTweetsLoaded(popularTweets, callback) {
-  if (popularTweets.length >= 5) {
+  if (popularTweets.length >= 18) {
     popularTweets.sort(function(a, b) {
       return parseFloat(a.favorite_count) - parseFloat(b.favorite_count);
   });
