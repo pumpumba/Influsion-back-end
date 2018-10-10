@@ -8,8 +8,17 @@ const hostname = "0.0.0.0";
 const port = 8080;
 const app = express();
 
-var twitterCloudComponent = require('./api/twitterCloudComponent');
-app.use('/twitter', twitterCloudComponent)
+var twitterCloudComponent = require("./api/twitterCloudComponent");
+app.use("/twitter", twitterCloudComponent);
+
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+});
 
 //Main page routing
 app.get("/", (req, res) => {
@@ -40,19 +49,15 @@ app.get("/api/twitter", (req, res) => {
     var username = req["query"]["username"];
     var tweetCount = req["query"]["count"];
 
-    twitterNodeMachine.getUserTweets(username, tweetCount, (result) => {
+    twitterNodeMachine.getUserTweets(username, tweetCount, result => {
       res.json(result);
     });
-
   } else if (reqType === "popular") {
-    twitterNodeMachine.getPopularTweets((result) => {
+    twitterNodeMachine.getPopularTweets(result => {
       res.json(result);
-    })
-  }
-   else {
-    res.send(
-      "Error: This request type is not defined"
-    );
+    });
+  } else {
+    res.send("Error: This request type is not defined");
   }
 });
 
