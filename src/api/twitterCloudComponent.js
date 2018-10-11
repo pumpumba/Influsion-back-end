@@ -98,12 +98,11 @@ module.exports = (function() {
                       bearerToken: process.env.TWITTER_BEARER_TOKEN,
                       screenNames: screenNames,
                       count: limit
-                    }).switch({
-                      error: function(err) {
+                    }).exec((err, result) => {
+                      if (err) {
                         console.log("Error at getPopularTweets");
                         console.log(err);
-                      },
-                      success: function(result) {
+                      } else {
                         res.json(result); //Shouldn't return json here yet, should do at the end but doesn't work at the moment cause it hangs in the loop for some reason.
                         successFlag = true;
                         //console.log("Length: " + result.length); // The loops also have to be changed in order for resultObj to contain right objects, because of async functions it won't output the right array of content at the moment.
@@ -122,12 +121,11 @@ module.exports = (function() {
                       bearerToken: process.env.TWITTER_BEARER_TOKEN,
                       screenName: filterValue,
                       count: limit
-                    }).switch({
-                      error: function(err) {
+                    }).exec((err, result) => {
+                      if (err) {
                         console.log("Error at getPopularTweets");
                         console.log(err);
-                      },
-                      success: function(result) {
+                      } else {
                         /*for(var k = 0; k<result.length;k++) {
                           resultObj.push(result[k]);
                         } */
