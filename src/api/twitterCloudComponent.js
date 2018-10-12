@@ -83,13 +83,7 @@ module.exports = (function() {
               case "user":
                 switch (filterValue) {
                   case "Popular":
-                    var screenNames = [
-                      "elonmusk",
-                      "justinbieber",
-                      "barackobama",
-                      "potus",
-                      "billgates"
-                    ];
+                  var screenNames = ["elonmusk", "justinbieber", "barackobama", "potus", "billgates", "beyonce"];
                     Twitter.getPopularTweets({
                       consumerKey: process.env.TWITTER_CONSUMER_KEY,
                       consumerSecret: process.env.TWITTER_CONSUMER_SECRET,

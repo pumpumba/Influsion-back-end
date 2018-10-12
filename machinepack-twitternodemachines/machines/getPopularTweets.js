@@ -50,8 +50,8 @@ module.exports = {
       description: "Invalid or unprovided API key. All calls must have a key."
     },
     success: {
-      description: "Returns popular tweets from influencers"
-      /* example: [
+      description: "Returns popular tweets from influencers",
+        example: [
         {
           platform: "Twitter",
           user_id: 850007368138018817,
@@ -60,21 +60,18 @@ module.exports = {
           user_screen_name: "elonmusk",
           user_followers_count: 120,
           user_verified: true,
-          user_profile_image_url:
-            "http://pbs.twimg.com/profile_images/859982100904148992/hv5soju7_bigger.jpg",
-          tweet_text:
-            "RT @TwitterDev: 1/ Today we’re sharing our vision for the future of the Twitter API platform!nhttps://t.co/XweGngmxlP",
+          user_profile_image_url: "http://pbs.twimg.com/profile_images/859982100904148992/hv5soju7_bigger.jpg",
+          tweet_id: 1045,
+          tweet_text: "RT @TwitterDev: 1/ Today we’re sharing our vision for the future of the Twitter API platform!nhttps://t.co/XweGngmxlP",
           tweet_url: "https://twitter.com/POTUS/status/1049292990215278593",
           tweet_favourite_count: 20,
           tweet_retweet_count: 0,
           retweet_count: 255,
           tweet_created_at: "Thu Apr 06 15:28:43 +0000 2017",
-          hashtags: ["swag"],
-          media: [
-            "http://pbs.twimg.com/profile_images/859982100904148992/hv5soju7_bigger.jpg"
-          ]
+          tweet_hashtags: ["swag"],
+          tweet_media: ["http://pbs.twimg.com/profile_images/859982100904148992/hv5soju7_bigger.jpg"]
         } 
-      ]*/
+      ]
     }
   },
   fn: function(inputs, exits) {
