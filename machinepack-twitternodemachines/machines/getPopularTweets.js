@@ -51,7 +51,7 @@ module.exports = {
     },
     success: {
       description: "Returns popular tweets from influencers",
-        example: [
+        /*example: [
         {
           platform: "Twitter",
           user_id: 850007368138018817,
@@ -71,7 +71,7 @@ module.exports = {
           tweet_hashtags: ["swag"],
           tweet_media: ["http://pbs.twimg.com/profile_images/859982100904148992/hv5soju7_bigger.jpg"]
         } 
-      ]
+      ] */
     }
   },
   fn: function(inputs, exits) {

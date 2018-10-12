@@ -50,7 +50,7 @@ module.exports = {
     },
     success: {
       description: "Returns tweets from User",
-        example: [
+        /*example: [
         {
           platform: "Twitter",
           user_id: 850007368138018817,
@@ -71,7 +71,7 @@ module.exports = {
             "http://pbs.twimg.com/profile_images/859982100904148992/hv5soju7_bigger.jpg"
           ]
         }
-      ] 
+      ] */
     }
   },
   fn: function(inputs, exits) {
