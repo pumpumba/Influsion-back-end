@@ -8,9 +8,6 @@ const hostname = "0.0.0.0";
 const port = 8080;
 const app = express();
 
-var twitterCloudComponent = require("./api/twitterCloudComponent");
-app.use("/twitter", twitterCloudComponent);
-
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
@@ -19,6 +16,9 @@ app.use(function(req, res, next) {
   );
   next();
 });
+
+var twitterCloudComponent = require("./api/twitterCloudComponent");
+app.use("/twitter", twitterCloudComponent);
 
 //Main page routing
 app.get("/", (req, res) => {
