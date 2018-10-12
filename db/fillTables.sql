@@ -14,7 +14,7 @@ INSERT INTO LOCATION (LOCATIONNAME, LOCATIONTYPE) VALUES ('United States', 'COUN
 INSERT INTO LOCATION (LOCATIONNAME, LOCATIONTYPE, COUNTRYID) VALUES ('New York', 'CITY', (select locationid from location where location.locationname = 'United States'));
 INSERT INTO LOCATION (LOCATIONNAME, LOCATIONTYPE, COUNTRYID) VALUES ('Stockholm', 'CITY', (select locationid from location where location.locationname = 'Sweden'));
 INSERT INTO INFLUENCER (INFLUENCERNAME, REALNAME, AGE) VALUES ('Bill Gates', 'Bill Gates', 62);
-INSERT INTO INFLUENCER (INFLUENCERNAME, REALNAME, AGE, CITYID, COUNTRYID) VALUES ('Jockiboi', 'Joakim Lundell', 62, (select locationid from location where location.locationname = 'Stockholm'),(select locationid from location where location.locationname = 'Sweden'));
+INSERT INTO INFLUENCER (INFLUENCERNAME, REALNAME, AGE, CITYID, COUNTRYID) VALUES ('Jockiboi', 'Joakim Lundell', 33, (select locationid from location where location.locationname = 'Stockholm'),(select locationid from location where location.locationname = 'Sweden'));
 
 -- Update country of a specific influencer
 UPDATE INFLUENCER SET COUNTRYID = (select locationid from location where location.locationname = 'United States') WHERE INFLUENCERNAME = 'Bill Gates';

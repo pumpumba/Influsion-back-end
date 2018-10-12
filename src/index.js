@@ -68,8 +68,48 @@ app.get("/api/youtube", (req, res) => {
 
 //Instagram routing
 app.get("/api/instagram", (req, res) => {
-  result = instagram.getInsta(result => {
+  var result = instagram.getInsta(result => {
     res.json(result);
+  });
+});
+
+app.post("/db/alter_user_info", (req,res) => {
+
+});
+
+app.post("/db/create_user", (req, res)=> {
+
+});
+
+app.use(bodyParser.urlencoded({
+  extended: true
+}))
+
+app.use(bodyParser.json());
+
+app.post("/db/alter_user_info", (req,res) => {
+
+});
+
+app.post("/db/create_user", (req, res)=> {
+  
+});
+
+app.post("/db/login", (req, res) => {
+  var inputObj = req.body;
+  //console.log(inputObj.username);
+  var hashedPwd = inputObj.password; //TODO: Change to hashed version of password
+  var usrname = inputObj.username;
+  var usrID = 1;
+
+  var dbRequest = "SELECT (i.usrname = '"+usrname+"' AND i.HASHEDPWD = '"+hashedPwd+"') FROM (SELECT usrname, hashedpwd from usr where usrid = "+usrID+") AS i;"
+  console.log(dbRequest);
+  client.query(dbRequest, (err, dbResult) => {
+
+    console.log("Result is EMPTY!!!!");
+
+    res.json(dbResult);
+
   });
 });
 
@@ -77,9 +117,9 @@ app.get("/db/get_influencer", (req, res) => {
   dbRequest = "SELECT * FROM INFLUENCER";
 
   client.query(dbRequest, (err, dbResult) => {
-    //console.log(err, res);
-    res.json(dbResult);
-    //client.end();
+
+    res.json(dbResult["rows"]);
+
   });
 });
 
