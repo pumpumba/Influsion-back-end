@@ -87,12 +87,67 @@ app.use(bodyParser.urlencoded({
 
 app.use(bodyParser.json());
 
-app.post("/db/alter_user_info", (req,res) => {
+app.post("/db/modify_user", (req,res) => {
+  var inputObj = req.body;
+  var hashedPwd = inputObj.password; //TODO: Change to hashed version of password
+  var usrname = inputObj.username;
+  var age = inputObj.age; //TODO: Change to hashed version of password
+  var email = inputObj.email;
+  var sex = inputObj.sex;
+  var usrID = inputObj.usrid;
+  console.log(usrID);
+  var dbRequest = "UPDATE USR SET HASHEDPWD = '"+hashedPwd+"', age = "+age+", email = '"+email+"', sex = "+sex+" WHERE usrid = "+usrID+";"
+  client.query(dbRequest, (err, dbResult) => {
+    console.log(dbResult); //We get a problem if login is
+    var dbResults = dbResult;
 
+    if (dbResults != undefined && dbResults["rowCount"] == 1) {
+
+
+      dbResults["updateSuccess"] = true;
+    } else if (dbResults == undefined) {
+      dbResults = {};
+      dbResults["updateSuccess"] = false;
+
+    } else if (dbResults["rowCount"] == 2){
+      console.log("2 or more updated. GRAVE ERROR in database.");
+    } else {
+      dbResults = {};
+      dbResults["updateSuccess"] = false;
+    }
+
+    res.json(dbResults);
+
+  });
 });
 
-app.post("/db/create_user", (req, res)=> {
-  
+app.post("/db/register_user", (req, res)=> {
+
+  var inputObj = req.body;
+  var hashedPwd = inputObj.password; //TODO: Change to hashed version of password
+  var usrname = inputObj.username;
+  var age = inputObj.age; //TODO: Change to hashed version of password
+  var email = inputObj.email;
+  var sex = inputObj.sex;
+  var dbRequest = "INSERT INTO USR (USRNAME, HASHEDPWD, EMAIL, AGE, SEX) VALUES ('"+usrname+"', '"+hashedPwd+"', '"+email+"', "+age+", "+sex+");"
+  client.query(dbRequest, (err, dbResult) => {
+    console.log(dbResult); //We get a problem if login is
+    var dbResults = dbResult;
+
+    if (dbResults != undefined && dbResults["rowCount"] == 1) {
+
+
+      dbResults["createSuccess"] = true;
+    } else {
+      dbResults = {};
+      dbResults["createSuccess"] = false;
+
+    }
+
+    res.json(dbResults);
+
+  });
+
 });
 
 app.post("/db/login", (req, res) => {
@@ -102,13 +157,22 @@ app.post("/db/login", (req, res) => {
   var usrname = inputObj.username;
   var usrID = 1;
 
-  var dbRequest = "SELECT (i.usrname = '"+usrname+"' AND i.HASHEDPWD = '"+hashedPwd+"') FROM (SELECT usrname, hashedpwd from usr where usrid = "+usrID+") AS i;"
-  console.log(dbRequest);
+  var dbRequest = "SELECT * FROM usr WHERE usrname = '"+usrname+"' AND HASHEDPWD = '"+hashedPwd+"'"
+  //var dbRequest = "SELECT * FROM usr WHERE (usrname = '"+usrname+"' AND HASHEDPWD = '"+hashedPwd+"')"
+
   client.query(dbRequest, (err, dbResult) => {
+    var dbResults = dbResult["rows"][0];
 
-    console.log("Result is EMPTY!!!!");
+    if (dbResults == undefined) {
 
-    res.json(dbResult);
+
+      dbResults = {};
+      dbResults["loginSuccess"] = false;
+    } else {
+      dbResults["loginSuccess"] = true;
+    }
+
+    res.json(dbResults);
 
   });
 });
