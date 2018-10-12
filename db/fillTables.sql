@@ -108,7 +108,7 @@ SELECT u.usrname, i.INFLUENCERNAME, LATESTVISITS.visittime as lastVisited from u
   ORDER BY VISITTIME DESC;
 
 -- List all users by number of visits
-SELECT COUNT(*) AS NRVISITORS FROM USRVISIT ()
+SELECT COUNT(*) AS NRVISITORS FROM USRVISIT;
 
 --- Count how many visits has been to a user
 SELECT COUNT(*) FROM USRVISIT WHERE USRVISIT.INFLID = (SELECT influencerID FROM Influencer where Influencer.REALNAME = 'Bill Gates');
@@ -130,7 +130,7 @@ SELECT * FROM (
 
 -- Count number of visits on a profile based on
 
-SELect COUNT(*) FROM USRVISIT WHERE INFLUENCERID = (SELECT influencerID where REALNAME = 'Jockiboi');
+SELECT COUNT(*) FROM USRVISIT WHERE INFLUENCERID = (SELECT influencerID where REALNAME = 'Jockiboi');
 
 
 -- Get all posts related to a tag
