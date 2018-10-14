@@ -4,6 +4,8 @@ instagram = require("./api/instagram");
 youtube = require("./api/youtube");
 const { Pool, Client } = require("pg");
 const bodyParser = require("body-parser");
+const bcrypt = require('bcrypt');
+const saltRounds = 10; // rounds for hashing. The more, the safer
 
 const hostname = "0.0.0.0";
 const port = 8080;
@@ -121,59 +123,66 @@ app.post("/db/modify_user", (req,res) => {
   });
 });
 
+
+
 app.post("/db/register_user", (req, res)=> {
 
   var inputObj = req.body;
-  var hashedPwd = inputObj.password; //TODO: Change to hashed version of password
+  var password = inputObj.password; //TODO: Change to hashed version of password
   var usrname = inputObj.username;
   var age = inputObj.age; //TODO: Change to hashed version of password
   var email = inputObj.email;
   var sex = inputObj.sex;
-  var dbRequest = "INSERT INTO USR (USRNAME, HASHEDPWD, EMAIL, AGE, SEX) VALUES ('"+usrname+"', '"+hashedPwd+"', '"+email+"', "+age+", "+sex+");"
-  client.query(dbRequest, (err, dbResult) => {
-    console.log(dbResult); //We get a problem if login is
-    var dbResults = dbResult;
 
-    if (dbResults != undefined && dbResults["rowCount"] == 1) {
+  bcrypt.hash(password, saltRounds, function(err, hash) {
+  // Store hash in your password DB.
+  var dbRequest = "INSERT INTO USR (USRNAME, HASHEDPWD, EMAIL, AGE, SEX) VALUES ('"+usrname+"', '"+hash+"', '"+email+"', "+age+", "+sex+");"
+
+    client.query(dbRequest, (err, dbResult) => {
+      console.log(dbResult); //We get a problem if login is
+      console.log(hash)
+      var dbResults = dbResult;
+
+      if (dbResults != undefined && dbResults["rowCount"] == 1) {
 
 
-      dbResults["createSuccess"] = true;
-    } else {
-      dbResults = {};
-      dbResults["createSuccess"] = false;
+        dbResults["createSuccess"] = true;
+      } else {
+        dbResults = {};
+        dbResults["createSuccess"] = false;
 
-    }
+      }
 
-    res.json(dbResults);
-
+      res.json(dbResults);
+    });
   });
 
 });
 
+
 app.post("/db/login", (req, res) => {
   var inputObj = req.body;
   //console.log(inputObj.username);
-  var hashedPwd = inputObj.password; //TODO: Change to hashed version of password
+  var password = inputObj.password; //TODO: Change to hashed version of password
   var usrname = inputObj.username;
-  var usrID = 1;
 
-  var dbRequest = "SELECT * FROM usr WHERE usrname = '"+usrname+"' AND HASHEDPWD = '"+hashedPwd+"'"
+  var dbRequest = "SELECT * FROM usr WHERE usrname = '"+usrname+"'"
   //var dbRequest = "SELECT * FROM usr WHERE (usrname = '"+usrname+"' AND HASHEDPWD = '"+hashedPwd+"')"
 
   client.query(dbRequest, (err, dbResult) => {
     var dbResults = dbResult["rows"][0];
+    var hashPassword = dbResult["rows"][0].hashedpwd;
 
-    if (dbResults == undefined) {
+    bcrypt.compare(password, hashPassword, function(err, resultCompare) {
+      if (resultCompare == true) {
+        dbResults["loginSuccess"] = true;
+      } else {
+        dbResults = {};
+        dbResults["loginSuccess"] = false;
+      }
 
-
-      dbResults = {};
-      dbResults["loginSuccess"] = false;
-    } else {
-      dbResults["loginSuccess"] = true;
-    }
-
-    res.json(dbResults);
-
+      res.json({dbResults});
+    });
   });
 });
 
@@ -186,6 +195,19 @@ app.get("/db/get_influencer", (req, res) => {
 
   });
 });
+
+// Jesper test av users. Kan/ska tas bort
+app.get("/db/get_user", (req, res) => {
+  dbRequest = "SELECT * FROM USR";
+
+  client.query(dbRequest, (err, dbResult) => {
+    res.json(dbResult["rows"]);
+
+  });
+
+});
+
+
 
 //TODO: THIS ONE SHOULD NOT BE GET, IT SHOULD BE POST, RIGHT?
 app.get("/db/add_influencer", (req, res) => {

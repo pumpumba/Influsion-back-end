@@ -27,7 +27,8 @@
     "wrappy": "^1.0.2",
     "pg": "^7.4.3",
     "body-parser": "^1.18.3",
-    "machinepack-twitternodemachines": "^1.17.0"
+    "machinepack-twitternodemachines": "^1.17.0",
+    "bcrypt": "^3.0.1"
   },
   "bugs": {
     "url": "https://github.com/pumpumba/project_TBD/issues"
