@@ -23,13 +23,13 @@ let youtube = google.youtube("v3");
 
 module.exports = {
   getYoutube: function(callback) {
-    youtube.search.list(
+      youtube.search.list(
       {
         auth: jwtClient,
         part: "snippet",
-        order: "viewCount",
-        q: "pewdiepie",
-        type: "video"
+        order: "date",
+        maxResults : 50, //integer 0-50, default 5
+        channelId: "UC-lHJZR3Gqxm24_Vd_AJ5Yw"
       },
       function(err, res) {
         if (err) {
@@ -42,5 +42,26 @@ module.exports = {
         }
       }
     );
+  },
+  getChannel: function(username, callback) {
+      youtube.channels.list(
+        {
+          auth: jwtClient,
+          part: "snippet",
+          order: "date",
+          forUsername: username,
+          maxResults : 1, //integer 0-50, default 5
+        },
+        function(err, res) {
+          if (err) {
+            console.log("The API returned an error: " + err);
+          } else {
+            callback(res.data.items);
+            /*for (var i = 0; i < response.data.items.length; i++) {
+               console.log(response.data.items[i].snippet.title);
+             }*/
+          }
+        }
+      );
   }
 };

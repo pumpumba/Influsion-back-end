@@ -28,11 +28,29 @@ app.get("/", (req, res) => {
 });
 
 //Youtube routing
+// app.get("/api/youtube", (req, res) => {
+//   youtube.getYoutube(result => {
+//     res.json(result);
+//   });
+// });
 app.get("/api/youtube", (req, res) => {
-  youtube.getYoutube(result => {
-    res.json(result);
-  });
+  var reqType = req["query"]["request_type"];
+
+  if (reqType === "get_channel") {
+    var username = req["query"]["username"];
+
+    youtube.getChannel(username, result => {
+      res.json(result);
+    });
+  } else if (reqType === "get_videos") {
+    twitterNodeMachine.getPopularTweets(result => {
+      res.json(result);
+    });
+  } else {
+    res.send("Error: This request type is not defined");
+  }
 });
+
 
 //Instagram routing
 app.get("/api/instagram", (req, res) => {
