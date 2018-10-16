@@ -130,7 +130,7 @@ SELECT * FROM (
 
 -- Count number of visits on a profile based on
 
-SELECT COUNT(*) FROM USRVISIT WHERE INFLUENCERID = (SELECT influencerID where REALNAME = 'Jockiboi');
+SELECT COUNT(*) FROM USRVISIT WHERE INFLID = (SELECT influencerID where REALNAME = 'Jockiboi');
 
 
 -- Get all posts related to a tag

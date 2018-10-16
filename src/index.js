@@ -89,6 +89,26 @@ app.use(bodyParser.urlencoded({
 
 app.use(bodyParser.json());
 
+//Get all the platform account names for a specific platform
+app.post("/db/get_platform_accounts", (req,res) => {
+  var inputObj = req.body;
+  var platform = inputObj.platform; //TODO: Change to hashed version of password
+  var dbRequest = "SELECT ACTNAME AS PLATFORMNAME FROM PLATFORMACCOUNT WHERE PLATFORM = '"+platform+"'";
+  client.query(dbRequest, (err, dbResult) => {
+    console.log(dbResult); //We get a problem if login is
+    var dbResults = dbResult;
+
+    if (dbResults != undefined && dbResults["rowCount"] >= 1) {
+      dbResults["retrieveSuccess"] = true;
+    } else {
+      dbResults = {};
+      dbResults["retrieveSuccess"] = false;
+    }
+
+    res.json(dbResults);
+
+  });
+});
 app.post("/db/modify_user", (req,res) => {
   var inputObj = req.body;
   var hashedPwd = inputObj.password; //TODO: Change to hashed version of password
