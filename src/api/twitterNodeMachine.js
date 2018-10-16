@@ -31,9 +31,7 @@ module.exports = {
 
 function popularTweetsLoaded(popularTweets, callback) {
   if (popularTweets.length >= 18) {
-    popularTweets.sort(function(a, b) {
-      return parseFloat(a.favorite_count) - parseFloat(b.favorite_count);
-  });
+    popularTweets.sort((a, b) => parseFloat(b.tweet_favorite_count) - parseFloat(a.tweet_favorite_count))
     callback(popularTweets);
   }
 }

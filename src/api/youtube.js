@@ -22,14 +22,15 @@ jwtClient.authorize(function(err, tokens) {
 let youtube = google.youtube("v3");
 
 module.exports = {
-  getYoutube: function(callback) {
+  getYoutube: function(channel_id, count, callback) {
       youtube.search.list(
       {
         auth: jwtClient,
         part: "snippet",
         order: "date",
-        maxResults : 50, //integer 0-50, default 5
-        channelId: "UC-lHJZR3Gqxm24_Vd_AJ5Yw"
+        maxResults : count, //integer 0-50, default 5
+        // channelId: "UC-lHJZR3Gqxm24_Vd_AJ5Yw"
+        channelId: channel_id
       },
       function(err, res) {
         if (err) {
@@ -50,7 +51,7 @@ module.exports = {
           part: "snippet",
           order: "date",
           forUsername: username,
-          maxResults : 1, //integer 0-50, default 5
+          maxResults : 50 //integer 0-50, default 5
         },
         function(err, res) {
           if (err) {
