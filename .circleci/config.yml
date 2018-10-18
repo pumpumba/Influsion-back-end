@@ -7,13 +7,10 @@ jobs:
   build:
     docker:
       - image: circleci/node:latest
-        auth:
-          username: $DOCKER_LOGIN
-          password: $DOCKER_PWD
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/mongo:3.4.4
+      
+     #   auth:
+      #    username: $DOCKER_LOGIN
+       #   password: $DOCKER_PWD
 
     working_directory: ~/repo
     
@@ -27,15 +24,26 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-      #- run: yarn install
-
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
         
       # run tests!
-      #- run: yarn test
+      #- run: roliga tests kanske
+      
+      - setup_remote_docker:   
+         docker_layer_caching: true 
+         
+      - run:
+         name: Install Docker client
+         command: |
+           set -x
+           VER="18.05.0-ce"
+           curl -L -o /tmp/docker-$VER.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz
+           tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+           mv /tmp/docker/* /usr/bin
+           
       - run:
           name: Docker Build
           command: |
@@ -44,7 +52,9 @@ jobs:
       - run:
           name: Push to docker hub
           command: |
+            docker login -u $DOCKER_LOGIN -p $DOCKER_PWD
             docker push mezzersmite/$BACK_END_IMAGE_NAME:$TAG
+            
       #- run:
       #   name: Deploy to Azure back-end VM
           #echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
