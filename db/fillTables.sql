@@ -1,98 +1,140 @@
--- This document is made to structure and fill up the database with content.
--- Have hashed passwords with a salt.
--- https://stackoverflow.com/questions/2647158/how-can-i-hash-passwords-in-postgresql
-CREATE TABLE USER (
-  USERID INT PRIMARY KEY NOT NULL,
-  USERNAME VARCHAR(20) NOT NULL UNIQUE,
-  HASHEDPWD VARCHAR(50) NOT NULL,
-  EMAIL VARCHAR(20),
-  AGE INT,
-  SEX BOOLEAN -- 1 for male, 0 for female
-);
+--CREATE TABLE INFLUENCER (
+--  INFLUENCERID INT PRIMARY KEY NOT NULL,
+--  INFLUENCERNAME VARCHAR(30) NOT NULL,
+--  REALNAME VARCHAR(30),
+--  AGE INT,
+--  COUNTRYID INT REFERENCES LOCATION(LOCATIONID),
+--  CITYID INT REFERENCES LOCATION(LOCATIONID)
+--);
 
-CREATE TABLE LOCATION (
-  LOCATIONID INT PRIMARY KEY NOT NULL,
-  LOCATIONNAME VARCHAR NOT NULL,
-  REGIONID INT REFERENCES LOCATION(LOCATIONID)
-);
 
-CREATE TABLE INFLUENCER (
-  INFLUENCERID INT PRIMARY KEY NOT NULL,
-  INFLUENCERNAME VARCHAR(30) NOT NULL,
-  REALNAME VARCHAR(30),
-  AGE INT,
-  COUNTRYID INT REFERENCES LOCATION(LOCATIONID)
-  CITYID INT REFERENCES LOCATION(LOCATIONID)
-);
+INSERT INTO LOCATION (LOCATIONNAME, LOCATIONTYPE) VALUES ('Sweden', 'COUNTRY');
+INSERT INTO LOCATION (LOCATIONNAME, LOCATIONTYPE) VALUES ('United States', 'COUNTRY');
+-- locationtype has to be inserted with caps!
+INSERT INTO LOCATION (LOCATIONNAME, LOCATIONTYPE, COUNTRYID) VALUES ('New York', 'CITY', (select locationid from location where location.locationname = 'United States'));
+INSERT INTO LOCATION (LOCATIONNAME, LOCATIONTYPE, COUNTRYID) VALUES ('Stockholm', 'CITY', (select locationid from location where location.locationname = 'Sweden'));
+INSERT INTO INFLUENCER (INFLUENCERNAME, REALNAME, AGE) VALUES ('Bill Gates', 'Bill Gates', 62);
+INSERT INTO INFLUENCER (INFLUENCERNAME, REALNAME, AGE, CITYID, COUNTRYID) VALUES ('Jockiboi', 'Joakim Lundell', 33, (select locationid from location where location.locationname = 'Stockholm'),(select locationid from location where location.locationname = 'Sweden'));
 
-CREATE TABLE USERFLWINFL (
-  RELATIONID INT PRIMARY KEY NOT NULL,
-  FLWRID INT REFERENCES USER (USERID) NOT NULL,
-  INFLID INT REFERENCES INFLUENCER(INFLUENCERID) NOT NULL
-);
+-- Update country of a specific influencer
+UPDATE INFLUENCER SET COUNTRYID = (select locationid from location where location.locationname = 'United States') WHERE INFLUENCERNAME = 'Bill Gates';
 
--- Have this table to track the number of visits?
-CREATE TABLE USERVISIT (
-  RELATIONID INT PRIMARY KEY NOT NULL,
-  USERID INT REFERENCES USER (USERID) NOT NULL,
-  INFLID INT REFERENCES INFLUENCER(INFLUENCERID) NOT NULL,
-  VISITTIME TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  VISITTYPE VARCHAR NOT NULL
-);
+-- Create a user
+INSERT INTO USR (USRNAME, HASHEDPWD, EMAIL, AGE, SEX)
+  VALUES ('Filleboy', 'BAJSBAJS', 'c.filip.cornell@gmail.com', 24, TRUE);
 
-CREATE TABLE POST (
-  POSTID INT PRIMARY KEY NOT NULL,
-  INFLID INT REFERENCES INFLUENCER(INFLUENCERID) NOT NULL,
-  NRLIKES INT NOT NULL,
-  PLATFORM VARCHAR(9) NOT NULL,
-  USERTXTCONTENT TEXT,
-  POSTED TIMESTAMPTZ,
-  POSTURL VARCHAR, --EXACTLY THE SAME AS
-  PLATFORMCONTENT JSON --TODO: decide whether JSONB or JSON is best. JSONB supports indexing, is faster to process but slower to insert.
-);
+-- INSERT a visit to a specific influencer
+INSERT INTO USRVISIT (USRID, INFLID, TYPEOFVISIT)
+    VALUES ((SELECT USRID FROM USR WHERE USRNAME = 'Filleboy'), (SELECT INFLUENCERID FROM INFLUENCER WHERE INFLUENCERNAME = 'Bill Gates'), 'instagrampost');
 
-CREATE TABLE TAG (
-  TAGID INT PRIMARY KEY NOT NULL,
-  TAGNAME VARCHAR,
-  POSTID INT REFERENCES POST (POSTID),
-  INFLID INT REFERENCES INFLUENCER (INFLUENCERID) NOT NULL
-);
+--Insert that a user wants to follow a specific influencer
+INSERT INTO USRFLWINFL (FLWRID, INFLID)
+    VALUES (
+      (SELECT USRID
+        FROM USR
+        WHERE USRNAME = 'Filleboy'),
+      (SELECT INFLUENCERID
+        FROM INFLUENCER
+        WHERE INFLUENCERNAME = 'Bill Gates'));
 
-CREATE TABLE PLATFORMACCOUNT (
-  INFLID INT REFERENCES INFLUENCER (INFLUENCERID) NOT NULL,
-  -- TODO: WHAT IS THE MAX AMT OF CHARS IN THE NAME
-  ACTNAME VARCHAR(30) NOT NULL,
-  -- MIGHT HAVE TO BE MODIFIED IF WE INTRODUCE MORE PLATFORMS
-  PLATFORM VARCHAR(9) NOT NULL,
-  NRFLWRS INT NOT NULL, -- IS SUBSCRIBERS FOR YOUTUBE
-  MEMBERSINCE DATE,
-  ACTURL TEXT NOT NULL,
-  VERIFIED BOOLEAN,
-  USERDESC TEXT,
-  PLATFORMCONTENT JSON
-);
+-- Get all posts from a specific platform
+SELECT * FROM POST
+  WHERE PLATFORM = 'instagram';
 
-CREATE TABLE TVOPERATOR (
-  TVOPERATORID INT PRIMARY KEY NOT NULL,
-  TVOPERATORNAME VARCHAR NOT NULL,
-  HASHEDPWD VARCHAR NOT NULL
-);
+-- Get all posts from an influencer
+SELECT * FROM POST
+  WHERE INFLID = 1;
 
-CREATE TABLE PROMOTION (
-  PROMOTIONID INT PRIMARY KEY NOT NULL,
-  TVOPERATORID INT REFERENCES TVOPERATOR(TVOPERATORID) NOT NULL,
-  STARTDATE TIMESTAMPTZ,
-  ENDDATE TIMESTAMPTZ
-);
+-- Get all posts from a specific platform and influencer
+SELECT * FROM POST
+  WHERE PLATFORM = 'instagram' AND INFLID = 1;
 
-CREATE TABLE TAGPROMOTED (
-  TAGID INT REFERENCES TAG(TAGID) NOT NULL,
-  PROMOTIONID INT REFERENCES PROMOTION(PROMOTIONID) NOT NULL,
-  ISPROMOTION BOOLEAN NOT NULL DEFAULT TRUE
-);
 
-CREATE TABLE INFLUENCERPROMOTED (
-  INFLUENCERID INT REFERENCES INFLUENCER(INFLUENCERID) NOT NULL,
-  PROMOTIONID INT REFERENCES PROMOTION(PROMOTIONID) NOT NULL,
-  ISPROMOTION BOOLEAN NOT NULL DEFAULT TRUE
+
+-- Get all posts from a user's favorite influencers
+SELECT * FROM POST AS P
+  WHERE P.INFLID = (SELECT INFLID FROM USRFLWINFL WHERE FLWRID = 1);
+
+-- Get complete list of influencers followed by a user (without platform info)
+SELECT * FROM INFLUENCER AS I
+  WHERE I.INFLUENCERID = (SELECT INFLID FROM USRFLWINFL WHERE FLWRID = 1);
+
+-- Get complete list of influencers followed by a user with their platformaccountinfo
+WITH INFLUENCERWITHPLATFORMACCOUNTS AS (
+  SELECT INFLUENCER.*, PLATFORMACCOUNT.* FROM INFLUENCER
+  INNER JOIN PLATFORMACCOUNT ON
+  INFLUENCER.INFLUENCERID = PLATFORMACCOUNT.INFLID
+  )
+SELECT * FROM INFLUENCERWITHPLATFORMACCOUNTS AS I
+  WHERE I.INFLUENCERID = (SELECT INFLID FROM USRFLWINFL WHERE FLWRID = 1);
+
+  -- Select all influencers with their countries and include null values
+  SELECT * FROM (
+    SELECT influencer.*, location.locationname AS Country FROM influencer
+    LEFT join location on
+    influencer.countryid = location.locationid
+    AND LOCATIONTYPE = 'COUNTRY' -- UNNECESSARY
+    and influencer.influencername = 'Bill Gates')
+    AS influencerWLocation;
+
+-- Select all influencers having countries and include countries
+SELECT * FROM (
+  SELECT influencer.*, location.locationname AS Country FROM influencer
+  inner join location on
+  influencer.countryid = location.locationid
+  AND LOCATIONTYPE = 'COUNTRY' -- UNNECESSARY
+  and influencer.influencername = 'Bill Gates')
+  AS influencerWLocation;
+
+-- Select all users from a specific country
+SELECT * FROM (
+  SELECT influencer.*, location.locationname AS Country FROM influencer
+  inner join location on
+  influencer.cityid = location.locationid
+  AND LOCATIONTYPE = 'CITY' -- UNNECESSARY
+  and influencer.influencername = 'Bill Gates')
+  AS influencerWLocation;
+
+
+-- Get latest visits by which users to which influencers
+WITH LATESTVISITS AS (
+  SELECT * FROM usrvisit
+  ORDER BY VISITTIME DESC
+  LIMIT 100 --This is how many
+)
+SELECT u.usrname, i.INFLUENCERNAME, LATESTVISITS.visittime as lastVisited from usr as u
+  INNER join LATESTVISITS on u.usrid = LATESTVISITS.usrid
+  inner join influencer as i on LATESTVISITS.inflid = i.influencerID
+  ORDER BY VISITTIME DESC;
+
+-- List all users by number of visits
+SELECT COUNT(*) AS NRVISITORS FROM USRVISIT;
+
+--- Count how many visits has been to a user
+SELECT COUNT(*) FROM USRVISIT WHERE USRVISIT.INFLID = (SELECT influencerID FROM Influencer where Influencer.REALNAME = 'Bill Gates');
+
+-- Count number of users following a specific
+SELECT COUNT(*) FROM USRVISIT WHERE USRVISIT.INFLID = (SELECT influencerID FROM Influencer where Influencer.REALNAME = 'Bill Gates');
+
+-- Retrieve all influencers and all their platform accounts based on id or name
+
+SELECT * FROM (
+  SELECT INFLUENCER.*, PLATFORMACCOUNT.* FROM INFLUENCER
+  INNER JOIN PLATFORMACCOUNT ON
+  INFLUENCER.INFLUENCERID = PLATFORMACCOUNT.INFLID
+) AS INFLUENCERWITHPLATFORMACCOUNTS;
+
+-- Perform a search for influencers based on keywords
+
+-- Select all promoted influencers and all their platformaccounts based on
+
+-- Count number of visits on a profile based on
+
+SELECT COUNT(*) FROM USRVISIT WHERE INFLID = (SELECT influencerID FROM INFLUENCER where REALNAME = 'Jockiboi');
+
+
+-- Get all posts related to a tag
+
+SELECT * FROM POST WHERE POST.POSTID = ANY(
+  SELECT POSTID FROM TAGFORPOST WHERE TAGFORPOST.TAGID = ANY(SELECT TAGID FROM TAG WHERE TAGNAME = 'metoo')
 );
