@@ -1,11 +1,12 @@
 const { google } = require("googleapis");
-let privatekey = require("./pumbagoogleprivatekey.json");
+//let privatekey = require("./pumbagoogleprivatekey.json");
+require("dotenv").load();
 
 // Configure a JWT auth client
 let jwtClient = new google.auth.JWT(
-  privatekey.client_email,
+  process.env.GOOGLE_CLIENT_EMAIL,
   null,
-  privatekey.private_key,
+  process.env.GOOGLE_PRIVATE_KEY,
   ["https://www.googleapis.com/auth/youtube"]
 );
 
