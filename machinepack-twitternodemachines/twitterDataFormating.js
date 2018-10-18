@@ -18,6 +18,7 @@ var self = module.exports = {
             "user_followers_count": tweets[i].user.followers_count,
             "user_verified": tweets[i].user.verified,
             "user_profile_image_url": tweets[i].user.profile_image_url,
+            "tweet_id": tweets[i].id_str,
             "tweet_text": tweets[i].text,
             "tweet_url": "",
             "tweet_favorite_count": tweets[i].favorite_count,
@@ -26,6 +27,16 @@ var self = module.exports = {
             "tweet_hashtags": [],
             "tweet_media": []
           };
+          var textLength = tweet.tweet_text.length;
+          var url_length = 'http://t.co'.length;
+          if(textLength > url_length) {
+            for(var k = 0; k<(textLength - url_length - 1);k++) {
+              if(tweet.tweet_text.substring(k, url_length + k) == 'http://t.co' || tweet.tweet_text.substring(k, url_length + k + 1) == 'https://t.co') {
+                tweet.tweet_text = tweet.tweet_text.substring(0, k);
+                break;
+              }
+            }
+          }
           tweet.user_url = "https://twitter.com/" + tweet.user_screen_name;
           tweet.tweet_url = "https://twitter.com/" + tweet.user_screen_name + "/status/" + tweet.tweet_id;
       
@@ -49,8 +60,8 @@ var self = module.exports = {
       
           // Get the higher res image
           var fileType = tweet.user_profile_image_url.substring(tweet.user_profile_image_url.length - 4, tweet.user_profile_image_url.length);
-          tweet.profile_image_url = tweet.user_profile_image_url.substring(0, tweet.user_profile_image_url.length - 10);
-          tweet.profile_image_url = tweet.user_profile_image_url + "bigger" + fileType;
+    tweet.user_profile_image_url = tweet.user_profile_image_url.substring(0, tweet.user_profile_image_url.length - 11);
+    tweet.user_profile_image_url = tweet.user_profile_image_url + fileType;
       
           formatedTweets.push(tweet);
         }

@@ -42,8 +42,6 @@ client.query("SELECT NOW()", (err, res) => {
   console.log(err, res);
   //client.end();
 });
-var twitterCloudComponent = require("./api/twitterCloudComponent");
-app.use("/twitter", twitterCloudComponent);
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -53,7 +51,10 @@ app.use(function(req, res, next) {
   );
   next();
 });
-//ROUTING
+
+var twitterCloudComponent = require("./api/twitterCloudComponent");
+app.use("/twitter", twitterCloudComponent);
+
 //Main page routing
 app.get("/", (req, res) => {
   res.send(
