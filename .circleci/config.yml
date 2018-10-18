@@ -7,7 +7,9 @@ jobs:
   build:
     docker:
       - image: circleci/node:latest
-      
+        auth:
+          username: $DOCKER_LOGIN
+          password: $DOCKER_PWD
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
       # documented at https://circleci.com/docs/2.0/circleci-images/
@@ -34,16 +36,18 @@ jobs:
         
       # run tests!
       #- run: yarn test
-      
       - run:
-          name: Build and push to docker hub
+          name: Docker Build
           command: |
             docker build -t mezzersmite/$BACK_END_IMAGE_NAME:$TAG .
-            echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
+            
+      - run:
+          name: Push to docker hub
+          command: |
             docker push mezzersmite/$BACK_END_IMAGE_NAME:$TAG
       #- run:
       #   name: Deploy to Azure back-end VM
-          
+          #echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
           
 
 #comment
