@@ -103,6 +103,7 @@ app.post("/db/get_platform_accounts", (req,res) => {
   });
 });
 
+//Inserts a post with all the information specificed for a post
 app.post("/db/insert_post", (req, res) => {
   var inputObj = req.body;
   var names = ["real_name", "nr_likes", "platform", "usr_text_content", "date_posted", "post_url", "jsonContent"];
@@ -130,6 +131,7 @@ app.post("/db/insert_post", (req, res) => {
 
 });
 
+// Unfollow an influencer by specifiying user_id for user, and influencer_id for influencer
 app.post("/db/unfollow_influencer", (req,res) => {
 
   var inputObj = req.body;
@@ -164,10 +166,10 @@ app.post("/db/add_follow_influencer", (req,res) => {
     }
   }
   var dbRequest = "INSERT INTO USRFLWINFL (FLWRID, INFLID) VALUES ("+usrID+","+inflID+");";
-  console.log(dbRequest);
+
   client.query(dbRequest, (err, dbResult) => {
-    console.log(dbResult);
-    console.log(err);
+
+
     var dbResults = dbResult;
     if (dbResults != undefined && dbResults["rowCount"] == 1) {
 
@@ -182,7 +184,39 @@ app.post("/db/add_follow_influencer", (req,res) => {
   });
 });
 
+//Returns ALL platformaccounts for all influencers a specific user follows
+app.post("/db/get_platf_accs_flwdinfls", (req, res) => {
+  var inputObj = req.body;
+  var usrID = inputObj.user_id;
+  var orderBy = inputObj.order_by;
+  var dbRequest = "WITH INFLUENCERWITHPLATFORMACCOUNTS AS ( \
+    SELECT INFLUENCER.*, PLATFORMACCOUNT.* FROM INFLUENCER \
+    INNER JOIN PLATFORMACCOUNT ON \
+    INFLUENCER.INFLUENCERID = PLATFORMACCOUNT.INFLID \
+    AND INFLUENCER.INFLUENCERID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = "+usrID+") \
+  ) \
+  SELECT * FROM INFLUENCERWITHPLATFORMACCOUNTS AS I ";
+  if (orderBy != undefined) {
+    dbRequest = dbRequest+"ORDER BY "+orderBy;
+  }
+  dbRequest = dbRequest+";";
+  console.log(dbRequest);
+  client.query(dbRequest, (err, dbResult) => {
 
+    var dbResults = dbResult;
+    if (dbResults != undefined) {
+
+
+      dbResults["retrieveSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["retrieveSuccess"] = false;
+    }
+
+    res.json(dbResults);
+  });
+
+});
 
 app.post("/db/get_follow_list_accounts", (req, res) => {
   var inputObj = req.body;
@@ -196,8 +230,7 @@ app.post("/db/get_follow_list_accounts", (req, res) => {
     FROM PLATFORMACCOUNT \
     WHERE INFLID = B.INFLID) FROM B;";
     client.query(dbRequest, (err, dbResult) => {
-      console.log(err);
-      console.log(dbResult);
+
       var dbResults = dbResult;
       if (dbResults != undefined) {
 
