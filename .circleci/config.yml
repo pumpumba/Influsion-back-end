@@ -6,7 +6,6 @@ version: 2
 jobs:
   build:
     docker:
-      # specify the version you desire here
       - image: circleci/node:latest
       
       # Specify service dependencies here if necessary
@@ -35,6 +34,16 @@ jobs:
         
       # run tests!
       #- run: yarn test
-
+      
+      - run:
+          name: Build and push to docker hub
+          command:
+            docker build -t mezzersmite/$BACK_END_IMAGE_NAME:$TAG .
+            echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
+            docker push mezzersmite/$BACK_END_IMAGE_NAME:$TAG
+      #- run:
+      #   name: Deploy to Azure back-end VM
+          
+          
 
 #comment
