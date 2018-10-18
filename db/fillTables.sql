@@ -24,8 +24,8 @@ INSERT INTO USR (USRNAME, HASHEDPWD, EMAIL, AGE, SEX)
   VALUES ('Filleboy', 'BAJSBAJS', 'c.filip.cornell@gmail.com', 24, TRUE);
 
 -- INSERT a visit to a specific influencer
-INSERT INTO USRVISIT (USRID, INFLID, VISITTYPE)
-    VALUES ((SELECT USRID FROM USR WHERE USRNAME = 'Filleboy'), (SELECT INFLUENCERID FROM INFLUENCER WHERE INFLUENCERNAME = 'Bill Gates'), 'INSTAGRAM');
+INSERT INTO USRVISIT (USRID, INFLID, TYPEOFVISIT)
+    VALUES ((SELECT USRID FROM USR WHERE USRNAME = 'Filleboy'), (SELECT INFLUENCERID FROM INFLUENCER WHERE INFLUENCERNAME = 'Bill Gates'), 'instagrampost');
 
 --Insert that a user wants to follow a specific influencer
 INSERT INTO USRFLWINFL (FLWRID, INFLID)
@@ -39,7 +39,7 @@ INSERT INTO USRFLWINFL (FLWRID, INFLID)
 
 -- Get all posts from a specific platform
 SELECT * FROM POST
-  WHERE PLATFORM = 'INSTAGRAM';
+  WHERE PLATFORM = 'instagram';
 
 -- Get all posts from an influencer
 SELECT * FROM POST
@@ -47,7 +47,7 @@ SELECT * FROM POST
 
 -- Get all posts from a specific platform and influencer
 SELECT * FROM POST
-  WHERE PLATFORM = 'INSTAGRAM' AND INFLID = 1;
+  WHERE PLATFORM = 'instagram' AND INFLID = 1;
 
 
 
@@ -130,7 +130,7 @@ SELECT * FROM (
 
 -- Count number of visits on a profile based on
 
-SELECT COUNT(*) FROM USRVISIT WHERE INFLID = (SELECT influencerID where REALNAME = 'Jockiboi');
+SELECT COUNT(*) FROM USRVISIT WHERE INFLID = (SELECT influencerID FROM INFLUENCER where REALNAME = 'Jockiboi');
 
 
 -- Get all posts related to a tag
