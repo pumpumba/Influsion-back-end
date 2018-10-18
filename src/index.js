@@ -23,7 +23,7 @@ app.use("/twitter", twitterCloudComponent);
 //Main page routing
 app.get("/", (req, res) => {
   res.send(
-    "<h1>Hello friends! Welcome to Pumba!</h1> <p> For Instagram API, go to ./api/instagram <br>For Twitter API, go to ./api/twitter <br>For Youtube API, go to ./api/youtube </p>"
+    "<h1>Hello I have no friends! Welcome to Pumba!</h1> <p> For Instagram API, go to ./api/instagram <br>For Twitter API, go to ./api/twitter <br>For Youtube API, go to ./api/youtube </p>"
   );
 });
 
