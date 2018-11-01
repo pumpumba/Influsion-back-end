@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 var self = module.exports = {
     getPlatformAccounts: function(platform, client, callback) {
         //TODO: Change to hashed version of password
@@ -12,7 +13,7 @@ var self = module.exports = {
             dbResults = err;
             dbResults["retrieveSuccess"] = false;
             }
-            callback(Results);
+            callback(dbResults);
         });
     },
 
@@ -189,14 +190,45 @@ var self = module.exports = {
         });
     },
 
-    getLatestPosts: function(userID, platform, top, client, callback) {
+    getLatestPosts: function(platform, top, client, callback) {
+        var dbRequest = "WITH INFLLIST AS ( \
+            SELECT INFLID \
+            FROM USRFLWINFL \
+          ), P AS ( \
+            SELECT * FROM POST ";
+            if (platform != undefined) {
+              dbRequest = dbRequest+" WHERE PLATFORM  = '"+platform+"' ";
+            }
+        
+            dbRequest = dbRequest+"ORDER BY POSTED DESC LIMIT "+top+" \
+          ) \
+          SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
+            FROM P ORDER BY POSTED DESC";
+            client.query(dbRequest, (err, dbResult) => {
+              console.log(err);
+              console.log(dbResult);
+              var dbResults = dbResult;
+              if (dbResults != undefined) {
+        
+        
+                dbResults["retrieveSuccess"] = true;
+              } else {
+                dbResults = err;
+                dbResults["retrieveSuccess"] = false;
+              }
+        
+              callback(dbResults);
+            });
+    },
+
+    getLatestPostsFromFollowedInfluencers: function(userID, platform, top, client, callback) {
         var dbRequest = "WITH INFLLIST AS ( \
             SELECT INFLID \
             FROM USRFLWINFL \
             WHERE FLWRID = "+userID+" \
           ), P AS ( \
             SELECT * FROM POST ";
-            if (inputObj.platform != undefined) {
+            if (platform != undefined) {
               dbRequest = dbRequest+" WHERE PLATFORM  = '"+platform+"' ";
             }
         

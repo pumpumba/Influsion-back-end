@@ -52,7 +52,7 @@ app.use(function(req, res, next) {
   next();
 });
 
-var twitterCloudComponent = require("./api/twitterCloudComponent");
+var twitterCloudComponent = require("./api/aggregateCloudComponent").getRoutes(client);
 app.use("/twitter", twitterCloudComponent);
 
 //Main page routing
@@ -126,6 +126,10 @@ app.post("/db/get_platf_accs_flwdinfls", (req, res) => {
   var userID = inputObj.user_id; //ss
   var orderBy = inputObj.order_by;
   dbFunctions.getPlatformAccountsFromFollowedInfluencers(userID, orderBy, client, (response) => {
+    for(var i = 0; i < response['rows'].length; i++) {
+      console.log(response['rows'][i]['influencerid']);
+    }
+    console.log(response['rows'])
     res.json(response);
   });
 });
@@ -179,9 +183,12 @@ app.post("/db/register_user", (req, res)=> {
 
 app.post("/db/get_latest_posts", (req, res) => {
   var inputObj = req.body;
-  dbFunctions.getLatestPosts(inputObj.user_id, inputObj.platform, inputObj.top, client, (response) => {
+  dbFunctions.getLatestPosts(inputObj.platform, inputObj.top, client, (response) => {
     res.json(response);
   });
+  /*dbFunctions.getLatestPostsFromFollowedInfluencers(inputObj.user_id, inputObj.platform, inputObj.top, client, (response) => {
+    res.json(response);
+  }); */
 });
 
 app.post("/db/get_content_from_infl", (req, res) => {

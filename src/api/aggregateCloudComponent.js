@@ -1,4 +1,5 @@
-module.exports = (function() {
+module.exports = {
+  getRoutes: function(client) {
     var express = require("express");
     const bodyParser = require("body-parser");
     var functions = require('./aggregateCloudFunctions');
@@ -26,7 +27,7 @@ module.exports = (function() {
     app.use(bodyParser.json());
   
     app.post("/content", (req, res) => {
-      functions.content(req, res);
+      functions.content(req, res, client);
     });
   
     app.get("/search", (req, res) => {
@@ -38,4 +39,6 @@ module.exports = (function() {
     });
   
     return app;
-  })();
+  }
+
+}
