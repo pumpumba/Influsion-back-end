@@ -24,19 +24,19 @@ var self = module.exports = {
             '"+realName+"'),\
             "+numLikes+", '"+platform+"',\
             '"+userTextContent+"', "+datePosted+",\
-            '"+postUrl+"',"+jsonContent+");"
-            client.query(dbRequest, (err, dbResult) => {
+            '"+postUrl+"',"+jsonContent+");";
+        client.query(dbRequest, (err, dbResult) => {
             console.log(dbResult);
             console.log(err);
-            var dbResults = dbResult;
-            if (dbResults != undefined && dbResults["rowCount"] == 1) {
-                dbResults["createSuccess"] = true;
-            } else {
-                dbResults = err;
-                dbResults["createSuccess"] = false;
-            }
-            callback(dbResults);
-            });
+        var dbResults = dbResult;
+        if (dbResults != undefined && dbResults["rowCount"] == 1) {
+            dbResults["createSuccess"] = true;
+        } else {
+            dbResults = err;
+            dbResults["createSuccess"] = false;
+        }
+        callback(dbResults);
+        });
     },
 
     unfollowInfluencer: function(userID, influencerID, client, callback) {

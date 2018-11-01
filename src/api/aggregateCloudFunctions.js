@@ -67,7 +67,6 @@ var self = module.exports = {
     }
   },
   content: function (req, res, client) {
-    var Twitter = require("../../machinepack-twitternodemachines");
     //var Instagram = require("../../machinepack-instagramnodemachines");
     //var Youtube = require("../../machinepack-youtubenodemachines");
     var inputObj = req.body;
@@ -103,13 +102,13 @@ var self = module.exports = {
     var resultObj = [];
     var currentAsset = 0;
     var currentFilter = 0;
-    self.getContent(assetTypes, filterTypes, currentAsset, currentFilter, resultObj, client, (response) => {
+    self.getContent(assetTypes, filterTypes, filterValue, context,  currentAsset, currentFilter, resultObj, client, (response) => {
       resultObj = response;
       res.json(resultObj);
     });
   },
 
-  getContent: function(assetTypes, filterTypes, currentAssetNum, currentFilterNum, resultObj, client, callback) {
+  getContent: function(assetTypes, filterTypes, filterValue, context, currentAssetNum, currentFilterNum, resultObj, client, callback) {
     switch (assetTypes[currentAssetNum]) {
       case "tweet":
         switch (filterTypes[currentFilterNum]) {
@@ -120,7 +119,7 @@ var self = module.exports = {
                 resultObj.push(result[k]);
               }
               if(currentAssetNum != (assetTypes.length - 1)) {
-                self.getContent(assetTypes, filterTypes, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+                self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
               }
               else {
                 callback(resultObj);
@@ -128,13 +127,13 @@ var self = module.exports = {
             });
             break;
           case "popular":
-            dbFunctions.getLatestPosts('twitter', 5, client, (response) => {
+            dbFunctions.getLatestPosts('Twitter', 5, client, (response) => {
               result = response['rows'];
               for(var k = 0; k<result.length;k++) {
                 resultObj.push(result[k]);
               }
               if(currentAssetNum != (assetTypes.length - 1)) {
-                self.getContent(assetTypes, filterTypes, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+                self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
               }
               else {
                 callback(resultObj);
@@ -148,20 +147,23 @@ var self = module.exports = {
             });
             break;
           case "Update":
-            dbFunctions.getPlatformAccountsFromFollowedInfluencers(filterValue, client, callback, (response1) => {
+            dbFunctions.getPlatformAccountsFromFollowedInfluencers(filterValue, undefined, client, (response1) => {
               var influencers = response1['rows'];
               var currentInfluencerAccount = 0;
               if(currentInfluencerAccount < influencers.length) {
-                self.getContentFromInfluencerTwitter(influencers, currentInfluencerAccount, resultObj, client, 'twitter', (response2) => {
+                var tweets = [];
+                self.getContentFromInfluencerTwitter(influencers, currentInfluencerAccount, tweets, 10, (response2) => {
                   if(response2.length != 0) {
                     self.storeTwitterContent(response2, 0, client, (response3) => {
                       dbFunctions.getLatestPostsFromFollowedInfluencers(filterValue, 'twitter', 5, client, (response4) => {
                         result = response4['rows'];
+                        console.log("final");
                         for(var k = 0; k<result.length;k++) {
+                          console.log(k);
                           resultObj.push(result[k]);
                         }
                         if(currentAssetNum != (assetTypes.length - 1)) {
-                          self.getContent(assetTypes, filterTypes, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+                          self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
                         }
                         else {
                           callback(resultObj);
@@ -171,7 +173,7 @@ var self = module.exports = {
                   }
                   else {
                     if(currentAssetNum != (assetTypes.length - 1)) {
-                      self.getContent(assetTypes, filterTypes, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+                      self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
                     }
                     else {
                       callback(resultObj);
@@ -181,7 +183,7 @@ var self = module.exports = {
               }
               else {
                 if(currentAssetNum != (assetTypes.length - 1)) {
-                  self.getContent(assetTypes, filterTypes, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+                  self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
                 }
                 else {
                   callback(resultObj);
@@ -204,7 +206,7 @@ var self = module.exports = {
     },
 
     getContentFromInfluencersFromPlatform: function(userID, influencerAccounts, currentInfluencer, resultObj, client, platform, callback) {
-      dbFunctions.getContentFromInfluencer(platform, influencerAccounts[currentInfluencer]['influencerID'], 5, userID, client, (response) => {
+      dbFunctions.getContentFromInfluencer(platform, influencerAccounts[currentInfluencer]['influencerid'], 5, userID, client, (response) => {
         for(var k = 0; k<response.length;k++) {
           resultObj.push(response[k]);
         }
@@ -217,10 +219,37 @@ var self = module.exports = {
       });
     },
 
-    getContentFromInfluencerTwitter: function(influencerID, )
+    getContentFromInfluencerTwitter: function(influencers, currentInfluencer, resultObj, limit, callback) {
+      var Twitter = require("machinepack-twitternodemachines");
+      Twitter.getUserTweets({
+        consumerKey: process.env.TWITTER_CONSUMER_KEY,
+        consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
+        accessToken: process.env.TWITTER_ACCESS_TOKEN,
+        accessSecret: process.env.TWITTER_ACCESS_SECRET,
+        bearerToken: process.env.TWITTER_BEARER_TOKEN,
+        userID: 50393960, //influencers[currentInfluencer]['influencerid'],
+        count: limit
+      }).exec((err, result) => {
+        console.log(result);
+        if (err) {
+          console.log("Error at getPopularTweets");
+          console.log(err);
+        } else {
+          for(var k = 0; k<result.length;k++) {
+            resultObj.push(result[k]);
+          }
+          if(currentInfluencer != (influencers.length - 1)) {
+            self.getContentFromInfluencerTwitter(influencers, currentInfluencer + 1, resultObj, limit, callback);
+          }
+          else {
+            callback(resultObj);
+          }
+        }
+      });
+    },
 
     storeTwitterContent: function(tweets, tweetNum, client, callback) {
-      dbFunctions.insertPost(tweets[k].user_name, tweets[k].tweet_favourite_count, tweets[k].platform, tweets[k].tweet_text, tweets[k].tweet_created_at, tweets[k].tweet_url, tweets[k], client, (response) => {
+      dbFunctions.insertPost(tweets[tweetNum].user_name, tweets[tweetNum].tweet_favorite_count, tweets[tweetNum].platform, tweets[tweetNum].tweet_text, tweets[tweetNum].tweet_created_at, tweets[tweetNum].tweet_url, JSON.stringify(tweets[tweetNum]), client, (response) => {
         if(tweetNum != tweets.length - 1) {
           self.storeTwitterContent(tweets, tweetNum + 1, client, callback);
         }
