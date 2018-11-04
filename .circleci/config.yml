@@ -46,8 +46,17 @@ jobs:
             docker login -u $DOCKER_LOGIN -p $DOCKER_PWD
             docker push mezzersmite/$BACK_END_IMAGE_NAME:$TAG
 
-      # run tests!
-      #- run: roliga tests kanske
+      - run:
+          name: test
+          command: npm test
+      - store_artifacts:
+          path: test-results.xml
+          prefix: tests
+      - store_artifacts:
+          path: coverage
+          prefix: coverage
+      - store_test_results:
+          path: test-results.xml
 
       #- run:
       #   name: Deploy to Azure back-end VM
