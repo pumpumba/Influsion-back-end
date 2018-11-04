@@ -246,6 +246,57 @@ app.post("/db/get_follow_list_accounts", (req, res) => {
 
 });
 
+app.post("/db/create_tv_operator", (req, res) => {
+  var inputObj = req.body;
+  var tv_op_name = inputObj.operatorname;
+  var pwd = inputObj.password;
+  bcrypt.hash(pwd, saltRounds, function(err, hash) {
+
+
+  var dbRequest = "INSERT INTO TVOPERATOR (TVOPERATORNAME, HASHEDPWD) VALUES ('"+tv_op_name+"', '"+hash+"');"
+
+  insertionToDB(client, dbRequest, (response) => {
+
+    res.json(response);
+  });
+
+  });
+
+});
+
+app.post("/db/login_tv_operator", (req, res) => {
+  var inputObj = req.body;
+  //console.log(inputObj.username);
+  var password = inputObj.password; //TODO: Change to hashed version of password
+  var tv_op_name = inputObj.operatorname;
+
+  var dbRequest = "SELECT * FROM TVOPERATOR WHERE TVOPERATORNAME = '"+tv_op_name+"'";
+  //var dbRequest = "SELECT * FROM usr WHERE (usrname = '"+usrname+"' AND HASHEDPWD = '"+hashedPwd+"')"
+
+  client.query(dbRequest, (err, dbResult) => {
+    var dbResults = dbResult["rows"][0];
+
+    if (dbResults != undefined) {
+      var hashPassword = dbResult["rows"][0].hashedpwd;
+
+      bcrypt.compare(password, hashPassword, function(err, resultCompare) {
+        if (resultCompare == true) {
+          dbResults["loginSuccess"] = true;
+        } else {
+          dbResults = {};
+          dbResults["loginSuccess"] = false;
+        }
+
+        res.json({dbResults});
+      });
+    } else {
+      dbResults = {};
+      dbResults["loginSuccess"] = false;
+      res.json({dbResults});
+    }
+  });
+});
+
 app.post("/db/add_user_visit", (req, res) =>  {
   var inputObj = req.body;
   var usrID = inputObj.user_id;
@@ -419,6 +470,26 @@ app.post("/db/get_content_from_infl", (req, res) => {
   });
 });
 
+app.post("/db/change_tv_op_info", (req, res) => {
+  var inputObj = req.body;
+  var tv_op_id = inputObj.tv_op_id;
+  var tv_op_name = inputObj.operatorname;
+  var pwd = inputObj.password;
+
+  bcrypt.hash(pwd, saltRounds, function(err, hash) {
+
+
+  var dbRequest = "UPDATE TVOPERATOR SET TVOPERATORNAME = '"+tv_op_name+"', HASHEDPWD = '"+hash+"' WHERE TVOPERATORID = "+tv_op_id+";"
+
+  insertionToDB(client, dbRequest, (response) => {
+
+    res.json(response);
+  });
+
+  });
+
+});
+
 app.post("/db/login", (req, res) => {
   var inputObj = req.body;
   //console.log(inputObj.username);
@@ -430,18 +501,24 @@ app.post("/db/login", (req, res) => {
 
   client.query(dbRequest, (err, dbResult) => {
     var dbResults = dbResult["rows"][0];
-    var hashPassword = dbResult["rows"][0].hashedpwd;
+    if (dbResults != undefined) {
+      var hashPassword = dbResult["rows"][0].hashedpwd;
 
-    bcrypt.compare(password, hashPassword, function(err, resultCompare) {
-      if (resultCompare == true) {
-        dbResults["loginSuccess"] = true;
-      } else {
-        dbResults = {};
-        dbResults["loginSuccess"] = false;
-      }
+      bcrypt.compare(password, hashPassword, function(err, resultCompare) {
+        if (resultCompare == true) {
+          dbResults["loginSuccess"] = true;
+        } else {
+          dbResults = {};
+          dbResults["loginSuccess"] = false;
+        }
 
+        res.json({dbResults});
+      });
+    } else {
+      dbResults = {};
+      dbResults["loginSuccess"] = false;
       res.json({dbResults});
-    });
+    }
   });
 });
 
