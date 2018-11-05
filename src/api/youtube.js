@@ -106,7 +106,7 @@ function formatChannelJson(channel) {
     "channel_id": channel.id,
     "channel_title": channel.snippet.title,
     "channel_description": channel.snippet.description,
-    "channel_created_at": channel.snippet.publishedAt,
+    "channel_created_at": (new Date(channel.snippet.publishedAt)).toISOString(),
     "channel_thumbnail_url": channel.snippet.thumbnails.high.url,
     "channel_url": "https://www.youtube.com/channel/" + channel.id,
     "channel_views": channel.statistics.viewCount,
@@ -128,7 +128,7 @@ function formatVideosJson(videos) {
       "video_url": "",
       "video_title": videos[i].snippet.title,
       "video_description": videos[i].snippet.description,
-      "video_created_at": new Date(videos[i].snippet.publishedAt),
+      "video_created_at": (new Date(videos[i].snippet.publishedAt).toISOString()),
       "video_thumbnail_url": videos[i].snippet.thumbnails.high.url
     };
     video.channel_url = "https://www.youtube.com/channel/" + video.channel_id;
