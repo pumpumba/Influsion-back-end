@@ -3,6 +3,8 @@
 -- https://stackoverflow.com/questions/2647158/how-can-i-hash-passwords-in-postgresql
 CREATE TYPE PF AS ENUM ('instagram', 'twitter', 'youtube');
 
+CREATE TYPE SEXX AS ENUM ('Male','Female');
+
 --- User table. Containing info about user
 CREATE TABLE USR (
   USRID SERIAL PRIMARY KEY,
@@ -10,7 +12,7 @@ CREATE TABLE USR (
   HASHEDPWD VARCHAR NOT NULL,
   EMAIL VARCHAR UNIQUE,
   AGE INT,
-  SEX BOOLEAN -- 1 for male, 0 for female
+  SEX SEXX -- Can be "Male" or "Female"
 );
 
 -- Specifies Location table, used to
@@ -28,6 +30,7 @@ CREATE TABLE INFLUENCER (
   INFLUENCERNAME VARCHAR(30) NOT NULL,
   REALNAME VARCHAR(30),
   AGE INT,
+  SEX SEXX,
   PICTURELINK TEXT,
   COUNTRYID INTEGER REFERENCES LOCATION(LOCATIONID) DEFAULT NULL,
   CITYID INTEGER REFERENCES LOCATION(LOCATIONID) DEFAULT NULL
