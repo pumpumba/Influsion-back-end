@@ -6,7 +6,7 @@ const { Pool, Client } = require("pg");
 const bodyParser = require("body-parser");
 const bcrypt = require('bcrypt');
 const saltRounds = 10; // rounds for hashing. The more, the safer
-
+var dbFunctions = require('./dbFunctions');
 const hostname = "0.0.0.0";
 const port = 8080;
 const app = express();
@@ -52,7 +52,7 @@ app.use(function(req, res, next) {
   next();
 });
 
-var twitterCloudComponent = require("./api/twitterCloudComponent");
+var twitterCloudComponent = require("./api/aggregateCloudComponent").getRoutes(client);
 app.use("/twitter", twitterCloudComponent);
 
 //Main page routing
@@ -86,49 +86,19 @@ app.use(bodyParser.json());
 app.post("/db/get_platform_accounts", (req,res) => {
   var inputObj = req.body;
   var platform = inputObj.platform; //TODO: Change to hashed version of password
-  var dbRequest = "SELECT ACTNAME AS PLATFORMNAME FROM PLATFORMACCOUNT WHERE PLATFORM = '"+platform+"'";
-  client.query(dbRequest, (err, dbResult) => {
-    console.log(dbResult); //We get a problem if login is
-    var dbResults = dbResult;
-
-    if (dbResults != undefined && dbResults["rowCount"] >= 1) {
-      dbResults["retrieveSuccess"] = true;
-    } else {
-      dbResults = err;
-      dbResults["retrieveSuccess"] = false;
-    }
-
-    res.json(dbResults);
-
+  dbFunctions.getPlatformAccounts(platform, client, (response) => {
+    res.json(response);
   });
 });
 
 //Inserts a post with all the information specificed for a post
 app.post("/db/insert_post", (req, res) => {
   var inputObj = req.body;
-  var names = ["real_name", "nr_likes", "platform", "usr_text_content", "date_posted", "post_url", "jsonContent"];
-  var dbRequest = "INSERT INTO POST(INFLID, NRLIKES, PLATFORM, USRTXTCONTENT, POSTED, POSTURL, PLATFORMCONTENT) \
-    VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE REALNAME =\
-     '"+inputObj.real_name+"'),\
-     "+inputObj.nr_likes+", '"+inputObj.platform+"',\
-    '"+inputObj.usr_text_content+"', "+inputObj.date_posted+",\
-     '"+inputObj.post_url+"',"+inputObj.jsonContent+");"
-     client.query(dbRequest, (err, dbResult) => {
-       console.log(dbResult);
-       console.log(err);
-       var dbResults = dbResult;
-       if (dbResults != undefined && dbResults["rowCount"] == 1) {
-
-
-         dbResults["createSuccess"] = true;
-       } else {
-         dbResults = err;
-         dbResults["createSuccess"] = false;
-       }
-
-       res.json(dbResults);
-     });
-
+  dbFunctions.insertPost(inputObj.real_name, inputObj.nr_likes, 
+    inputObj.platform, inputObj.usr_text_content, inputObj.date_posted, 
+    inputObj.post_url, inputObj.jsonContent, client, (response) => {
+      res.json(response);
+    });
 });
 
 app.get("/db/get_followed_infl_posts", (req, res) => {
@@ -155,8 +125,8 @@ app.get("/db/get_followed_infl_posts", (req, res) => {
 
 // Unfollow an influencer by specifiying user_id for user, and influencer_id for influencer
 app.post("/db/unfollow_influencer", (req,res) => {
-
   var inputObj = req.body;
+<<<<<<< HEAD
   var usrID = inputObj.user_id;
   var inflID = inputObj.influencer_id;
   var dbRequest = "DELETE FROM USRFLWINFL WHERE FLWRID = "+usrID+" AND INFLID = "+inflID+";";
@@ -174,98 +144,44 @@ app.post("/db/unfollow_influencer", (req,res) => {
     }
 
     res.json(dbResults);
+=======
+  var userID = inputObj.user_id;
+  var influencerID = inputObj.influencer_id;
+  dbFunctions.unfollowInfluencer(userID, influencerID, client, (response) => {
+    res.json(response);
+>>>>>>> origin/development
   });
 });
 
 app.post("/db/add_follow_influencer", (req,res) => {
   var inputObj = req.body;
-  var usrID = inputObj.user_id;
-  var inflID = inputObj.influencer_id;
-  var names = ["real_name", "influencer_id"];
-  for (i in inputObj) {
-    if (names.includes(i)) {
-      console.log("Yes!");
-    }
-  }
-  var dbRequest = "INSERT INTO USRFLWINFL (FLWRID, INFLID) VALUES ("+usrID+","+inflID+");";
-
-  client.query(dbRequest, (err, dbResult) => {
-
-
-    var dbResults = dbResult;
-    if (dbResults != undefined && dbResults["rowCount"] == 1) {
-
-
-      dbResults["createSuccess"] = true;
-    } else {
-      dbResults = err;
-      dbResults["createSuccess"] = false;
-    }
-
-    res.json(dbResults);
+  var userID = inputObj.user_id;
+  var influencerID = inputObj.influencer_id;
+  dbFunctions.addFollowInfluencer(userID, influencerID, client, (response) => {
+    res.json(response);
   });
 });
 
 //Returns ALL platformaccounts for all influencers a specific user follows
 app.post("/db/get_platf_accs_flwdinfls", (req, res) => {
   var inputObj = req.body;
-  var usrID = inputObj.user_id;
+  var userID = inputObj.user_id; //ss
   var orderBy = inputObj.order_by;
-  var dbRequest = "WITH INFLUENCERWITHPLATFORMACCOUNTS AS ( \
-    SELECT INFLUENCER.*, PLATFORMACCOUNT.* FROM INFLUENCER \
-    INNER JOIN PLATFORMACCOUNT ON \
-    INFLUENCER.INFLUENCERID = PLATFORMACCOUNT.INFLID \
-    AND INFLUENCER.INFLUENCERID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = "+usrID+") \
-  ) \
-  SELECT * FROM INFLUENCERWITHPLATFORMACCOUNTS AS I ";
-  if (orderBy != undefined) {
-    dbRequest = dbRequest+"ORDER BY "+orderBy;
-  }
-  dbRequest = dbRequest+";";
-  console.log(dbRequest);
-  client.query(dbRequest, (err, dbResult) => {
-
-    var dbResults = dbResult;
-    if (dbResults != undefined) {
-
-
-      dbResults["retrieveSuccess"] = true;
-    } else {
-      dbResults = err;
-      dbResults["retrieveSuccess"] = false;
+  dbFunctions.getPlatformAccountsFromFollowedInfluencers(userID, orderBy, client, (response) => {
+    for(var i = 0; i < response['rows'].length; i++) {
+      console.log(response['rows'][i]['influencerid']);
     }
-
-    res.json(dbResults);
+    console.log(response['rows'])
+    res.json(response);
   });
-
 });
 
 app.post("/db/get_follow_list_accounts", (req, res) => {
   var inputObj = req.body;
-  var usrID = inputObj.user_id;
-  var dbRequest = "WITH B AS ( \
-    SELECT I.INFLUENCERNAME, U.INFLID \
-    FROM USRFLWINFL AS U, INFLUENCER AS I \
-    WHERE U.FLWRID = "+usrID+" AND U.INFLID = I.INFLUENCERID \
-  ) \
-  SELECT B.INFLUENCERNAME, ARRAY(SELECT ACTNAME || ' : ' || PLATFORM \
-    FROM PLATFORMACCOUNT \
-    WHERE INFLID = B.INFLID) FROM B;";
-    client.query(dbRequest, (err, dbResult) => {
-
-      var dbResults = dbResult;
-      if (dbResults != undefined) {
-
-
-        dbResults["retrieveSuccess"] = true;
-      } else {
-        dbResults = err;
-        dbResults["retrieveSuccess"] = false;
-      }
-
-      res.json(dbResults);
-    });
-
+  var userID = inputObj.user_id;
+  dbFunctions.getFollowListAccounts(userID, client, (response) => {
+    res.json(response);
+  });
 });
 
 app.post("/db/create_tv_operator", (req, res) => {
@@ -321,78 +237,26 @@ app.post("/db/login_tv_operator", (req, res) => {
 
 app.post("/db/add_user_visit", (req, res) =>  {
   var inputObj = req.body;
-  var usrID = inputObj.user_id;
-  var inflID = inputObj.influencer_id;
+  var userID = inputObj.user_id;
+  var influencerID = inputObj.influencer_id;
   var typeOfVisit = inputObj.type_of_visit;
-  var dbRequest = "INSERT INTO USRVISIT(USRID, INFLID, TYPEOFVISIT) VALUES ("+usrID+","+inflID+",'"+typeOfVisit+"');";
-  client.query(dbRequest, (err, dbResult) => {
-    console.log(err);
-    console.log(dbResult);
-    var dbResults = dbResult;
-    if (dbResults != undefined && dbResults["rowCount"] == 1) {
-
-
-      dbResults["createSuccess"] = true;
-    } else {
-      dbResults = err;
-      dbResults["createSuccess"] = false;
-    }
-
-    res.json(dbResults);
+  dbFunctions.addUserVisit(userID, influencerID, typeOfVisit, client, (response) => {
+    res.json(response);
   });
 });
 
 app.post("/db/modify_user", (req,res) => {
   var inputObj = req.body;
-  var hashedPwd = inputObj.password; //TODO: Change to hashed version of password
-  var usrname = inputObj.username;
+  var hashedPassword = inputObj.password; //TODO: Change to hashed version of password
+  var username = inputObj.username;
   var age = inputObj.age; //TODO: Change to hashed version of password
   var email = inputObj.email;
   var sex = inputObj.sex;
-  var usrID = inputObj.usrid;
-  console.log(usrID);
-  var dbRequest = "UPDATE USR SET USRNAME = '"+usrname+"', HASHEDPWD = '"+hashedPwd+"', age = "+age+", email = '"+email+"', sex = '"+sex+"' WHERE usrid = "+usrID+";"
-  console.log(dbRequest);
-  client.query(dbRequest, (err, dbResult) => {
-    console.log(dbResult); //We get a problem if login is
-    var dbResults = dbResult;
-
-    if (dbResults != undefined && dbResults["rowCount"] == 1) {
-
-
-      dbResults["updateSuccess"] = true;
-    } else if (dbResults == undefined) {
-      dbResults = err;
-      dbResults["updateSuccess"] = false;
-
-    } else if (dbResults["rowCount"] == 2){
-      console.log("2 or more updated. GRAVE ERROR in database.");
-    } else {
-      dbResults = {};
-      dbResults["updateSuccess"] = false;
-    }
-
-    res.json(dbResults);
-
+  var userID = inputObj.usrid;
+  dbFunctions.modifyUser(hashedPassword, username, age, email, sex, userID, client, (response) => {
+    res.json(response);
   });
 });
-
-function insertionToDB(client, dbRequest, callback) {
-  client.query(dbRequest, (err, dbResult) => {
-
-    var dbResults = dbResult;
-    if (dbResults != undefined && dbResults["rowCount"] == 1) {
-
-
-      dbResults["createSuccess"] = true;
-    } else {
-      dbResults = err;
-      dbResults["createSuccess"] = false;
-    }
-
-    callback(dbResults);
-  });
-}
 app.use(bodyParser.urlencoded({
   extended: true
 }))
@@ -401,94 +265,29 @@ app.use(bodyParser.json());
 app.post("/db/register_user", (req, res)=> {
   var inputObj = req.body;
   var password = inputObj.password; //TODO: Change to hashed version of password
-  var usrname = inputObj.username;
+  var username = inputObj.username;
   var age = inputObj.age; //TODO: Change to hashed version of password
   var email = inputObj.email;
   var sex = inputObj.sex;
-
-  bcrypt.hash(password, saltRounds, function(err, hash) {
-  // Store hash in your password DB.
-
-
-  var dbRequest = "INSERT INTO USR (USRNAME, HASHEDPWD, EMAIL, AGE, SEX) VALUES ('"+usrname+"', '"+hash+"', '"+email+"', "+age+", '"+sex+"');"
-
-  insertionToDB(client, dbRequest, (response) => {
-
+  dbFunctions.registerUser(password, username, age, email, sex, client, (response) => {
     res.json(response);
   });
-
-  });
-
 });
 
 app.post("/db/get_latest_posts", (req, res) => {
   var inputObj = req.body;
-
-  var dbRequest = "WITH INFLLIST AS ( \
-    SELECT INFLID \
-    FROM USRFLWINFL \
-    WHERE FLWRID = "+inputObj.user_id+" \
-  ), P AS ( \
-    SELECT * FROM POST ";
-    if (inputObj.platform != undefined) {
-      dbRequest = dbRequest+" WHERE PLATFORM  = '"+inputObj.platform+"' ";
-    }
-
-    dbRequest = dbRequest+"ORDER BY POSTED DESC LIMIT "+inputObj.top+" \
-  ) \
-  SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
-    FROM P ORDER BY POSTED DESC";
-    client.query(dbRequest, (err, dbResult) => {
-      console.log(err);
-      console.log(dbResult);
-      var dbResults = dbResult;
-      if (dbResults != undefined) {
-
-
-        dbResults["retrieveSuccess"] = true;
-      } else {
-        dbResults = err;
-        dbResults["retrieveSuccess"] = false;
-      }
-
-      res.json(dbResults);
-    });
-
+  dbFunctions.getLatestPosts(inputObj.platform, inputObj.top, client, (response) => {
+    res.json(response);
+  });
+  /*dbFunctions.getLatestPostsFromFollowedInfluencers(inputObj.user_id, inputObj.platform, inputObj.top, client, (response) => {
+    res.json(response);
+  }); */
 });
 
 app.post("/db/get_content_from_infl", (req, res) => {
   var inputObj = req.body;
-
-  var dbRequest = "WITH P AS ( \
-    SELECT * FROM POST \
-    WHERE PLATFORM = '"+inputObj.platform+"' AND INFLID = "+inputObj.influencer_id+" \
-    ORDER BY POSTED DESC \
-  "
-  if (inputObj.top != undefined) {
-    dbRequest = dbRequest+" LIMIT "+ inputObj.top;
-  }
-  dbRequest = dbRequest+"), INFLLIST AS ( \
-    SELECT INFLID \
-    FROM USRFLWINFL \
-    WHERE FLWRID = "+inputObj.user_id+" \
-  )\
-   SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
-    FROM P ORDER BY POSTED DESC";
-  dbRequest = dbRequest+";";
-  console.log(dbRequest);
-  client.query(dbRequest, (err, dbResult) => {
-
-    var dbResults = dbResult;
-    if (dbResults != undefined) {
-
-
-      dbResults["retrieveSuccess"] = true;
-    } else {
-      dbResults = err;
-      dbResults["retrieveSuccess"] = false;
-    }
-
-    res.json(dbResults);
+  dbFunctions.getContentFromInfluencer(inputObj.platform, inputObj.influencer_id, inputObj.top, inputObj.user_id, client, (response) => {
+    res.json(response);
   });
 });
 
@@ -516,51 +315,23 @@ app.post("/db/login", (req, res) => {
   var inputObj = req.body;
   //console.log(inputObj.username);
   var password = inputObj.password; //TODO: Change to hashed version of password
-  var usrname = inputObj.username;
-
-  var dbRequest = "SELECT * FROM usr WHERE usrname = '"+usrname+"'"
-  //var dbRequest = "SELECT * FROM usr WHERE (usrname = '"+usrname+"' AND HASHEDPWD = '"+hashedPwd+"')"
-
-  client.query(dbRequest, (err, dbResult) => {
-    var dbResults = dbResult["rows"][0];
-    if (dbResults != undefined) {
-      var hashPassword = dbResult["rows"][0].hashedpwd;
-
-      bcrypt.compare(password, hashPassword, function(err, resultCompare) {
-        if (resultCompare == true) {
-          dbResults["loginSuccess"] = true;
-        } else {
-          dbResults = {};
-          dbResults["loginSuccess"] = false;
-        }
-
-        res.json({dbResults});
-      });
-    } else {
-      dbResults = {};
-      dbResults["loginSuccess"] = false;
-      res.json({dbResults});
-    }
+  var username = inputObj.username;
+  dbFunctions.login(password, username, client, (response) => {
+    res.json(response);
   });
 });
 
 app.get("/db/get_influencer", (req, res) => {
-  dbRequest = "SELECT * FROM INFLUENCER";
-
-  client.query(dbRequest, (err, dbResult) => {
-
-    res.json(dbResult["rows"]);
-
+  dbFunctions.getInfluencer(client, (response) => {
+    res.json(response);
   });
 });
 
 // Jesper test av users. Kan/ska tas bort
 app.get("/db/get_user", (req, res) => {
   dbRequest = "SELECT * FROM USR";
-
   client.query(dbRequest, (err, dbResult) => {
     res.json(dbResult["rows"]);
-
   });
 
 });
