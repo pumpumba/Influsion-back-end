@@ -80,6 +80,10 @@ app.get("/api/instagram", (req, res) => {
     instagram.getInstaPosts(username, postCount, result => {
       res.json(result);
     });
+  } else if (reqType === "get_popular_posts") {
+    instagram.getPopularPosts(result => {
+      res.json(result);
+    });
   } else {
     res.send("Error: This request type is not defined");
   }
