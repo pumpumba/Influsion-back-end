@@ -329,7 +329,7 @@ app.post("/db/modify_user", (req,res) => {
   var sex = inputObj.sex;
   var usrID = inputObj.usrid;
   console.log(usrID);
-  var dbRequest = "UPDATE USR SET USRNAME = '"+usrname+"', HASHEDPWD = '"+hashedPwd+"', age = "+age+", email = '"+email+"', sex = "+sex+" WHERE usrid = "+usrID+";"
+  var dbRequest = "UPDATE USR SET USRNAME = '"+usrname+"', HASHEDPWD = '"+hashedPwd+"', age = "+age+", email = '"+email+"', sex = '"+sex+"' WHERE usrid = "+usrID+";"
   client.query(dbRequest, (err, dbResult) => {
     console.log(dbResult); //We get a problem if login is
     var dbResults = dbResult;
