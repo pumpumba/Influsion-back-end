@@ -76,14 +76,6 @@ app.get("/api/instagram", (req, res) => {
   });
 });
 
-app.post("/db/alter_user_info", (req,res) => {
-
-});
-
-app.post("/db/create_user", (req, res)=> {
-
-});
-
 app.use(bodyParser.urlencoded({
   extended: true
 }))
@@ -102,7 +94,7 @@ app.post("/db/get_platform_accounts", (req,res) => {
     if (dbResults != undefined && dbResults["rowCount"] >= 1) {
       dbResults["retrieveSuccess"] = true;
     } else {
-      dbResults = {};
+      dbResults = err;
       dbResults["retrieveSuccess"] = false;
     }
 
@@ -110,6 +102,173 @@ app.post("/db/get_platform_accounts", (req,res) => {
 
   });
 });
+
+//Inserts a post with all the information specificed for a post
+app.post("/db/insert_post", (req, res) => {
+  var inputObj = req.body;
+  var names = ["real_name", "nr_likes", "platform", "usr_text_content", "date_posted", "post_url", "jsonContent"];
+  var dbRequest = "INSERT INTO POST(INFLID, NRLIKES, PLATFORM, USRTXTCONTENT, POSTED, POSTURL, PLATFORMCONTENT) \
+    VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE REALNAME =\
+     '"+inputObj.real_name+"'),\
+     "+inputObj.nr_likes+", '"+inputObj.platform+"',\
+    '"+inputObj.usr_text_content+"', "+inputObj.date_posted+",\
+     '"+inputObj.post_url+"',"+inputObj.jsonContent+");"
+     client.query(dbRequest, (err, dbResult) => {
+       console.log(dbResult);
+       console.log(err);
+       var dbResults = dbResult;
+       if (dbResults != undefined && dbResults["rowCount"] == 1) {
+
+
+         dbResults["createSuccess"] = true;
+       } else {
+         dbResults = err;
+         dbResults["createSuccess"] = false;
+       }
+
+       res.json(dbResults);
+     });
+
+});
+
+// Unfollow an influencer by specifiying user_id for user, and influencer_id for influencer
+app.post("/db/unfollow_influencer", (req,res) => {
+
+  var inputObj = req.body;
+  var usrID = inputObj.user_id;
+  var inflID = inputObj.influencer_id;
+  var dbRequest = "DELETE FROM USRFLWINFL WHERE FLWRID = "+usrID+" AND INFLID = "+inflID+";";
+  console.log(dbRequest);
+  client.query(dbRequest, (err, dbResult) => {
+
+    var dbResults = dbResult;
+    if (dbResults != undefined && dbResuls["rowCount"] >= 1) {
+
+
+      dbResults["deleteSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["deleteSuccess"] = false;
+    }
+
+    res.json(dbResults);
+  });
+});
+
+app.post("/db/add_follow_influencer", (req,res) => {
+  var inputObj = req.body;
+  var usrID = inputObj.user_id;
+  var inflID = inputObj.influencer_id;
+  var names = ["real_name", "influencer_id"];
+  for (i in inputObj) {
+    if (names.includes(i)) {
+      console.log("Yes!");
+    }
+  }
+  var dbRequest = "INSERT INTO USRFLWINFL (FLWRID, INFLID) VALUES ("+usrID+","+inflID+");";
+
+  client.query(dbRequest, (err, dbResult) => {
+
+
+    var dbResults = dbResult;
+    if (dbResults != undefined && dbResults["rowCount"] == 1) {
+
+
+      dbResults["createSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["createSuccess"] = false;
+    }
+
+    res.json(dbResults);
+  });
+});
+
+//Returns ALL platformaccounts for all influencers a specific user follows
+app.post("/db/get_platf_accs_flwdinfls", (req, res) => {
+  var inputObj = req.body;
+  var usrID = inputObj.user_id;
+  var orderBy = inputObj.order_by;
+  var dbRequest = "WITH INFLUENCERWITHPLATFORMACCOUNTS AS ( \
+    SELECT INFLUENCER.*, PLATFORMACCOUNT.* FROM INFLUENCER \
+    INNER JOIN PLATFORMACCOUNT ON \
+    INFLUENCER.INFLUENCERID = PLATFORMACCOUNT.INFLID \
+    AND INFLUENCER.INFLUENCERID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = "+usrID+") \
+  ) \
+  SELECT * FROM INFLUENCERWITHPLATFORMACCOUNTS AS I ";
+  if (orderBy != undefined) {
+    dbRequest = dbRequest+"ORDER BY "+orderBy;
+  }
+  dbRequest = dbRequest+";";
+  console.log(dbRequest);
+  client.query(dbRequest, (err, dbResult) => {
+
+    var dbResults = dbResult;
+    if (dbResults != undefined) {
+
+
+      dbResults["retrieveSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["retrieveSuccess"] = false;
+    }
+
+    res.json(dbResults);
+  });
+
+});
+
+app.post("/db/get_follow_list_accounts", (req, res) => {
+  var inputObj = req.body;
+  var usrID = inputObj.user_id;
+  var dbRequest = "WITH B AS ( \
+    SELECT I.INFLUENCERNAME, U.INFLID \
+    FROM USRFLWINFL AS U, INFLUENCER AS I \
+    WHERE U.FLWRID = "+usrID+" AND U.INFLID = I.INFLUENCERID \
+  ) \
+  SELECT B.INFLUENCERNAME, ARRAY(SELECT ACTNAME || ' : ' || PLATFORM \
+    FROM PLATFORMACCOUNT \
+    WHERE INFLID = B.INFLID) FROM B;";
+    client.query(dbRequest, (err, dbResult) => {
+
+      var dbResults = dbResult;
+      if (dbResults != undefined) {
+
+
+        dbResults["retrieveSuccess"] = true;
+      } else {
+        dbResults = err;
+        dbResults["retrieveSuccess"] = false;
+      }
+
+      res.json(dbResults);
+    });
+
+});
+
+app.post("/db/add_user_visit", (req, res) =>  {
+  var inputObj = req.body;
+  var usrID = inputObj.user_id;
+  var inflID = inputObj.influencer_id;
+  var typeOfVisit = inputObj.type_of_visit;
+  var dbRequest = "INSERT INTO USRVISIT(USRID, INFLID, TYPEOFVISIT) VALUES ("+usrID+","+inflID+",'"+typeOfVisit+"');";
+  client.query(dbRequest, (err, dbResult) => {
+    console.log(err);
+    console.log(dbResult);
+    var dbResults = dbResult;
+    if (dbResults != undefined && dbResults["rowCount"] == 1) {
+
+
+      dbResults["createSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["createSuccess"] = false;
+    }
+
+    res.json(dbResults);
+  });
+});
+
 app.post("/db/modify_user", (req,res) => {
   var inputObj = req.body;
   var hashedPwd = inputObj.password; //TODO: Change to hashed version of password
@@ -144,8 +303,27 @@ app.post("/db/modify_user", (req,res) => {
   });
 });
 
+function insertionToDB(client, dbRequest, callback) {
+  client.query(dbRequest, (err, dbResult) => {
+
+    var dbResults = dbResult;
+    if (dbResults != undefined && dbResults["rowCount"] == 1) {
 
 
+      dbResults["createSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["createSuccess"] = false;
+    }
+
+    callback(dbResults);
+  });
+}
+app.use(bodyParser.urlencoded({
+  extended: true
+}))
+
+app.use(bodyParser.json());
 app.post("/db/register_user", (req, res)=> {
 
   var inputObj = req.body;
@@ -157,29 +335,89 @@ app.post("/db/register_user", (req, res)=> {
 
   bcrypt.hash(password, saltRounds, function(err, hash) {
   // Store hash in your password DB.
+
+
   var dbRequest = "INSERT INTO USR (USRNAME, HASHEDPWD, EMAIL, AGE, SEX) VALUES ('"+usrname+"', '"+hash+"', '"+email+"', "+age+", "+sex+");"
 
-    client.query(dbRequest, (err, dbResult) => {
-      console.log(dbResult); //We get a problem if login is
-      console.log(hash)
-      var dbResults = dbResult;
+  insertionToDB(client, dbRequest, (response) => {
 
-      if (dbResults != undefined && dbResults["rowCount"] == 1) {
+    res.json(response);
+  });
 
-
-        dbResults["createSuccess"] = true;
-      } else {
-        dbResults = {};
-        dbResults["createSuccess"] = false;
-
-      }
-
-      res.json(dbResults);
-    });
   });
 
 });
 
+app.post("/db/get_latest_posts", (req, res) => {
+  var inputObj = req.body;
+
+  var dbRequest = "WITH INFLLIST AS ( \
+    SELECT INFLID \
+    FROM USRFLWINFL \
+    WHERE FLWRID = "+inputObj.user_id+" \
+  ), P AS ( \
+    SELECT * FROM POST ";
+    if (inputObj.platform != undefined) {
+      dbRequest = dbRequest+" WHERE PLATFORM  = '"+inputObj.platform+"' ";
+    }
+
+    dbRequest = dbRequest+"ORDER BY POSTED DESC LIMIT "+inputObj.top+" \
+  ) \
+  SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
+    FROM P ORDER BY POSTED DESC";
+    client.query(dbRequest, (err, dbResult) => {
+      console.log(err);
+      console.log(dbResult);
+      var dbResults = dbResult;
+      if (dbResults != undefined) {
+
+
+        dbResults["retrieveSuccess"] = true;
+      } else {
+        dbResults = err;
+        dbResults["retrieveSuccess"] = false;
+      }
+
+      res.json(dbResults);
+    });
+
+});
+
+app.post("/db/get_content_from_infl", (req, res) => {
+  var inputObj = req.body;
+
+  var dbRequest = "WITH P AS ( \
+    SELECT * FROM POST \
+    WHERE PLATFORM = '"+inputObj.platform+"' AND INFLID = "+inputObj.influencer_id+" \
+    ORDER BY POSTED DESC \
+  "
+  if (inputObj.top != undefined) {
+    dbRequest = dbRequest+" LIMIT "+ inputObj.top;
+  }
+  dbRequest = dbRequest+"), INFLLIST AS ( \
+    SELECT INFLID \
+    FROM USRFLWINFL \
+    WHERE FLWRID = "+inputObj.user_id+" \
+  )\
+   SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
+    FROM P ORDER BY POSTED DESC";
+  dbRequest = dbRequest+";";
+  console.log(dbRequest);
+  client.query(dbRequest, (err, dbResult) => {
+
+    var dbResults = dbResult;
+    if (dbResults != undefined) {
+
+
+      dbResults["retrieveSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["retrieveSuccess"] = false;
+    }
+
+    res.json(dbResults);
+  });
+});
 
 app.post("/db/login", (req, res) => {
   var inputObj = req.body;

@@ -6,22 +6,25 @@
 --  COUNTRYID INT REFERENCES LOCATION(LOCATIONID),
 --  CITYID INT REFERENCES LOCATION(LOCATIONID)
 --);
-
+-- Create a user
+INSERT INTO USR (USRNAME, HASHEDPWD, EMAIL, AGE, SEX)
+  VALUES ('Filleboy', 'BAJSBAJS', 'c.filip.cornell@gmail.com', 24, TRUE);
 
 INSERT INTO LOCATION (LOCATIONNAME, LOCATIONTYPE) VALUES ('Sweden', 'COUNTRY');
 INSERT INTO LOCATION (LOCATIONNAME, LOCATIONTYPE) VALUES ('United States', 'COUNTRY');
 -- locationtype has to be inserted with caps!
 INSERT INTO LOCATION (LOCATIONNAME, LOCATIONTYPE, COUNTRYID) VALUES ('New York', 'CITY', (select locationid from location where location.locationname = 'United States'));
 INSERT INTO LOCATION (LOCATIONNAME, LOCATIONTYPE, COUNTRYID) VALUES ('Stockholm', 'CITY', (select locationid from location where location.locationname = 'Sweden'));
-INSERT INTO INFLUENCER (INFLUENCERNAME, REALNAME, AGE) VALUES ('Bill Gates', 'Bill Gates', 62);
+INSERT INTO INFLUENCER (INFLUENCERNAME, REALNAME, AGE, PICTURELINK) VALUES ('Bill Gates', 'Bill Gates', 62, 'https://pbs.twimg.com/profile_images/988775660163252226/XpgonN0X_400x400.jpg');
 INSERT INTO INFLUENCER (INFLUENCERNAME, REALNAME, AGE, CITYID, COUNTRYID) VALUES ('Jockiboi', 'Joakim Lundell', 33, (select locationid from location where location.locationname = 'Stockholm'),(select locationid from location where location.locationname = 'Sweden'));
-
+-- Add a platform account
+INSERT INTO PLATFORMACCOUNT(INFLID, ACTNAME, PLATFORM, NRFLWRS, MEMBERSINCE, ACTURL) VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE INFLUENCERNAME = 'Bill Gates'), 'BillG', 'instagram', 23121, (SELECT NOW()::date), 'instagram.com/BillG');
+INSERT INTO PLATFORMACCOUNT(INFLID, ACTNAME, PLATFORM, NRFLWRS, MEMBERSINCE, ACTURL) VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE INFLUENCERNAME = 'Bill Gates'), 'BillG', 'twitter', 211121, (SELECT NOW()::date), 'twitter.com/BillG');
+INSERT INTO PLATFORMACCOUNT(INFLID, ACTNAME, PLATFORM, NRFLWRS, MEMBERSINCE, ACTURL) VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE INFLUENCERNAME = 'Jockiboi'), 'Jockiboi', 'instagram', 23121, (SELECT NOW()::date), 'instagram.com/Jockiboi');
 -- Update country of a specific influencer
 UPDATE INFLUENCER SET COUNTRYID = (select locationid from location where location.locationname = 'United States') WHERE INFLUENCERNAME = 'Bill Gates';
 
--- Create a user
-INSERT INTO USR (USRNAME, HASHEDPWD, EMAIL, AGE, SEX)
-  VALUES ('Filleboy', 'BAJSBAJS', 'c.filip.cornell@gmail.com', 24, TRUE);
+
 
 -- INSERT a visit to a specific influencer
 INSERT INTO USRVISIT (USRID, INFLID, TYPEOFVISIT)
@@ -36,6 +39,14 @@ INSERT INTO USRFLWINFL (FLWRID, INFLID)
       (SELECT INFLUENCERID
         FROM INFLUENCER
         WHERE INFLUENCERNAME = 'Bill Gates'));
+        INSERT INTO USRFLWINFL (FLWRID, INFLID)
+            VALUES (
+              (SELECT USRID
+                FROM USR
+                WHERE USRNAME = 'Filleboy'),
+              (SELECT INFLUENCERID
+                FROM INFLUENCER
+                WHERE INFLUENCERNAME = 'Jockiboi'));
 
 -- Get all posts from a specific platform
 SELECT * FROM POST
@@ -43,33 +54,71 @@ SELECT * FROM POST
 
 -- Get all posts from an influencer
 SELECT * FROM POST
-  WHERE INFLID = 1;
+  WHERE INFLID = 1 ;
+
+
+-- Get content from influencer
+WITH P AS (
+  SELECT * FROM POST
+  WHERE PLATFORM = 'instagram'
+  AND INFLID = 1
+  ORDER BY POSTED DESC
+), INFLLIST AS (
+  SELECT INFLID
+  FROM USRFLWINFL
+  WHERE FLWRID = 1
+)   SELECT *, (SELECT (COUNT(*) >= 1)
+FROM INFLLIST
+WHERE INFLID IN(P.INFLID))
+AS USRFOLLOWINGINFLUENCER
+FROM P ORDER BY POSTED DESC;
+
+-- Return latest feed with a status if user with user id sent in follows the influencer posting the post.
+WITH INFLLIST AS (
+  SELECT INFLID
+  FROM USRFLWINFL
+  WHERE FLWRID = 1
+), P AS (
+  SELECT * FROM POST ORDER BY POSTED DESC LIMIT 100
+)
+SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER
+  FROM P ORDER BY POSTED DESC;
 
 -- Get all posts from a specific platform and influencer
 SELECT * FROM POST
   WHERE PLATFORM = 'instagram' AND INFLID = 1;
 
-
-
 -- Get all posts from a user's favorite influencers
-SELECT * FROM POST AS P
-  WHERE P.INFLID = (SELECT INFLID FROM USRFLWINFL WHERE FLWRID = 1);
+SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = 1);
 
 -- Get complete list of influencers followed by a user (without platform info)
-SELECT * FROM INFLUENCER AS I
-  WHERE I.INFLUENCERID = (SELECT INFLID FROM USRFLWINFL WHERE FLWRID = 1);
+SELECT * FROM INFLUENCER AS I WHERE I.INFLUENCERID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = 1);
 
 -- Get complete list of influencers followed by a user with their platformaccountinfo
 WITH INFLUENCERWITHPLATFORMACCOUNTS AS (
   SELECT INFLUENCER.*, PLATFORMACCOUNT.* FROM INFLUENCER
   INNER JOIN PLATFORMACCOUNT ON
   INFLUENCER.INFLUENCERID = PLATFORMACCOUNT.INFLID
+  AND INFLUENCER.INFLUENCERID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = 1)
   )
 SELECT * FROM INFLUENCERWITHPLATFORMACCOUNTS AS I
-  WHERE I.INFLUENCERID = (SELECT INFLID FROM USRFLWINFL WHERE FLWRID = 1);
+  ORDER BY INFLUENCERNAME;
 
-  -- Select all influencers with their countries and include null values
-  SELECT * FROM (
+-- INSERT A USER
+INSERT INTO POST(INFLID, NRLIKES, PLATFORM, USRTXTCONTENT, POSTED, POSTURL, PLATFORMCONTENT)
+  VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE REALNAME = 'Bill Gates'), 1231, 'instagram', 'Chilliaang at the WEF. Cool', (SELECT NOW()), 'instagram.com/aasdq', NULL);
+
+WITH B AS (
+  SELECT I.INFLUENCERNAME, U.INFLID
+  FROM USRFLWINFL AS U, INFLUENCER AS I
+  WHERE U.FLWRID = 1 AND U.INFLID = I.INFLUENCERID
+)
+SELECT B.INFLUENCERNAME, ARRAY(SELECT ACTNAME || ' : ' || PLATFORM
+  FROM PLATFORMACCOUNT
+  WHERE INFLID = B.INFLID) FROM B;
+
+-- Select all influencers with their countries and include null values
+SELECT * FROM (
     SELECT influencer.*, location.locationname AS Country FROM influencer
     LEFT join location on
     influencer.countryid = location.locationid
@@ -126,6 +175,8 @@ SELECT * FROM (
 
 -- Perform a search for influencers based on keywords
 
+
+
 -- Select all promoted influencers and all their platformaccounts based on
 
 -- Count number of visits on a profile based on
@@ -138,3 +189,6 @@ SELECT COUNT(*) FROM USRVISIT WHERE INFLID = (SELECT influencerID FROM INFLUENCE
 SELECT * FROM POST WHERE POST.POSTID = ANY(
   SELECT POSTID FROM TAGFORPOST WHERE TAGFORPOST.TAGID = ANY(SELECT TAGID FROM TAG WHERE TAGNAME = 'metoo')
 );
+
+--Update a post
+UPDATE POST SET platform = ('twitter') WHERE postid = 1;
