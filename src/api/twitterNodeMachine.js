@@ -63,7 +63,7 @@ function formatJson(tweets) {
       "tweet_id": tweets[i].id_str,
       "tweet_url": "",
       "tweet_text": tweets[i].text,
-      "tweet_created_at": tweets[i].created_at,
+      "tweet_created_at": new Date(tweets[i].created_at),
       "tweet_favorite_count": tweets[i].favorite_count,
       "tweet_retweet_count": tweets[i].retweet_count,
       "tweet_hashtags": [],

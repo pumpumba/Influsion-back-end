@@ -44,7 +44,7 @@ function getChannel(channelID, callback) {
   youtube.channels.list(
     {
       auth: jwtClient,
-      part: "snippet",
+      part: "snippet, statistics",
       order: "date",
       id: channelID,
       maxResults: 1 //integer 0-50, default 5
@@ -53,6 +53,7 @@ function getChannel(channelID, callback) {
       if (err) {
         console.log("The API returned an error: " + err);
       } else {
+        console.log(res.data.items[0]);
         var formatedChannel = formatChannelJson(res.data.items[0])
         callback(formatedChannel);
       }
@@ -64,7 +65,7 @@ function getChannelUsername(username, callback) {
   youtube.channels.list(
     {
       auth: jwtClient,
-      part: "snippet",
+      part: "snippet, statistics",
       order: "date",
       forUsername: username,
       maxResults: 1 //integer 0-50, default 5
@@ -107,7 +108,10 @@ function formatChannelJson(channel) {
     "channel_description": channel.snippet.description,
     "channel_created_at": channel.snippet.publishedAt,
     "channel_thumbnail_url": channel.snippet.thumbnails.high.url,
-    "channel_url": "https://www.youtube.com/channel/" + channel.id
+    "channel_url": "https://www.youtube.com/channel/" + channel.id,
+    "channel_views": channel.statistics.viewCount,
+    "channel_subscribers": channel.statistics.subscribersCount,
+    "channel_no_of_videos": channel.statistics.videoCount
   };
 }
 
@@ -124,7 +128,7 @@ function formatVideosJson(videos) {
       "video_url": "",
       "video_title": videos[i].snippet.title,
       "video_description": videos[i].snippet.description,
-      "video_created_at": videos[i].snippet.publishedAt,
+      "video_created_at": new Date(videos[i].snippet.publishedAt),
       "video_thumbnail_url": videos[i].snippet.thumbnails.high.url
     };
     video.channel_url = "https://www.youtube.com/channel/" + video.channel_id;
@@ -134,3 +138,21 @@ function formatVideosJson(videos) {
   }
   return formatedVideos;
 }
+
+// function convertYoutubeTime(time) {
+//   // console.log(time);
+//   // var year = time.substring(0, 4);
+//   // var month = time.substring(5, 7);
+//   // var day = time.substring(8, 10);
+//   // var hh = time.substring(11, 13);
+//   // var mm = time.substring(14, 16);
+//   // var ss = time.substring(17, 19);
+//   // var time = year + "-" + month + "-"
+//   // console.log(year + "-" + month + "-" + day);
+//   // console.log(hh + ":" + mm + ":" +ss);
+//   // var newTime = new Date(year, month, day, hh, mm, ss, 0);
+//   var newTime = new Date(time);
+//   console.log(newTime);
+//   return newTime;
+  
+// }  
