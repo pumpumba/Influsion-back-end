@@ -23,6 +23,6 @@
   "machinepack": {
     "friendlyName": "instagramnodemachines",
     "machineDir": "machines/",
-    "machines": ["getInstaPosts"]
+    "machines": ["getInstaPosts", "getPopularInstaPosts"]
   }
 }

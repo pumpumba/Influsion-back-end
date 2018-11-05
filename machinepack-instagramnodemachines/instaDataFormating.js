@@ -1,10 +1,10 @@
 var self = module.exports = {
-    // popularPostsLoaded: function(popularPosts) {
-    //     popularPosts.sort(function(a, b) {
-    //         return a.post_like_count - b.post_like_count;
-    //     });
-    //     return popularPosts;
-    // },
+    popularPostsLoaded: function(popularPosts) {
+        popularPosts.sort(function(a, b) {
+            return a.like_count - b.like_count;
+        });
+        return popularPosts;
+    },
     formatJson: function(instagramResponse) {
       var formatedInstaPosts = []
 
@@ -18,12 +18,11 @@ var self = module.exports = {
           "user_followers_count": instagramResponse.business_discovery.followers_count,
           // "user_verified": instagramResponse[i].user.verified,
           "user_profile_image_url": instagramResponse.business_discovery.profile_picture_url,
-          "post_likes" : instagramResponse.business_discovery.media.data[i].like_count,
+          "post_like_count" : instagramResponse.business_discovery.media.data[i].like_count,
           "post_id": instagramResponse.business_discovery.media.data[i].id,
           "post_url": instagramResponse.business_discovery.media.data[i].permalink,
           "post_text": instagramResponse.business_discovery.media.data[i].caption,
           "post_created_at": instagramResponse.business_discovery.media.data[i].timestamp,
-          "post_like_count": instagramResponse.business_discovery.media.data[i].like_count,
           "post_media": [],
           "post_hashtags": []
         };
@@ -71,18 +70,20 @@ var self = module.exports = {
         .on("error", function(e) {
           console.log("Got an error: ", e);
         });
+    },
+    getPostsFromUsers: function(screen_names, postCount, access_token, instagram_id, callback) {
+      var popularPosts = [];
+      var pushedCount = 0;
+      for (var i = 0; i < screen_names.length; i++) {
+        self.getInstaPostsFromUser(screen_names[i], postCount, access_token, instagram_id, (result) => {
+          for(var j = 0; j < result.length;j++) {
+              popularPosts.push(result[j]);
+          }
+          pushedCount += 1;
+          if(pushedCount == screen_names.length) {
+              callback(popularPosts);
+          }
+        });
+      }
     }
-    // getPostsFromUsers: function(screen_names, tweetCount, access_token, instagram_id, callback) {
-    //   var popularPosts = [];
-    //   var screen_names = ["joakimlundell", "katyperry"];
-    //
-    //   for(var i = 0; i < screen_names.length; i++){
-    //     getInstaPosts(screen_names[i], 2, (result) => {
-    //       console.log("HEJ HEJ");
-    //       console.log(result);
-    //       popularPosts.push(result);
-    //     })
-    //   }
-    //   popularPostsLoaded(popularPosts, callback);
-    // }
   };
