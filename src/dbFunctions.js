@@ -189,39 +189,11 @@ var self = module.exports = {
         });
     },
 
-    getLatestPostsFromFollowedInfluencers: function(userID, platform, top, client, callback) {
+    getLatestPosts: function(userID, platform, top, client, callback) {
         var dbRequest = "WITH INFLLIST AS ( \
             SELECT INFLID \
             FROM USRFLWINFL \
             WHERE FLWRID = "+userID+" \
-          ), P AS ( \
-            SELECT * FROM POST ";
-            if (platform != undefined) {
-              dbRequest = dbRequest+" WHERE PLATFORM  = '"+platform+"' ";
-            }
-
-            dbRequest = dbRequest+"ORDER BY POSTED DESC LIMIT "+top+" \
-          ) \
-          SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
-            FROM P ORDER BY POSTED DESC";
-            client.query(dbRequest, (err, dbResult) => {
-              console.log(err);
-              console.log(dbResult);
-              var dbResults = dbResult;
-              if (dbResults != undefined) {
-                dbResults["retrieveSuccess"] = true;
-              } else {
-                dbResults = err;
-                dbResults["retrieveSuccess"] = false;
-              }
-              callback(dbResults);
-            });
-    },
-
-    getLatestPosts: function(platform, top, client, callback) {
-        var dbRequest = "WITH INFLLIST AS ( \
-            SELECT INFLID \
-            FROM USRFLWINFL \
           ), P AS ( \
             SELECT * FROM POST ";
             if (platform != undefined) {

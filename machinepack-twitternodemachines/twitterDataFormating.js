@@ -67,26 +67,26 @@ var self = module.exports = {
         }
         return formatedTweets;
     },
-    getTweetsFromUser: function(userID, tweetCount, client, callback) {
+    getTweetsFromUser: function(userScreenName, tweetCount, client, callback) {
         client.get(
           "/statuses/user_timeline",
-          { user_id: userID, count: tweetCount },
+          { screen_name: userScreenName, count: tweetCount },
           function(error, tweets, response) {
             var formatedTweets = self.formatJson(tweets);
             callback(formatedTweets);
           }
         );
     },
-    getTweetsFromUsers: function(userIDs, tweetCount, client, callback) {
+    getTweetsFromUsers: function(userScreenNames, tweetCount, client, callback) {
         var popularTweets = [];
         var pushedCount = 0;
-        for (var i = 0; i < userIDs.length; i++) {
-          self.getTweetsFromUser(userIDs[i], tweetCount, client, (result) => {
+        for (var i = 0; i < userScreenNames.length; i++) {
+          self.getTweetsFromUser(userScreenNames[i], tweetCount, client, (result) => {
             for(var j = 0; j < result.length;j++) {
                 popularTweets.push(result[j]);
             }
             pushedCount += 1;
-            if(pushedCount == screen_names.length) {
+            if(pushedCount == userScreenNames.length) {
                 callback(popularTweets);
             }
           });

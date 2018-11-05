@@ -29,10 +29,10 @@ module.exports = {
       description: "Your Twitter Bearertoken API key.",
       required: false
     },
-    userIDs: {
-      example: [12345, 67895],
-      type: ["integer"],
-      description: "The Twitter user IDs of the persons you want tweets from",
+    userScreenNames: {
+      example: ["elonmusk", "BillGates"],
+      type: ["string"],
+      description: "The Twitter user screen names of the persons you want tweets from",
       required: true
     },
     count: {
@@ -104,7 +104,7 @@ module.exports = {
     });
 
     formatFunctions.getTweetsFromUsers(
-      inputs.userIDs,
+      inputs.userScreenNames,
       inputs.count,
       client,
       result => {
