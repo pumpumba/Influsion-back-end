@@ -58,7 +58,7 @@ app.use("/twitter", twitterCloudComponent);
 //Main page routing
 app.get("/", (req, res) => {
   res.send(
-    "<h1>Hello! Welcome to Pumba!</h1> <p> For Instagram API, go to ./api/instagram <br>For Twitter API, go to ./api/twitter <br>For Youtube API, go to ./api/youtube </p>"
+    "<h1>Hello, Elon have no friends! Welcome to Pumba!</h1> <p> For Instagram API, go to ./api/instagram <br>For Twitter API, go to ./api/twitter <br>For Youtube API, go to ./api/youtube </p>"
   );
 });
 
@@ -142,6 +142,57 @@ app.post("/db/get_follow_list_accounts", (req, res) => {
   });
 });
 
+app.post("/db/create_tv_operator", (req, res) => {
+  var inputObj = req.body;
+  var tv_op_name = inputObj.operatorname;
+  var pwd = inputObj.password;
+  bcrypt.hash(pwd, saltRounds, function(err, hash) {
+
+
+  var dbRequest = "INSERT INTO TVOPERATOR (TVOPERATORNAME, HASHEDPWD) VALUES ('"+tv_op_name+"', '"+hash+"');"
+
+  insertionToDB(client, dbRequest, (response) => {
+
+    res.json(response);
+  });
+
+  });
+
+});
+
+app.post("/db/login_tv_operator", (req, res) => {
+  var inputObj = req.body;
+  //console.log(inputObj.username);
+  var password = inputObj.password; //TODO: Change to hashed version of password
+  var tv_op_name = inputObj.operatorname;
+
+  var dbRequest = "SELECT * FROM TVOPERATOR WHERE TVOPERATORNAME = '"+tv_op_name+"'";
+  //var dbRequest = "SELECT * FROM usr WHERE (usrname = '"+usrname+"' AND HASHEDPWD = '"+hashedPwd+"')"
+
+  client.query(dbRequest, (err, dbResult) => {
+    var dbResults = dbResult["rows"][0];
+
+    if (dbResults != undefined) {
+      var hashPassword = dbResult["rows"][0].hashedpwd;
+
+      bcrypt.compare(password, hashPassword, function(err, resultCompare) {
+        if (resultCompare == true) {
+          dbResults["loginSuccess"] = true;
+        } else {
+          dbResults = {};
+          dbResults["loginSuccess"] = false;
+        }
+
+        res.json({dbResults});
+      });
+    } else {
+      dbResults = {};
+      dbResults["loginSuccess"] = false;
+      res.json({dbResults});
+    }
+  });
+});
+
 app.post("/db/add_user_visit", (req, res) =>  {
   var inputObj = req.body;
   var userID = inputObj.user_id;
@@ -196,6 +247,26 @@ app.post("/db/get_content_from_infl", (req, res) => {
   dbFunctions.getContentFromInfluencer(inputObj.platform, inputObj.influencer_id, inputObj.top, inputObj.user_id, client, (response) => {
     res.json(response);
   });
+});
+
+app.post("/db/change_tv_op_info", (req, res) => {
+  var inputObj = req.body;
+  var tv_op_id = inputObj.tv_op_id;
+  var tv_op_name = inputObj.operatorname;
+  var pwd = inputObj.password;
+
+  bcrypt.hash(pwd, saltRounds, function(err, hash) {
+
+
+  var dbRequest = "UPDATE TVOPERATOR SET TVOPERATORNAME = '"+tv_op_name+"', HASHEDPWD = '"+hash+"' WHERE TVOPERATORID = "+tv_op_id+";"
+
+  insertionToDB(client, dbRequest, (response) => {
+
+    res.json(response);
+  });
+
+  });
+
 });
 
 app.post("/db/login", (req, res) => {

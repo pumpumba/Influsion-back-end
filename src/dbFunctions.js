@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 var self = module.exports = {
     getPlatformAccounts: function(platform, client, callback) {
         //TODO: Change to hashed version of password
-        var dbRequest = "SELECT ACTNAME AS PLATFORMNAME FROM PLATFORMACCOUNT WHERE PLATFORM = '"+platform+"'";
+        var dbRequest = "SELECT INFLID AS INFLUENCERID, ACTNAME AS PLATFORMNAME FROM PLATFORMACCOUNT WHERE PLATFORM = '"+platform+"'";
         client.query(dbRequest, (err, dbResult) => {
             console.log(dbResult); //We get a problem if login is
             var dbResults = dbResult;
@@ -13,7 +13,7 @@ var self = module.exports = {
             dbResults = err;
             dbResults["retrieveSuccess"] = false;
             }
-            callback(dbResults);
+            callback(Results);
         });
     },
 
@@ -44,7 +44,7 @@ var self = module.exports = {
         console.log(dbRequest);
         client.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
-            if (dbResults != undefined && dbResuls["rowCount"] >= 1) {
+            if (dbResults != undefined && dbResults["rowCount"] >= 1) {
                 dbResults["deleteSuccess"] = true;
             } else {
                 dbResults = err;
@@ -106,7 +106,7 @@ var self = module.exports = {
             FROM USRFLWINFL AS U, INFLUENCER AS I \
             WHERE U.FLWRID = "+userID+" AND U.INFLID = I.INFLUENCERID \
           ) \
-          SELECT B.INFLUENCERNAME, ARRAY(SELECT ACTNAME || ' : ' || PLATFORM \
+          SELECT B.INFLUENCERNAME, ARRAY(SELECT INFLID || ' : ' || ACTNAME || ' : ' || PLATFORM \
             FROM PLATFORMACCOUNT \
             WHERE INFLID = B.INFLID) FROM B;";
         client.query(dbRequest, (err, dbResult) => {
@@ -139,7 +139,7 @@ var self = module.exports = {
 
     modifyUser: function(hashedPassword, username, age, email, sex, userID, client, callback) {
         console.log(userID);
-        var dbRequest = "UPDATE USR SET HASHEDPWD = '"+hashedPassword+"', age = "+age+", email = '"+email+"', sex = "+sex+" WHERE usrid = "+userID+";"
+        var dbRequest = "UPDATE USR SET USRNAME = '"+username+"' HASHEDPWD = '"+hashedPassword+"', age = "+age+", email = '"+email+"', sex = "+sex+" WHERE usrid = "+userID+";"
         client.query(dbRequest, (err, dbResult) => {
             console.log(dbResult); //We get a problem if login is
             var dbResults = dbResult;
@@ -165,17 +165,16 @@ var self = module.exports = {
 
     insertionToDB: function(client, dbRequest, callback) {
         client.query(dbRequest, (err, dbResult) => {
-      
+
           var dbResults = dbResult;
           if (dbResults != undefined && dbResults["rowCount"] == 1) {
-      
-      
+
+
             dbResults["createSuccess"] = true;
           } else {
             dbResults = err;
             dbResults["createSuccess"] = false;
           }
-      
           callback(dbResults);
         });
     },
@@ -190,37 +189,6 @@ var self = module.exports = {
         });
     },
 
-    getLatestPosts: function(platform, top, client, callback) {
-        var dbRequest = "WITH INFLLIST AS ( \
-            SELECT INFLID \
-            FROM USRFLWINFL \
-          ), P AS ( \
-            SELECT * FROM POST ";
-            if (platform != undefined) {
-              dbRequest = dbRequest+" WHERE PLATFORM  = '"+platform+"' ";
-            }
-        
-            dbRequest = dbRequest+"ORDER BY POSTED DESC LIMIT "+top+" \
-          ) \
-          SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
-            FROM P ORDER BY POSTED DESC";
-            client.query(dbRequest, (err, dbResult) => {
-              console.log(err);
-              console.log(dbResult);
-              var dbResults = dbResult;
-              if (dbResults != undefined) {
-        
-        
-                dbResults["retrieveSuccess"] = true;
-              } else {
-                dbResults = err;
-                dbResults["retrieveSuccess"] = false;
-              }
-        
-              callback(dbResults);
-            });
-    },
-
     getLatestPostsFromFollowedInfluencers: function(userID, platform, top, client, callback) {
         var dbRequest = "WITH INFLLIST AS ( \
             SELECT INFLID \
@@ -231,7 +199,7 @@ var self = module.exports = {
             if (platform != undefined) {
               dbRequest = dbRequest+" WHERE PLATFORM  = '"+platform+"' ";
             }
-        
+
             dbRequest = dbRequest+"ORDER BY POSTED DESC LIMIT "+top+" \
           ) \
           SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
@@ -241,14 +209,39 @@ var self = module.exports = {
               console.log(dbResult);
               var dbResults = dbResult;
               if (dbResults != undefined) {
-        
-        
                 dbResults["retrieveSuccess"] = true;
               } else {
                 dbResults = err;
                 dbResults["retrieveSuccess"] = false;
               }
-        
+              callback(dbResults);
+            });
+    },
+
+    getLatestPosts: function(platform, top, client, callback) {
+        var dbRequest = "WITH INFLLIST AS ( \
+            SELECT INFLID \
+            FROM USRFLWINFL \
+          ), P AS ( \
+            SELECT * FROM POST ";
+            if (platform != undefined) {
+              dbRequest = dbRequest+" WHERE PLATFORM  = '"+platform+"' ";
+            }
+
+            dbRequest = dbRequest+"ORDER BY POSTED DESC LIMIT "+top+" \
+          ) \
+          SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
+            FROM P ORDER BY POSTED DESC";
+            client.query(dbRequest, (err, dbResult) => {
+              console.log(err);
+              console.log(dbResult);
+              var dbResults = dbResult;
+              if (dbResults != undefined) {
+                dbResults["retrieveSuccess"] = true;
+              } else {
+                dbResults = err;
+                dbResults["retrieveSuccess"] = false;
+              }
               callback(dbResults);
             });
     },
@@ -272,17 +265,16 @@ var self = module.exports = {
           dbRequest = dbRequest+";";
           console.log(dbRequest);
           client.query(dbRequest, (err, dbResult) => {
-        
+
             var dbResults = dbResult;
             if (dbResults != undefined) {
-        
-        
+
+
               dbResults["retrieveSuccess"] = true;
             } else {
               dbResults = err;
               dbResults["retrieveSuccess"] = false;
             }
-        
             callback(dbResults);
           });
     },
