@@ -22,47 +22,63 @@ jwtClient.authorize(function(err, tokens) {
 let youtube = google.youtube("v3");
 
 module.exports = {
-  getYoutube: function(channel_id, count, callback) {
-      youtube.search.list(
-      {
-        auth: jwtClient,
-        part: "snippet",
-        order: "date",
-        maxResults : count, //integer 0-50, default 5
-        // channelId: "UC-lHJZR3Gqxm24_Vd_AJ5Yw"
-        channelId: channel_id
-      },
-      function(err, res) {
-        if (err) {
-          console.log("The API returned an error: " + err);
-        } else {
-          callback(res.data.items);
-          /*for (var i = 0; i < response.data.items.length; i++) {
-             console.log(response.data.items[i].snippet.title);
-           }*/
-        }
-      }
-    );
+  getVideos: function(channel_id, count, callback) {
+      getVideo(channel_id, count, callback);
   },
   getChannel: function(username, callback) {
-      youtube.channels.list(
-        {
-          auth: jwtClient,
-          part: "snippet",
-          order: "date",
-          forUsername: username,
-          maxResults : 50 //integer 0-50, default 5
-        },
-        function(err, res) {
-          if (err) {
-            console.log("The API returned an error: " + err);
-          } else {
-            callback(res.data.items);
-            /*for (var i = 0; i < response.data.items.length; i++) {
-               console.log(response.data.items[i].snippet.title);
-             }*/
-          }
-        }
-      );
-  }
+      getChannel(username, callback);
+  },
+  getVideosUsername: function(username, count, callback) {
+   getChannel(username, (result) => {
+     console.log(result.id);
+     getVideos(result.id, count, (result) => {
+       callback(result);
+     });
+   });
+ }
 };
+
+function getChannel(username, callback) {
+  youtube.channels.list(
+    {
+      auth: jwtClient,
+      part: "snippet",
+      order: "date",
+      forUsername: username,
+      maxResults : 50 //integer 0-50, default 5
+    },
+    function(err, res) {
+      if (err) {
+        console.log("The API returned an error: " + err);
+      } else {
+        callback(res.data.items[0]);
+        /*for (var i = 0; i < response.data.items.length; i++) {
+           console.log(response.data.items[i].snippet.title);
+         }*/
+      }
+    }
+  );
+}
+
+function getVideos(channel_id, count, callback) {
+  youtube.search.list(
+  {
+    auth: jwtClient,
+    part: "snippet",
+    order: "date",
+    maxResults : count, //integer 0-50, default 5
+    // channelId: "UC-lHJZR3Gqxm24_Vd_AJ5Yw"
+    channelId: channel_id
+  },
+  function(err, res) {
+    if (err) {
+      console.log("The API returned an error: " + err);
+    } else {
+      callback(res.data.items);
+      /*for (var i = 0; i < response.data.items.length; i++) {
+         console.log(response.data.items[i].snippet.title);
+       }*/
+    }
+  }
+);
+}

@@ -43,10 +43,21 @@ app.get("/api/youtube", (req, res) => {
       res.json(result);
     });
   } else if (reqType === "get_videos") {
-    twitterNodeMachine.getPopularTweets(result => {
+    var channelID = req["query"]["channel_id"];
+    var count = req["query"]["count"];
+
+    youtube.getVideos(channelID, count, (result) => {
       res.json(result);
-    });
-  } else {
+    })
+  } else if (reqType === "get_videos_username") {
+    var username = req["query"]["username"];
+    var count = req["query"]["count"];
+
+    youtube.getVideosUsername(username, count, (result) => {
+      res.json(result);
+    })
+  }
+  else {
     res.send("Error: This request type is not defined");
   }
 });
