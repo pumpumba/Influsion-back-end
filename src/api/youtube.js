@@ -22,19 +22,18 @@ jwtClient.authorize(function(err, tokens) {
 let youtube = google.youtube("v3");
 
 module.exports = {
-  getVideos: function(channel_id, count, callback) {
-      getVideos(channel_id, count, callback);
-  },
   getChannel: function(channel_id, count, callback) {
     getChannel(channel_id, count, callback);
   },
   getChannelUsername: function(username, callback) {
       getChannelUsername(username, callback);
   },
+  getVideos: function(channel_id, count, callback) {
+      getVideos(channel_id, count, callback);
+  },
   getVideosUsername: function(username, count, callback) {
-   getChannel(username, (result) => {
-     console.log(result.id);
-     getVideos(result.id, count, (result) => {
+   getChannelUsername(username, (result) => {
+     getVideos(result.channel_id, count, (result) => {
        callback(result);
      });
    });
@@ -95,7 +94,6 @@ function getVideos(channel_id, count, callback) {
       console.log("The API returned an error: " + err);
     } else {
       var formatedVideos = formatVideosJson(res.data.items);
-      console.log(formatedVideos);
       callback(formatedVideos);
     }
   }
