@@ -50,10 +50,28 @@ function formatJson(instagramResponse) {
       "post_id": instagramResponse.business_discovery.media.data[i].id,
       "post_url": instagramResponse.business_discovery.media.data[i].permalink,
       "post_text": instagramResponse.business_discovery.media.data[i].caption,
-      "post_created_at": instagramResponse.business_discovery.media.data[i].timestamp
+      "post_created_at": instagramResponse.business_discovery.media.data[i].timestamp,
+      "post_like_count": instagramResponse.business_discovery.media.data[i].like_count,
+      "post_media": instagramResponse.business_discovery.media.data[i].media_url,
+      "post_hashtags": []
     };
 
     instaPost.user_url = "https://instagram.com/" + instaPost.user_screen_name + "/";
+
+    //get post_hashtags
+    var regex = /(?:^|\s)(?:#)([a-zA-Z\d]+)/gm;
+    var match;
+    while ((match = regex.exec(instaPost.post_text))) {
+        instaPost.post_hashtags.push(match[1]);
+    }
+
+    //check if user_verified
+    // $response = file_get_contents('https://instagram.com/'.katyperry);
+    // if (preg_match('/"user":\{"username":"'.katyperry.'",.*?"isVerified":true\},"__path":".*?'.katyperry.'.*?"/s', $response) || preg_match('/<meta content=".*?official.*?account.*?" name="description" \/>/is', $response)) {
+    // print "VERIFIED USER!";
+    // }
+
+
 
     formatedInstaPosts.push(instaPost);
   }
