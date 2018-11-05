@@ -149,6 +149,11 @@ var self = module.exports = {
           case "Update":
             dbFunctions.getPlatformAccountsFromFollowedInfluencers(filterValue, undefined, client, (response1) => {
               var influencers = response1['rows'];
+              var twitterAccounts = [];
+              for(var k = 0; k<influencers.length;k++) {
+                console.log(k);
+                resultObj.push(influencers[k]);
+              }
               var currentInfluencerAccount = 0;
               if(currentInfluencerAccount < influencers.length) {
                 var tweets = [];
@@ -156,6 +161,8 @@ var self = module.exports = {
                   if(response2.length != 0) {
                     self.storeTwitterContent(response2, 0, client, (response3) => {
                       dbFunctions.getLatestPostsFromFollowedInfluencers(filterValue, 'twitter', 5, client, (response4) => {
+                        console.log("Heres comes response4!");
+                        console.log(response4);
                         result = response4['rows'];
                         console.log("final");
                         for(var k = 0; k<result.length;k++) {
