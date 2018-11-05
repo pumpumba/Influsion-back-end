@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon src/index.js --legacy-watch",
-    "test": "npm build"
+    "test": "mocha --timeout 10000"
   },
   "repository": {
     "type": "git",
@@ -29,6 +29,11 @@
     "body-parser": "^1.18.3",
     "machinepack-twitternodemachines": "^1.17.0",
     "bcrypt": "^3.0.1"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.2.0",
+    "mocha": "^5.2.0"
   },
   "bugs": {
     "url": "https://github.com/pumpumba/project_TBD/issues"
