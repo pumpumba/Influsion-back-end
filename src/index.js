@@ -70,25 +70,19 @@ app.get("/api/youtube", (req, res) => {
 });
 
 //Instagram routing
-// app.get("/api/instagram", (req, res) => {
-//   var result = instagram.getInstaPosts(result => {
-//     res.json(result);
-//   });
-// });
-
 app.get("/api/instagram", (req, res) => {
   var reqType = req["query"]["request_type"];
 
-  // if (reqType === "get_user_posts") {
+  if (reqType === "get_user_posts") {
     var username = req["query"]["username"];
     var postCount = req["query"]["count"];
 
     instagram.getInstaPosts(username, postCount, result => {
       res.json(result);
     });
-  // } else {
-  //   res.send("Error: This request type is not defined");
-  // }
+  } else {
+    res.send("Error: This request type is not defined");
+  }
 });
 
 app.use(bodyParser.urlencoded({
