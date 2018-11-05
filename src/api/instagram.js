@@ -6,6 +6,37 @@ const instagram_id = process.env.INSTAGRAM_ID;
 
 var instagramResponse = "";
 
+// module.exports = {
+//   getInstaPosts: function(username, postCount, callback) {
+//     getInstaPosts(username, postCount, callback);
+//   },
+//
+//   getPopularPosts: function(callback) {
+//     var popularPosts = [];
+//     var screen_names = ["joakimlundell", "katyperry"];
+//
+//     for (var i = 0; i < screen_names.length; i++) {
+//       getInstaPosts(screen_names[i], 2, (result) => {
+//         for (var j = 0; j < result.length; j++) {
+//           console.log("NU SKRIVER JAG UT RESULT FRÅN ETT CALL")
+//           console.log(result[j]);
+//           popularPosts.push(result[j]);
+//         }
+//          popularPostsLoaded(popularPosts, callback);
+//       });
+//     }
+//   },
+// };
+//
+// function popularPostsLoaded(popularPosts, callback) {
+//   if (popularPosts.length >= 10) {
+//     popularPosts.sort(function(a, b) {
+//       return parseFloat(a.post_like_count) - parseFloat(b.post_like_count);
+//   });
+//     callback(popularPosts);
+//   }
+// }
+
 module.exports = {
   getInstaPosts: function(username, postCount, callback) {
     getInstaPosts(username, postCount, callback);
@@ -15,27 +46,26 @@ module.exports = {
     var popularPosts = [];
     var screen_names = ["joakimlundell", "katyperry"];
 
-    for (var i = 0; i < screen_names.length; i++) {
-      getInstaPosts(screen_names[i], 3, (result) => {
-        for (var j = 0; j < result.length; j++) {
-          popularPosts.push(result[j]);
-        }
-        // popularPostsLoaded(popularPosts, callback);
-      });
-
+    for(var i = 0; i < screen_names.length; i++){
+      getInstaPosts(screen_names[i], 2, (result) => {
+        console.log("HEJ HEJ");
+        console.log(result);
+        popularPosts.push(result);
+      })
     }
-    callback(popularPosts);
+    popularPostsLoaded(popularPosts, callback);
+
   }
 };
 
-// function popularPostsLoaded(popularPosts, callback) {
-//   if (popularPosts.length >= 18) {
-//     popularPosts.sort(function(a, b) {
-//       return parseFloat(a.business_discovery.followers_count) - parseFloat(b.business_discovery.followers_count);
-//   });
-//     callback(popularPosts);
-//   }
-// }
+function popularPostsLoaded(popularPosts, callback) {
+  if (popularPosts.length >= 10) {
+    popularPosts.sort(function(a, b) {
+      return parseFloat(a.post_like_count) - parseFloat(b.post_like_count);
+  });
+    callback(popularPosts);
+  }
+}
 
 function getInstaPosts(username, postCount, callback) {
 
