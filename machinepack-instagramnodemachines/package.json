@@ -16,11 +16,13 @@
     "machine": "^12.2.5"
   },
   "devDependencies": {
-    "test-machinepack-mocha": "^2.1.5"
+    "test-machinepack-mocha": "^2.1.5",
+    "lodash": "^4.17.11",
+    "util": "^0.11.0"
   },
   "machinepack": {
     "friendlyName": "instagramnodemachines",
     "machineDir": "machines/",
-    "machines": ["say-hello"]
+    "machines": ["getInstaPosts"]
   }
 }
