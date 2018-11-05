@@ -131,6 +131,28 @@ app.post("/db/insert_post", (req, res) => {
 
 });
 
+app.get("/db/get_followed_infl_posts", (req, res) => {
+  console.log("ASDASDQWEASDASDASDQWEASD");
+  var usrID = req["query"]["userid"]
+
+  var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = "+usrID+") ORDER BY POSTED DESC;"
+  client.query(dbRequest, (err, dbResult) => {
+    console.log(dbResult); //We get a problem if login is
+    var dbResults = dbResult;
+
+    if (dbResults != undefined && dbResults["rowCount"] >= 1) {
+      dbResults["retrieveSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["retrieveSuccess"] = false;
+    }
+
+    res.json(dbResults);
+
+  });
+});
+
+
 // Unfollow an influencer by specifiying user_id for user, and influencer_id for influencer
 app.post("/db/unfollow_influencer", (req,res) => {
 
@@ -138,7 +160,7 @@ app.post("/db/unfollow_influencer", (req,res) => {
   var usrID = inputObj.user_id;
   var inflID = inputObj.influencer_id;
   var dbRequest = "DELETE FROM USRFLWINFL WHERE FLWRID = "+usrID+" AND INFLID = "+inflID+";";
-  console.log(dbRequest);
+  //console.log(dbRequest);
   client.query(dbRequest, (err, dbResult) => {
 
     var dbResults = dbResult;
