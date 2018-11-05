@@ -25,8 +25,11 @@ module.exports = {
   getVideos: function(channel_id, count, callback) {
       getVideos(channel_id, count, callback);
   },
-  getChannel: function(username, callback) {
-      getChannel(username, callback);
+  getChannel: function(channel_id, count, callback) {
+    getChannel(channel_id, count, callback);
+  },
+  getChannelUsername: function(username, callback) {
+      getChannelUsername(username, callback);
   },
   getVideosUsername: function(username, count, callback) {
    getChannel(username, (result) => {
@@ -38,14 +41,14 @@ module.exports = {
  }
 };
 
-function getChannel(username, callback) {
+function getChannel(channelID, callback) {
   youtube.channels.list(
     {
       auth: jwtClient,
       part: "snippet",
       order: "date",
-      forUsername: username,
-      maxResults : 50 //integer 0-50, default 5
+      id: channelID,
+      maxResults: 1 //integer 0-50, default 5
     },
     function(err, res) {
       if (err) {
@@ -53,9 +56,26 @@ function getChannel(username, callback) {
       } else {
         var formatedChannel = formatChannelJson(res.data.items[0])
         callback(formatedChannel);
-        /*for (var i = 0; i < response.data.items.length; i++) {
-           console.log(response.data.items[i].snippet.title);
-         }*/
+      }
+    }
+  );
+}
+
+function getChannelUsername(username, callback) {
+  youtube.channels.list(
+    {
+      auth: jwtClient,
+      part: "snippet",
+      order: "date",
+      forUsername: username,
+      maxResults: 1 //integer 0-50, default 5
+    },
+    function(err, res) {
+      if (err) {
+        console.log("The API returned an error: " + err);
+      } else {
+        var formatedChannel = formatChannelJson(res.data.items[0])
+        callback(formatedChannel);
       }
     }
   );
@@ -68,7 +88,6 @@ function getVideos(channel_id, count, callback) {
     part: "snippet",
     order: "date",
     maxResults : count, //integer 0-50, default 5
-    // channelId: "UC-lHJZR3Gqxm24_Vd_AJ5Yw"
     channelId: channel_id
   },
   function(err, res) {
@@ -78,13 +97,9 @@ function getVideos(channel_id, count, callback) {
       var formatedVideos = formatVideosJson(res.data.items);
       console.log(formatedVideos);
       callback(formatedVideos);
-      /*for (var i = 0; i < response.data.items.length; i++) {
-         console.log(response.data.items[i].snippet.title);
-       }*/
     }
   }
 );
-
 }
 
 function formatChannelJson(channel) {
@@ -116,9 +131,8 @@ function formatVideosJson(videos) {
     };
     video.channel_url = "https://www.youtube.com/channel/" + video.channel_id;
     video.video_url = "https://www.youtube.com/watch?v=" + video.video_id;
-    
-    formatedVideos.push(video);
-  } 
 
+    formatedVideos.push(video);
+  }
   return formatedVideos;
 }

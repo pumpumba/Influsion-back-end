@@ -28,20 +28,22 @@ app.get("/", (req, res) => {
 });
 
 //Youtube routing
-// app.get("/api/youtube", (req, res) => {
-//   youtube.getYoutube(result => {
-//     res.json(result);
-//   });
-// });
 app.get("/api/youtube", (req, res) => {
   var reqType = req["query"]["request_type"];
 
   if (reqType === "get_channel") {
+    var channelID = req["query"]["channel_id"];
     var username = req["query"]["username"];
 
-    youtube.getChannel(username, result => {
-      res.json(result);
-    });
+    if (channelID != null) {
+      youtube.getChannel(channelID, result => {
+        res.json(result);
+      });
+    } else if (username != null) {
+      youtube.getChannelUsername(username, result => {
+        res.json(result);
+      });
+    }
   } else if (reqType === "get_videos") {
     var channelID = req["query"]["channel_id"];
     var count = req["query"]["count"];
@@ -61,7 +63,6 @@ app.get("/api/youtube", (req, res) => {
     res.send("Error: This request type is not defined");
   }
 });
-
 
 //Instagram routing
 app.get("/api/instagram", (req, res) => {
