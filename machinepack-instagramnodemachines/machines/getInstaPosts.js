@@ -7,22 +7,22 @@ module.exports = {
     accessToken: {
       example: "djfh48HUIiuUd73y3hhuIsadsagdui7676aksdjfidsojfiKSHFOUSDHFk3k3k3wr23ujdkafhsdjhfjsdhkjfhdskjJKAHSD728237JKJSHFDSFKJSHDJKFHKJDSHJjhdsfoiushfhsdoifhoiuesdoir4isjofois",
       description: "Your Instagram access API token.",
-      required: false
+      required: true
     },
     id: {
       example: "73264732487234723",
       description: "Your Instagram business account ID",
-      required: false
+      required: true
     },
     screenName: {
       example: "katyperry",
-      description: "The Instagram username of the person you want pos from",
+      description: "The Instagram username of the person you want posts from",
       required: true
     },
     count: {
       example: 20,
       description: "The maximum amount of posts you want",
-      required: false
+      required: true
     }
   },
 
@@ -60,11 +60,11 @@ module.exports = {
   fn: function(inputs, exits) {
     var util = require("util");
     var _ = require("lodash");
-    var request = require("request");
+    //require("dotenv").config({ path: __dirname + "/./../../.env" });
     var formatFunctions = require("../instaDataFormating");
     if (
       _.isUndefined(inputs.id) ||
-      _.isUndefined(inputs.acessToken)
+      _.isUndefined(inputs.accessToken)
     ) {
       return exits.error(
         new Error(
@@ -72,8 +72,9 @@ module.exports = {
         )
       );
     }
-    const access_token = process.env.INSTAGRAM_ACCESS_TOKEN;
-    const instagram_id = process.env.INSTAGRAM_ID;
+
+    const access_token = inputs.accessToken;
+    const instagram_id = inputs.id;
 
     formatFunctions.getInstaPostsFromUser(
       inputs.screenName,
