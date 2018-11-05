@@ -339,7 +339,7 @@ app.post("/db/modify_user", (req,res) => {
 
       dbResults["updateSuccess"] = true;
     } else if (dbResults == undefined) {
-      dbResults = {};
+      dbResults = err;
       dbResults["updateSuccess"] = false;
 
     } else if (dbResults["rowCount"] == 2){
