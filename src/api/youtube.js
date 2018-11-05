@@ -23,7 +23,7 @@ let youtube = google.youtube("v3");
 
 module.exports = {
   getVideos: function(channel_id, count, callback) {
-      getVideo(channel_id, count, callback);
+      getVideos(channel_id, count, callback);
   },
   getChannel: function(username, callback) {
       getChannel(username, callback);
@@ -51,7 +51,8 @@ function getChannel(username, callback) {
       if (err) {
         console.log("The API returned an error: " + err);
       } else {
-        callback(res.data.items[0]);
+        var formatedChannel = formatChannelJson(res.data.items[0])
+        callback(formatedChannel);
         /*for (var i = 0; i < response.data.items.length; i++) {
            console.log(response.data.items[i].snippet.title);
          }*/
@@ -74,11 +75,50 @@ function getVideos(channel_id, count, callback) {
     if (err) {
       console.log("The API returned an error: " + err);
     } else {
-      callback(res.data.items);
+      var formatedVideos = formatVideosJson(res.data.items);
+      console.log(formatedVideos);
+      callback(formatedVideos);
       /*for (var i = 0; i < response.data.items.length; i++) {
          console.log(response.data.items[i].snippet.title);
        }*/
     }
   }
 );
+
+}
+
+function formatChannelJson(channel) {
+  return formatedChannel = {
+    "channel_id": channel.id,
+    "channel_title": channel.snippet.title,
+    "channel_description": channel.snippet.description,
+    "channel_created_at": channel.snippet.publishedAt,
+    "channel_thumbnail_url": channel.snippet.thumbnails.high.url,
+    "channel_url": "https://www.youtube.com/channel/" + channel.id
+  };
+}
+
+function formatVideosJson(videos) {
+  var formatedVideos = []
+
+  for (var i = 0; i < videos.length; i++) {
+    var video = {
+      "platform": "Youtube",
+      "channel_id": videos[i].snippet.channelId,
+      "channel_url": "",
+      "channel_title": videos[i].snippet.channelTitle,
+      "video_id": videos[i].id.videoId,
+      "video_url": "",
+      "video_title": videos[i].snippet.title,
+      "video_description": videos[i].snippet.description,
+      "video_created_at": videos[i].snippet.publishedAt,
+      "video_thumbnail_url": videos[i].snippet.thumbnails.high.url
+    };
+    video.channel_url = "https://www.youtube.com/channel/" + video.channel_id;
+    video.video_url = "https://www.youtube.com/watch?v=" + video.video_id;
+    
+    formatedVideos.push(video);
+  } 
+
+  return formatedVideos;
 }
