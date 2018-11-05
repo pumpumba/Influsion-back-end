@@ -6,19 +6,16 @@ version: 2
 jobs:
   build:
     docker:
-      # specify the version you desire here
-      - image: circleci/node:7.10
+      - image: circleci/node:latest
       
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/mongo:3.4.4
-
-      branches:
-        only:
-          - continuous_integration_testing
+     #   auth:
+      #    username: $DOCKER_LOGIN
+       #   password: $DOCKER_PWD
 
     working_directory: ~/repo
+    branches:
+      only:
+        - master
     
     steps:
       - checkout
@@ -30,15 +27,31 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-      #- run: yarn install
-
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
         
+      - setup_remote_docker:   
+         docker_layer_caching: true 
+           
+      - run:
+          name: Docker Build
+          command: |
+            docker build -t mezzersmite/$BACK_END_IMAGE_NAME:$TAG .
+            
+      - run:
+          name: Push to docker hub
+          command: |
+            docker login -u $DOCKER_LOGIN -p $DOCKER_PWD
+            docker push mezzersmite/$BACK_END_IMAGE_NAME:$TAG
+
       # run tests!
-      #- run: yarn test
+      #- run: roliga tests kanske
+
+      #- run:
+      #   name: Deploy to Azure back-end VM
+          #echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
+          
 
 
-#comment
