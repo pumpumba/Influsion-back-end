@@ -138,21 +138,3 @@ function formatVideosJson(videos) {
   }
   return formatedVideos;
 }
-
-// function convertYoutubeTime(time) {
-//   // console.log(time);
-//   // var year = time.substring(0, 4);
-//   // var month = time.substring(5, 7);
-//   // var day = time.substring(8, 10);
-//   // var hh = time.substring(11, 13);
-//   // var mm = time.substring(14, 16);
-//   // var ss = time.substring(17, 19);
-//   // var time = year + "-" + month + "-"
-//   // console.log(year + "-" + month + "-" + day);
-//   // console.log(hh + ":" + mm + ":" +ss);
-//   // var newTime = new Date(year, month, day, hh, mm, ss, 0);
-//   var newTime = new Date(time);
-//   console.log(newTime);
-//   return newTime;
-  
-// }  
