@@ -330,6 +330,7 @@ app.post("/db/modify_user", (req,res) => {
   var usrID = inputObj.usrid;
   console.log(usrID);
   var dbRequest = "UPDATE USR SET USRNAME = '"+usrname+"', HASHEDPWD = '"+hashedPwd+"', age = "+age+", email = '"+email+"', sex = '"+sex+"' WHERE usrid = "+usrID+";"
+  console.log(dbRequest);
   client.query(dbRequest, (err, dbResult) => {
     console.log(dbResult); //We get a problem if login is
     var dbResults = dbResult;
@@ -376,7 +377,6 @@ app.use(bodyParser.urlencoded({
 
 app.use(bodyParser.json());
 app.post("/db/register_user", (req, res)=> {
-
   var inputObj = req.body;
   var password = inputObj.password; //TODO: Change to hashed version of password
   var usrname = inputObj.username;
@@ -388,7 +388,7 @@ app.post("/db/register_user", (req, res)=> {
   // Store hash in your password DB.
 
 
-  var dbRequest = "INSERT INTO USR (USRNAME, HASHEDPWD, EMAIL, AGE, SEX) VALUES ('"+usrname+"', '"+hash+"', '"+email+"', "+age+", "+sex+");"
+  var dbRequest = "INSERT INTO USR (USRNAME, HASHEDPWD, EMAIL, AGE, SEX) VALUES ('"+usrname+"', '"+hash+"', '"+email+"', "+age+", '"+sex+"');"
 
   insertionToDB(client, dbRequest, (response) => {
 
