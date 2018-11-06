@@ -77,8 +77,8 @@ module.exports = {
     const access_token = inputs.accessToken;
     const instagram_id = inputs.id;
 
-    formatFunctions.getInstaPostsFromUser(
-      inputs.screenName,
+    formatFunctions.getInstaPostsFromUsers(
+      inputs.screenNames,
       inputs.count,
       access_token,
       instagram_id,
