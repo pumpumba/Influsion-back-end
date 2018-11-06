@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 var self = module.exports = {
     getPlatformAccounts: function(platform, client, callback) {
         //TODO: Change to hashed version of password
@@ -23,19 +24,19 @@ var self = module.exports = {
             '"+realName+"'),\
             "+numLikes+", '"+platform+"',\
             '"+userTextContent+"', "+datePosted+",\
-            '"+postUrl+"',"+jsonContent+");"
-            client.query(dbRequest, (err, dbResult) => {
+            '"+postUrl+"',"+jsonContent+");";
+        client.query(dbRequest, (err, dbResult) => {
             console.log(dbResult);
             console.log(err);
-            var dbResults = dbResult;
-            if (dbResults != undefined && dbResults["rowCount"] == 1) {
-                dbResults["createSuccess"] = true;
-            } else {
-                dbResults = err;
-                dbResults["createSuccess"] = false;
-            }
-            callback(dbResults);
-            });
+        var dbResults = dbResult;
+        if (dbResults != undefined && dbResults["rowCount"] == 1) {
+            dbResults["createSuccess"] = true;
+        } else {
+            dbResults = err;
+            dbResults["createSuccess"] = false;
+        }
+        callback(dbResults);
+        });
     },
 
     unfollowInfluencer: function(userID, influencerID, client, callback) {
@@ -174,7 +175,6 @@ var self = module.exports = {
             dbResults = err;
             dbResults["createSuccess"] = false;
           }
-
           callback(dbResults);
         });
     },
@@ -196,7 +196,7 @@ var self = module.exports = {
             WHERE FLWRID = "+userID+" \
           ), P AS ( \
             SELECT * FROM POST ";
-            if (inputObj.platform != undefined) {
+            if (platform != undefined) {
               dbRequest = dbRequest+" WHERE PLATFORM  = '"+platform+"' ";
             }
 
@@ -209,14 +209,11 @@ var self = module.exports = {
               console.log(dbResult);
               var dbResults = dbResult;
               if (dbResults != undefined) {
-
-
                 dbResults["retrieveSuccess"] = true;
               } else {
                 dbResults = err;
                 dbResults["retrieveSuccess"] = false;
               }
-
               callback(dbResults);
             });
     },
@@ -250,7 +247,6 @@ var self = module.exports = {
               dbResults = err;
               dbResults["retrieveSuccess"] = false;
             }
-
             callback(dbResults);
           });
     },
