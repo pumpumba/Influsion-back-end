@@ -7,51 +7,57 @@ jobs:
   build:
     docker:
       - image: circleci/node:latest
-      
-     #   auth:
+      #   auth:
       #    username: $DOCKER_LOGIN
-       #   password: $DOCKER_PWD
+      #   password: $DOCKER_PWD
 
     working_directory: ~/repo
     branches:
       only:
         - master
-    
+
     steps:
       - checkout
 
       # Download and cache dependencies
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
+            - v1-dependencies-{{ checksum "package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
 
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-        
-      - setup_remote_docker:   
-         docker_layer_caching: true 
-           
+
+      - setup_remote_docker:
+          docker_layer_caching: true
+
       - run:
-          name: Docker Build
+          name: Docker build server
           command: |
-            docker build -t mezzersmite/$BACK_END_IMAGE_NAME:$TAG .
-            
+            docker build -f Dockerfile -t mezzersmite/$BACK_END_IMAGE_NAME:$TAG .
+
       - run:
-          name: Push to docker hub
+          name: Push server to docker hub
           command: |
             docker login -u $DOCKER_LOGIN -p $DOCKER_PWD
             docker push mezzersmite/$BACK_END_IMAGE_NAME:$TAG
 
+      - run:
+          name: Docker build database
+          command: |
+            docker build -f Dockerfile.db -t mezzersmite/$BACK_END_DB_IMAGE_NAME:$TAG .
+
+      - run:
+          name: Push database to docker hub
+          command: |
+            docker push mezzersmite/$BACK_END_DB_IMAGE_NAME:$TAG
       # run tests!
       #- run: roliga tests kanske
 
       #- run:
       #   name: Deploy to Azure back-end VM
-          #echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
-          
-
+      #echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
 
