@@ -65,6 +65,28 @@ module.exports = {
       }
     });
 
+    require("dotenv").load();
+
+    /*
+    // Configure a JWT auth client
+    let jwtClient = new google.auth.JWT(
+      process.env.GOOGLE_CLIENT_EMAIL,
+      null,
+      process.env.GOOGLE_PRIVATE_KEY,
+      ["https://www.googleapis.com/auth/youtube"]
+    );
+
+    // Authenticate request
+    jwtClient.authorize(function(err, tokens) {
+      if (err) {
+        console.log(err);
+        return;
+      } else {
+        console.log("Successfully connected!");
+      }
+    });
+    */
+
     if (!_.isUndefined(inputs.channelID)) {
       youtubeAPICalls.getChannelUsername(jwtClient, youtube, inputs.channelName, inputs.count, (result) => {
         return exits.success(result);

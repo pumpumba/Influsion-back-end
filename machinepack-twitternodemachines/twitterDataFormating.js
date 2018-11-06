@@ -10,7 +10,7 @@ var self = module.exports = {
       
         for (var i = 0; i < tweets.length; i++) {
           var tweet = {
-            "platform": "Twitter",
+            "platform": "twitter",
             "user_id": tweets[i].user.id,
             "user_url": "",
             "user_name": tweets[i].user.name,
@@ -18,6 +18,7 @@ var self = module.exports = {
             "user_followers_count": tweets[i].user.followers_count,
             "user_verified": tweets[i].user.verified,
             "user_profile_image_url": tweets[i].user.profile_image_url,
+            "tweet_id": tweets[i].id_str,
             "tweet_text": tweets[i].text,
             "tweet_url": "",
             "tweet_favorite_count": tweets[i].favorite_count,
@@ -26,6 +27,16 @@ var self = module.exports = {
             "tweet_hashtags": [],
             "tweet_media": []
           };
+          var textLength = tweet.tweet_text.length;
+          var url_length = 'http://t.co'.length;
+          if(textLength > url_length) {
+            for(var k = 0; k<(textLength - url_length - 1);k++) {
+              if(tweet.tweet_text.substring(k, url_length + k) == 'http://t.co' || tweet.tweet_text.substring(k, url_length + k + 1) == 'https://t.co') {
+                tweet.tweet_text = tweet.tweet_text.substring(0, k);
+                break;
+              }
+            }
+          }
           tweet.user_url = "https://twitter.com/" + tweet.user_screen_name;
           tweet.tweet_url = "https://twitter.com/" + tweet.user_screen_name + "/status/" + tweet.tweet_id;
       
@@ -49,33 +60,33 @@ var self = module.exports = {
       
           // Get the higher res image
           var fileType = tweet.user_profile_image_url.substring(tweet.user_profile_image_url.length - 4, tweet.user_profile_image_url.length);
-          tweet.profile_image_url = tweet.user_profile_image_url.substring(0, tweet.user_profile_image_url.length - 10);
-          tweet.profile_image_url = tweet.user_profile_image_url + "bigger" + fileType;
+    tweet.user_profile_image_url = tweet.user_profile_image_url.substring(0, tweet.user_profile_image_url.length - 11);
+    tweet.user_profile_image_url = tweet.user_profile_image_url + fileType;
       
           formatedTweets.push(tweet);
         }
         return formatedTweets;
     },
-    getTweetsFromUser: function(username, tweetCount, client, callback) {
+    getTweetsFromUser: function(userScreenName, tweetCount, client, callback) {
         client.get(
           "/statuses/user_timeline",
-          { screen_name: username, count: tweetCount },
+          { screen_name: userScreenName, count: tweetCount },
           function(error, tweets, response) {
             var formatedTweets = self.formatJson(tweets);
             callback(formatedTweets);
           }
         );
     },
-    getTweetsFromUsers: function(screen_names, tweetCount, client, callback) {
+    getTweetsFromUsers: function(userScreenNames, tweetCount, client, callback) {
         var popularTweets = [];
         var pushedCount = 0;
-        for (var i = 0; i < screen_names.length; i++) {
-          self.getTweetsFromUser(screen_names[i], tweetCount, client, (result) => {
+        for (var i = 0; i < userScreenNames.length; i++) {
+          self.getTweetsFromUser(userScreenNames[i], tweetCount, client, (result) => {
             for(var j = 0; j < result.length;j++) {
                 popularTweets.push(result[j]);
             }
             pushedCount += 1;
-            if(pushedCount == screen_names.length) {
+            if(pushedCount == userScreenNames.length) {
                 callback(popularTweets);
             }
           });
