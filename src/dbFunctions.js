@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const saltRounds = 10;
 var self = module.exports = {
     getPlatformAccounts: function(platform, client, callback) {
         //TODO: Change to hashed version of password
@@ -13,7 +14,7 @@ var self = module.exports = {
             dbResults = err;
             dbResults["retrieveSuccess"] = false;
             }
-            callback(Results);
+            callback(dbResults);
         });
     },
 
@@ -38,20 +39,17 @@ var self = module.exports = {
         });
     },
 
-    insertPost: function(realName, numLikes, platform, userTextContent, datePosted, postID, postUrl, jsonContent, client, callback) {
+    insertPost: function(influencerID, numLikes, platform, userTextContent, datePosted, postID, postUrl, jsonContent, client, callback) {
         splitedDate = datePosted.split(" ");
         var unixtime = new Date(datePosted).getTime();
         var regex = /'/gi;
         userTextContent = userTextContent.replace(regex, "''");
-        console.log(typeof(jsonContent));
         jsonContent = jsonContent.replace(regex, "''");
         var dbRequest = "INSERT INTO POST(INFLID, NRLIKES, PLATFORM, USRTXTCONTENT, POSTED, POSTURL, PLATFORMCONTENT) \
-            VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE REALNAME =\
-            '"+realName+"'),\
+            VALUES ("+influencerID+",\
             "+numLikes+", '"+platform+"',\
             '"+userTextContent+"', to_timestamp("+unixtime+"),\
             '"+postUrl+"', '"+jsonContent+"'::json);";
-        console.log(dbRequest);
         
         client.query(dbRequest, (err, dbResult) => {
             console.log(dbResult);
@@ -108,8 +106,12 @@ var self = module.exports = {
             SELECT INFLUENCER.*, PLATFORMACCOUNT.* FROM INFLUENCER \
             INNER JOIN PLATFORMACCOUNT ON \
             INFLUENCER.INFLUENCERID = PLATFORMACCOUNT.INFLID \
-            AND INFLUENCER.INFLUENCERID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = "+userID+") \
-          ) \
+            AND INFLUENCER.INFLUENCERID IN(SELECT INFLID FROM USRFLWINFL";
+        if(userID != undefined) {
+            dbRequest = dbRequest + " WHERE FLWRID = "+userID;
+        }
+        dbRequest = dbRequest + ") \
+        ) \
           SELECT * FROM INFLUENCERWITHPLATFORMACCOUNTS AS I ";
         if (orderBy != undefined) {
             dbRequest = dbRequest+"ORDER BY "+orderBy;
@@ -165,29 +167,31 @@ var self = module.exports = {
         });
     },
 
-    modifyUser: function(hashedPassword, username, age, email, sex, userID, client, callback) {
+    modifyUser: function(password, username, age, email, sex, userID, client, callback) {
         console.log(userID);
-        var dbRequest = "UPDATE USR SET USRNAME = '"+username+"' HASHEDPWD = '"+hashedPassword+"', age = "+age+", email = '"+email+"', sex = "+sex+" WHERE usrid = "+userID+";"
-        client.query(dbRequest, (err, dbResult) => {
-            console.log(dbResult); //We get a problem if login is
-            var dbResults = dbResult;
+        bcrypt.hash(password, saltRounds, function(err, hash) {
+            var dbRequest = "UPDATE USR SET USRNAME = '"+username+"' HASHEDPWD = '"+hash+"', age = "+age+", email = '"+email+"', sex = "+sex+" WHERE usrid = "+userID+";";
+            console.log(dbRequest);
+            client.query(dbRequest, (err, dbResult) => {
+                console.log(dbResult); //We get a problem if login is
+                var dbResults = dbResult;
 
-            if (dbResults != undefined && dbResults["rowCount"] == 1) {
+                if (dbResults != undefined && dbResults["rowCount"] == 1) {
 
 
-            dbResults["updateSuccess"] = true;
-            } else if (dbResults == undefined) {
-            dbResults = {};
-            dbResults["updateSuccess"] = false;
+                    dbResults["updateSuccess"] = true;
+                } else if (dbResults == undefined) {
+                    dbResults = {};
+                    dbResults["updateSuccess"] = false;
 
-            } else if (dbResults["rowCount"] == 2){
-            console.log("2 or more updated. GRAVE ERROR in database.");
-            } else {
-            dbResults = {};
-            dbResults["updateSuccess"] = false;
-            }
-
-            callback(dbResults);
+                } else if (dbResults["rowCount"] == 2){
+                    console.log("2 or more updated. GRAVE ERROR in database.");
+                } else {
+                    dbResults = {};
+                    dbResults["updateSuccess"] = false;
+                }
+                callback(dbResults);
+            });
         });
     },
 
@@ -207,10 +211,11 @@ var self = module.exports = {
         });
     },
 
-    registerUser: function(password, username, age, email, sex, callback) {
+    registerUser: function(password, username, age, email, sex, client, callback) {
         bcrypt.hash(password, saltRounds, function(err, hash) {
             // Store hash in your password DB.
-              var dbRequest = "INSERT INTO USR (USRNAME, HASHEDPWD, EMAIL, AGE, SEX) VALUES ('"+username+"', '"+hash+"', '"+email+"', "+age+", "+sex+");"
+              var dbRequest = "INSERT INTO USR (USRNAME, HASHEDPWD, EMAIL, AGE, SEX) VALUES ('"+username+"', '"+hash+"', '"+email+"', "+age+", '"+sex+"');";
+              console.log(dbRequest);
               self.insertionToDB(client, dbRequest, (response) => {
                 callback(response);
               });
@@ -286,22 +291,27 @@ var self = module.exports = {
     login: function(password, username, client, callback) {
         var dbRequest = "SELECT * FROM usr WHERE usrname = '"+username+"'";
         //var dbRequest = "SELECT * FROM usr WHERE (usrname = '"+username+"' AND HASHEDPWD = '"+password+"')"
-
+        console.log(password);
+        console.log("hhoho");
+        console.log(username);
         client.query(dbRequest, (err, dbResult) => {
-            var dbResults = dbResult["rows"][0];
-            console.log(dbResult);
-            var hashPassword = dbResult["rows"][0].hashedpwd;
-
-            bcrypt.compare(password, hashPassword, function(err, resultCompare) {
-            if (resultCompare == true) {
-                dbResults["loginSuccess"] = true;
-            } else {
-                dbResults = {};
-                dbResults["loginSuccess"] = false;
+            if(dbResult["rows"][0] == undefined) {
+                callback({loginSuccess: false});
             }
+            else {
+                var dbResults = dbResult["rows"][0];
+                var hashPassword = dbResult["rows"][0].hashedpwd;
 
-            callback({dbResults});
-            });
+                bcrypt.compare(password, hashPassword, function(err, resultCompare) {
+                    if (resultCompare == true) {
+                        dbResults["loginSuccess"] = true;
+                    } else {
+                        dbResults = err;
+                        dbResults["loginSuccess"] = false;
+                    }
+                    callback({dbResults});
+                });
+            }
         });
     },
 

@@ -273,13 +273,13 @@ app.post("/db/add_user_visit", (req, res) =>  {
 
 app.post("/db/modify_user", (req,res) => {
   var inputObj = req.body;
-  var hashedPassword = inputObj.password; //TODO: Change to hashed version of password
+  var password = inputObj.password; //TODO: Change to hashed version of password
   var username = inputObj.username;
   var age = inputObj.age; //TODO: Change to hashed version of password
   var email = inputObj.email;
   var sex = inputObj.sex;
   var userID = inputObj.usrid;
-  dbFunctions.modifyUser(hashedPassword, username, age, email, sex, userID, client, (response) => {
+  dbFunctions.modifyUser(password, username, age, email, sex, userID, client, (response) => {
     res.json(response);
   });
 });
@@ -289,10 +289,12 @@ app.use(bodyParser.urlencoded({
 
 app.use(bodyParser.json());
 app.post("/db/register_user", (req, res)=> {
+  console.log("ASDASDASD");
+  console.log(req.body);
   var inputObj = req.body;
-  var password = inputObj.password; //TODO: Change to hashed version of password
+  var password = inputObj.password;
   var username = inputObj.username;
-  var age = inputObj.age; //TODO: Change to hashed version of password
+  var age = inputObj.age;
   var email = inputObj.email;
   var sex = inputObj.sex;
   dbFunctions.registerUser(password, username, age, email, sex, client, (response) => {
@@ -342,10 +344,8 @@ app.post("/db/login", (req, res) => {
   //console.log(inputObj.username);
   var password = inputObj.password; //TODO: Change to hashed version of password
   var username = inputObj.username;
-  bcrypt.hash(password, saltRounds, function(err, hash) {
-    dbFunctions.login(hash, username, client, (response) => {
+  dbFunctions.login(password, username, client, (response) => {
       res.json(response);
-    });
   });
 });
 
