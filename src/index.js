@@ -96,8 +96,8 @@ app.post("/db/get_platform_accounts", (req,res) => {
 //Inserts a post with all the information specificed for a post
 app.post("/db/insert_post", (req, res) => {
   var inputObj = req.body;
-  dbFunctions.insertPost(inputObj.real_name, inputObj.nr_likes, 
-    inputObj.platform, inputObj.usr_text_content, inputObj.date_posted, 
+  dbFunctions.insertPost(inputObj.real_name, inputObj.nr_likes,
+    inputObj.platform, inputObj.usr_text_content, inputObj.date_posted,
     inputObj.post_url, inputObj.jsonContent, client, (response) => {
       res.json(response);
     });
@@ -302,7 +302,7 @@ app.post("/db/register_user", (req, res)=> {
 
 app.post("/db/get_latest_posts", (req, res) => {
   var inputObj = req.body;
-  dbFunctions.getLatestPosts(inputObj.platform, inputObj.top, client, (response) => {
+  dbFunctions.getLatestPosts(inputObj.user_id, inputObj.platform, inputObj.top, client, (response) => {
     res.json(response);
   });
   /*dbFunctions.getLatestPostsFromFollowedInfluencers(inputObj.user_id, inputObj.platform, inputObj.top, client, (response) => {
