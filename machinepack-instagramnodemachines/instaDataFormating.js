@@ -71,7 +71,7 @@ var self = module.exports = {
           console.log("Got an error: ", e);
         });
     },
-    getPostsFromUsers: function(screen_names, postCount, access_token, instagram_id, callback) {
+    getInstaPostsFromUsers: function(screen_names, postCount, access_token, instagram_id, callback) {
       var popularPosts = [];
       var pushedCount = 0;
       for (var i = 0; i < screen_names.length; i++) {
