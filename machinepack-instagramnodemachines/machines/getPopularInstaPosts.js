@@ -76,7 +76,7 @@ module.exports = {
 
     const client = [];
     client.push(inputs.accessToken);
-    clients.push(inputs.id);
+    client.push(inputs.id);
 
     formatFunctions.getInstaPostsFromUsers(
       inputs.screenNames,
