@@ -60,9 +60,9 @@ module.exports = {
       }
     });
 
+    /*
     require("dotenv").load();
 
-    /*
     // Configure a JWT auth client
     let jwtClient = new google.auth.JWT(
       process.env.GOOGLE_CLIENT_EMAIL,

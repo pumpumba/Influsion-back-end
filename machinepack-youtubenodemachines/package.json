@@ -23,6 +23,7 @@
     "machineDir": "machines/",
     "machines": [
       "say-hello",
+      "getChannelYoutube",
       "getChannelYoutubeVideos"
     ]
   }
