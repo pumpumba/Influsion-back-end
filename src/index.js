@@ -96,8 +96,8 @@ app.post("/db/get_platform_accounts", (req,res) => {
 //Inserts a post with all the information specificed for a post
 app.post("/db/insert_post", (req, res) => {
   var inputObj = req.body;
-  dbFunctions.insertPost(inputObj.real_name, inputObj.nr_likes, 
-    inputObj.platform, inputObj.usr_text_content, inputObj.date_posted, 
+  dbFunctions.insertPost(inputObj.real_name, inputObj.nr_likes,
+    inputObj.platform, inputObj.usr_text_content, inputObj.date_posted,
     inputObj.post_url, inputObj.jsonContent, client, (response) => {
       res.json(response);
     });
@@ -297,6 +297,33 @@ app.post("/db/register_user", (req, res)=> {
   var sex = inputObj.sex;
   dbFunctions.registerUser(password, username, age, email, sex, client, (response) => {
     res.json(response);
+  });
+});
+
+app.post("/db/delete_user", (req, res) => {
+  var inputObj = req.body;
+  var usrID = inputObj.usrid;
+  var password = inputObj.password;
+
+  var dbRequest = "BEGIN; \
+  DELETE FROM USRFLWINFL WHERE FLWRID = "+usrID+"; \
+  DELETE FROM USRLIKEPOST WHERE USRID = "+usrID+"; \
+  DELETE FROM USRVISIT WHERE usrid = "+usrID+"; \
+  DELETE FROM USR WHERE usrid = "+usrID+"; \
+  COMMIT;";
+
+  client.query(dbRequest, (err, dbResult) => {
+    var dbResults = dbResult;
+    if (dbResults != undefined) {
+
+
+      dbResults["deleteSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["deleteSuccess"] = false;
+    }
+
+    res.json(dbResults);
   });
 });
 
