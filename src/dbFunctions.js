@@ -81,12 +81,6 @@ var self = module.exports = {
     },
 
     addFollowInfluencer: function(userID, influencerID, client, callback) {
-        var names = ["real_name", "influencer_id"];
-        for (i in inputObj) {
-            if (names.includes(i)) {
-            console.log("Yes!");
-            }
-        }
         var dbRequest = "INSERT INTO USRFLWINFL (FLWRID, INFLID) VALUES ("+userID+","+influencerID+");";
 
         client.query(dbRequest, (err, dbResult) => {

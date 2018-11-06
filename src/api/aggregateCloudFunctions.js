@@ -182,8 +182,6 @@ var self = module.exports = {
               if(currentInfluencerAccount < twitterAccounts.length) {
                 var tweets = [];
                 self.getContentFromInfluencerTwitter(twitterAccounts, currentInfluencerAccount, tweets, limit, (response2) => {
-                  console.log("HEEEEJ");
-                  console.log(response2);
                   if(response2.length != 0) {
                     self.storeTwitterContent(response2, 0, client, (response3) => {
                       resultObj.push("Success");
@@ -269,19 +267,18 @@ var self = module.exports = {
             callback("Search option is not available at the moment");
             break;
           case "update":
-          dbFunctions.getPlatformAccounts('instagram', client, (response1) => {
+            dbFunctions.getPlatformAccounts('instagram', client, (response1) => {
               var influencers = response1['rows'];
               var twitterAccounts = [];
               for(var k = 0; k<influencers.length;k++) {
-                console.log(k);
                 twitterAccounts.push(influencers[k]);
               }
               var currentInfluencerAccount = 0;
               if(currentInfluencerAccount < twitterAccounts.length) {
                 var tweets = [];
-                self.getContentFromInfluencerTwitter(twitterAccounts, currentInfluencerAccount, tweets, limit, (response2) => {
+                self.getContentFromInfluencerInstagram(twitterAccounts, currentInfluencerAccount, tweets, limit, (response2) => {
                   if(response2.length != 0) {
-                    self.storeTwitterContent(response2, 0, client, (response3) => {
+                    self.storeInstagramContent(response2, 0, client, (response3) => {
                       resultObj.push("Success");
                       if(currentAssetNum != (assetTypes.length - 1)) {
                         self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
@@ -517,7 +514,11 @@ var self = module.exports = {
     },
 
     storeTwitterContent: function(tweets, tweetNum, client, callback) {
-      dbFunctions.insertPost(tweets[tweetNum].realInfluencerName, tweets[tweetNum].tweet_favorite_count, tweets[tweetNum].platform, tweets[tweetNum].tweet_text, tweets[tweetNum].tweet_created_at, tweets[tweetNum].tweet_id, tweets[tweetNum].tweet_url, JSON.stringify(tweets[tweetNum]), client, (response) => {
+      var unixtime =  new Date(tweets[tweetNum].tweet_created_at).getTime();
+      var regex = /'/gi;
+      var userTextContent = tweets[tweetNum].tweet_text.replace(regex, "''");
+      var jsonContent = tweets[tweetNum].replace(regex, "''");
+      dbFunctions.insertPost(tweets[tweetNum].realInfluencerName, tweets[tweetNum].tweet_favorite_count, tweets[tweetNum].platform, userTextContent, unixtime, tweets[tweetNum].tweet_id, tweets[tweetNum].tweet_url, jsonContent, client, (response) => {
         if(tweetNum != tweets.length - 1) {
           self.storeTwitterContent(tweets, tweetNum + 1, client, callback);
         }
@@ -554,10 +555,40 @@ var self = module.exports = {
           }
         }
       }); */
+      var Instagram = require("machinepack-instagramnodemachines");
+      Instagram.getInstaPosts({
+        accessToken: process.env.INSTAGRAM_ACCESS_TOKEN,
+        id: process.env.INSTAGRAM_ID,
+        screenName: influencers[currentInfluencer].platformname,
+        count: limit
+      }).exec((err, result) => {
+        if (err) {
+          console.log("Error at getInstaPosts");
+          console.log(err);
+        } else {
+          if(result != undefined) {
+            for(var k = 0; k<result.length;k++) {
+              result[k].realInfluencerName = influencers[currentInfluencer].influencerid
+              resultObj.push(result[k]);
+            }
+          }
+          if(currentInfluencer != (influencers.length - 1)) {
+            self.getContentFromInfluencerInstagram(influencers, currentInfluencer + 1, resultObj, limit, callback);
+          }
+          else {
+            callback(resultObj);
+          }
+        }
+      });
     },
 
     storeInstagramContent: function(posts, postNum, client, callback) {
-      dbFunctions.insertPost(posts[postNum].realInfluencerName, posts[tweetNum].post_favorite_count, posts[postNum].platform, posts[postNum].post_text, posts[postNum].post_created_at, posts[postNum].post_url, posts[postNum], client, (response) => {
+      var platform = posts[postNum].platform.toLowerCase();
+      var regex = /'/gi;
+      var userTextContent = posts[postNum].post_text.replace(regex, "''");
+      var datePosted = Date.parse(posts[postNum].post_created_at);
+      var jsonContent = JSON.stringify(posts[postNum]).replace(regex, "''");
+      dbFunctions.insertPost(posts[postNum].realInfluencerName, posts[tweetNum].post_favorite_count, platform, userTextContent, datePosted, posts[postNum].post_url, jsonContent, client, (response) => {
         if(postNum != posts.length - 1) {
           self.storeInstagramContent(posts, postNum + 1, client, callback);
         }
