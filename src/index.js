@@ -60,7 +60,7 @@ app.use("/aggregate", aggregateCloudComponent);
 //Main page routing
 app.get("/", (req, res) => {
   res.send(
-    "<h1>Hello, Elon have no friends! Welcome to Pumba!</h1> <p> For Instagram API, go to ./api/instagram <br>For Twitter API, go to ./api/twitter <br>For Youtube API, go to ./api/youtube </p>"
+    "<h1>Hello, friends! Welcome to Pumba!</h1> <p> For Instagram API, go to ./api/instagram <br>For Twitter API, go to ./api/twitter <br>For Youtube API, go to ./api/youtube </p>"
   );
 });
 
@@ -125,7 +125,6 @@ app.get("/db/get_followed_infl_posts", (req, res) => {
 
   });
 });
-
 // Unfollow an influencer by specifiying user_id for user, and influencer_id for influencer
 app.post("/db/unfollow_influencer", (req,res) => {
   var inputObj = req.body;
@@ -133,6 +132,7 @@ app.post("/db/unfollow_influencer", (req,res) => {
   var influencerID = inputObj.influencer_id;
   dbFunctions.unfollowInfluencer(userID, influencerID, client, (response) => {
     res.json(response);
+
   });
 });
 
@@ -215,6 +215,49 @@ app.post("/db/login_tv_operator", (req, res) => {
       dbResults["loginSuccess"] = false;
       res.json({dbResults});
     }
+  });
+});
+
+app.get("/db/get_user", (req, res) => {
+
+  var usrID = req["query"]["usrid"];
+  //console.log("HEHEHEHEHEHEHEH");
+  //console.log(req);
+  var dbRequest = "SELECT * FROM USR WHERE usrid = "+usrID+";";
+  console.log(dbRequest);
+  client.query(dbRequest, (err, dbResult) => {
+    console.log(err);
+    console.log(dbResult);
+    var dbResults = dbResult;
+    if (dbResults != undefined) {
+
+
+      dbResults["retrieveSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["retrieveSuccess"] = false;
+    }
+
+    res.json(dbResults);
+  });
+});
+
+app.get("/db/get_all_users", (req, res) => {
+  var dbRequest = "SELECT * FROM USR;";
+  client.query(dbRequest, (err, dbResult) => {
+    console.log(err);
+    console.log(dbResult);
+    var dbResults = dbResult;
+    if (dbResults != undefined) {
+
+
+      dbResults["retrieveSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["retrieveSuccess"] = false;
+    }
+
+    res.json(dbResults);
   });
 });
 
