@@ -52,8 +52,10 @@ app.use(function(req, res, next) {
   next();
 });
 
-var twitterCloudComponent = require("./api/aggregateCloudComponent").getRoutes(client);
+var twitterCloudComponent = require("./api/twitterCloudComponent");
 app.use("/twitter", twitterCloudComponent);
+var aggregateCloudComponent = require("./api/aggregateCloudComponent").getRoutes(client);
+app.use("/aggregate", aggregateCloudComponent);
 
 //Main page routing
 app.get("/", (req, res) => {
@@ -102,7 +104,9 @@ app.post("/db/insert_post", (req, res) => {
 });
 
 app.get("/db/get_followed_infl_posts", (req, res) => {
-  console.log("ASDASDQWEASDASDASDQWEASD");
+  // dbFunctions.getFollowedInfluencersPosts(userID, client, (response) => {
+
+  //})
   var usrID = req["query"]["userid"]
 
   var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = "+usrID+") ORDER BY POSTED DESC;"
@@ -121,8 +125,6 @@ app.get("/db/get_followed_infl_posts", (req, res) => {
 
   });
 });
-
-
 // Unfollow an influencer by specifiying user_id for user, and influencer_id for influencer
 app.post("/db/unfollow_influencer", (req,res) => {
   var inputObj = req.body;
