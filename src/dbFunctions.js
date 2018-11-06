@@ -170,13 +170,11 @@ var self = module.exports = {
     modifyUser: function(password, username, age, email, sex, userID, client, callback) {
         console.log(userID);
         bcrypt.hash(password, saltRounds, function(err, hash) {
-            var dbRequest = "UPDATE USR SET USRNAME = '"+username+"' HASHEDPWD = '"+hash+"', age = "+age+", email = '"+email+"', sex = "+sex+" WHERE usrid = "+userID+";";
-            console.log(dbRequest);
+            var dbRequest = "UPDATE USR SET USRNAME = '"+username+"', HASHEDPWD = '"+hash+"', age = "+age+", email = '"+email+"', sex = '"+sex+"' WHERE usrid = "+userID+";";
             client.query(dbRequest, (err, dbResult) => {
                 console.log(dbResult); //We get a problem if login is
                 var dbResults = dbResult;
-
-                if (dbResults != undefined && dbResults["rowCount"] == 1) {
+                if (dbResults != undefined) {
 
 
                     dbResults["updateSuccess"] = true;
