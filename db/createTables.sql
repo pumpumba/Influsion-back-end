@@ -26,34 +26,34 @@ CREATE TABLE LOCATION (
 
 --
 CREATE TABLE INFLUENCER (
-  INFLUENCERID SERIAL PRIMARY KEY,
-  INFLUENCERNAME VARCHAR NOT NULL UNIQUE,
-  REALNAME VARCHAR,
-  AGE INT,
-  SEX SEXX,
-  PICTURELINK TEXT,
-  COUNTRYID INTEGER REFERENCES LOCATION(LOCATIONID) DEFAULT NULL,
-  CITYID INTEGER REFERENCES LOCATION(LOCATIONID) DEFAULT NULL
+  INFLUENCERID SERIAL PRIMARY KEY, -- ID for the influencer in OUR database
+  INFLUENCERNAME VARCHAR NOT NULL UNIQUE, -- The name of the influencer, e.g., Pewdiepie
+  REALNAME VARCHAR, -- The real name, for example pewdiepie = Felix Kjellberg. For a lot of influencers, this is the same for all.
+  AGE INT, -- How old the influencer is
+  SEX SEXX, -- Enum type. Can be 'Male' or 'Female' (case-sensitive)
+  PICTURELINK TEXT, -- Link for a profile picture
+  COUNTRYID INTEGER REFERENCES LOCATION(LOCATIONID) DEFAULT NULL, -- Which country the influencer lives in
+  CITYID INTEGER REFERENCES LOCATION(LOCATIONID) DEFAULT NULL -- Which city the influencer lives in
 );
 
 CREATE TABLE USRFLWINFL (
-  RELATIONID SERIAL PRIMARY KEY,
-  FLWRID INTEGER REFERENCES USR (USRID) NOT NULL,
-  INFLID INTEGER REFERENCES INFLUENCER(INFLUENCERID) NOT NULL
+  RELATIONID SERIAL PRIMARY KEY, -- Just an id. Not really useful or important atm.
+  FLWRID INTEGER REFERENCES USR (USRID) NOT NULL, -- The id of the user following an influencer
+  INFLID INTEGER REFERENCES INFLUENCER(INFLUENCERID) NOT NULL -- The id of the influencer a user follows.
 );
-ALTER TABLE USRFLWINFL
+ALTER TABLE USRFLWINFL -- constraint added to make sure that only one follow exists.
 ADD CONSTRAINT UNIQUEFLWRELATION
 UNIQUE (FLWRID,INFLID);
 
 CREATE TYPE VISITTYPE AS ENUM ('profilevisit', 'instagrampost', 'twitterpost', 'youtubevideo');
 
 -- Have this table to track the number of visits?
-CREATE TABLE USRVISIT (
-  RELATIONID SERIAL PRIMARY KEY,
+CREATE TABLE USRVISIT ( -- Table that describes a visit to a profile
+  RELATIONID SERIAL PRIMARY KEY, -- ID
   USRID INTEGER REFERENCES USR (USRID) NOT NULL,
   INFLID INTEGER REFERENCES INFLUENCER(INFLUENCERID) NOT NULL,
-  VISITTIME TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  TYPEOFVISIT VISITTYPE NOT NULL
+  VISITTIME TIMESTAMPTZ NOT NULL DEFAULT NOW(), -- 
+  TYPEOFVISIT VISITTYPE NOT NULL -- Type of visit. Did they see a post from a platform, or visit the user's profile?
 );
 
 CREATE TABLE POST (
