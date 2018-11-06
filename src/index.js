@@ -319,6 +319,49 @@ app.post("/db/login_tv_operator", (req, res) => {
   });
 });
 
+app.get("/db/get_user", (req, res) => {
+
+  var usrID = req["query"]["usrid"];
+  //console.log("HEHEHEHEHEHEHEH");
+  //console.log(req);
+  var dbRequest = "SELECT * FROM USR WHERE usrid = "+usrID+";";
+  console.log(dbRequest);
+  client.query(dbRequest, (err, dbResult) => {
+    console.log(err);
+    console.log(dbResult);
+    var dbResults = dbResult;
+    if (dbResults != undefined) {
+
+
+      dbResults["retrieveSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["retrieveSuccess"] = false;
+    }
+
+    res.json(dbResults);
+  });
+});
+
+app.get("/db/get_all_users", (req, res) => {
+  var dbRequest = "SELECT * FROM USR;";
+  client.query(dbRequest, (err, dbResult) => {
+    console.log(err);
+    console.log(dbResult);
+    var dbResults = dbResult;
+    if (dbResults != undefined) {
+
+
+      dbResults["retrieveSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["retrieveSuccess"] = false;
+    }
+
+    res.json(dbResults);
+  });
+});
+
 app.post("/db/add_user_visit", (req, res) =>  {
   var inputObj = req.body;
   var usrID = inputObj.user_id;
