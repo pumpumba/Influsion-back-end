@@ -508,7 +508,7 @@ var self = module.exports = {
           console.log(err);
         } else {
           for(var k = 0; k<result.length;k++) {
-            result[k].realInfluencerName = influencers[currentInfluencer].influencername
+            result[k].realInfluencerName = influencers[currentInfluencer].realname
             resultObj.push(result[k]);
           }
           if(currentInfluencer != (influencers.length - 1)) {
@@ -522,7 +522,7 @@ var self = module.exports = {
     },
 
     storeTwitterContent: function(tweets, tweetNum, client, callback) {
-      dbFunctions.insertPost("Bill Gates", tweets[tweetNum].tweet_favorite_count, tweets[tweetNum].platform, tweets[tweetNum].tweet_text, tweets[tweetNum].tweet_created_at, tweets[tweetNum].tweet_id, tweets[tweetNum].tweet_url, JSON.stringify(tweets[tweetNum]), client, (response) => {
+      dbFunctions.insertPost(tweets[tweetNum].realInfluencerName, tweets[tweetNum].tweet_favorite_count, tweets[tweetNum].platform, tweets[tweetNum].tweet_text, tweets[tweetNum].tweet_created_at, tweets[tweetNum].tweet_id, tweets[tweetNum].tweet_url, JSON.stringify(tweets[tweetNum]), client, (response) => {
         if(tweetNum != tweets.length - 1) {
           self.storeTwitterContent(tweets, tweetNum + 1, client, callback);
         }

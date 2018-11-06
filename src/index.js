@@ -342,8 +342,10 @@ app.post("/db/login", (req, res) => {
   //console.log(inputObj.username);
   var password = inputObj.password; //TODO: Change to hashed version of password
   var username = inputObj.username;
-  dbFunctions.login(password, username, client, (response) => {
-    res.json(response);
+  bcrypt.hash(password, saltRounds, function(err, hash) {
+    dbFunctions.login(hash, username, client, (response) => {
+      res.json(response);
+    });
   });
 });
 

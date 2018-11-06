@@ -284,11 +284,12 @@ var self = module.exports = {
     },
 
     login: function(password, username, client, callback) {
-        var dbRequest = "SELECT * FROM usr WHERE usrname = '"+username+"'"
-        //var dbRequest = "SELECT * FROM usr WHERE (usrname = '"+usrname+"' AND HASHEDPWD = '"+hashedPwd+"')"
+        var dbRequest = "SELECT * FROM usr WHERE usrname = '"+username+"'";
+        //var dbRequest = "SELECT * FROM usr WHERE (usrname = '"+username+"' AND HASHEDPWD = '"+password+"')"
 
         client.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult["rows"][0];
+            console.log(dbResult);
             var hashPassword = dbResult["rows"][0].hashedpwd;
 
             bcrypt.compare(password, hashPassword, function(err, resultCompare) {
