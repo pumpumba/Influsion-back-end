@@ -1,6 +1,6 @@
 module.exports = {
-  getChannel: function(auth, youtube, channel_id, count, callback) {
-    getChannel(auth, youtube, channel_id, count, callback);
+  getChannel: function(auth, youtube, channel_id, callback) {
+    getChannel(auth, youtube, channel_id, callback);
   },
   getChannelUsername: function(auth, youtube, username, callback) {
       getChannelUsername(auth, youtube, username, callback);

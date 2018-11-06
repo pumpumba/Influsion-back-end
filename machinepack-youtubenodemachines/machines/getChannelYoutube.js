@@ -18,11 +18,6 @@ module.exports = {
       example: "Pewdiepie",
       description: "The user name of the channel",
       required: false
-    },
-    count: {
-      example: 20,
-      description: "The maximum amount of videos you want. Is 5 as default and can max be 50.",
-      required: false
     }
   },
   exits: {
@@ -88,11 +83,11 @@ module.exports = {
     */
 
     if (!_.isUndefined(inputs.channelID)) {
-      youtubeAPICalls.getVideos(jwtClient, youtube, inputs.channelName, inputs.count, (result) => {
+      youtubeAPICalls.getChannel(jwtClient, youtube, inputs.channelName, (result) => {
         return exits.success(result);
       });
     } else if (!_.isUndefined(inputs.channelName)) {
-      youtubeAPICalls.getVideosUsername(jwtClient, youtube, inputs.channelName, inputs.count, (result) => {
+      youtubeAPICalls.getChannelUsername(jwtClient, youtube, inputs.channelName, (result) => {
         return exits.success(result);
       });
     } else {
