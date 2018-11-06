@@ -125,7 +125,7 @@ var self = module.exports = {
       case "tweet":
         switch (filterTypes[currentFilterNum]) {
           case "influencer":
-            dbFunctions.getContentFromInfluencer('twitter', filterValue[0], 5, filterValue[1], client, (response) => {
+            dbFunctions.getContentFromInfluencer('twitter', filterValue[0], limit, filterValue[1], client, (response) => {
               result = response['rows'];
               for(var k = 0; k<result.length;k++) {
                 resultObj.push(result[k]);
@@ -138,8 +138,8 @@ var self = module.exports = {
               }
             });
             break;
-          case "user_id":
-            dbFunctions.getLatestPostsFromFollowedInfluencers(filterValue, 'twitter', 5, client, (response) => {
+          case "user":
+            dbFunctions.getFollowedInfluencersPosts(filterValue, limit, 'twitter', client, (response) => {
               result = response['rows'];
               for(var k = 0; k<result.length;k++) {
                 resultObj.push(result[k]);
@@ -153,8 +153,10 @@ var self = module.exports = {
             });
             break;
           case "popular":
-            dbFunctions.getLatestPosts(filterValue, 'Twitter', 5, client, (response) => {
+            dbFunctions.getLatestPosts(filterValue, 'twitter', limit, client, (response) => {
+              console.log(response)
               result = response['rows'];
+              console.log(result);
               for(var k = 0; k<result.length;k++) {
                 resultObj.push(result[k]);
               }
@@ -166,13 +168,10 @@ var self = module.exports = {
               }
             });
             break;
-          case "Search":
-            res.json({
-              errorMessage:
-                "Search option is not available at the moment"
-            });
+          case "search":
+            callback("Search option is not available at the moment");
             break;
-          case "Update":
+          case "update":
             dbFunctions.getPlatformAccountsFromFollowedInfluencers(filterValue, undefined, client, (response1) => {
               var influencers = response1['rows'];
               var twitterAccounts = [];
@@ -183,25 +182,16 @@ var self = module.exports = {
               var currentInfluencerAccount = 0;
               if(currentInfluencerAccount < twitterAccounts.length) {
                 var tweets = [];
-                self.getContentFromInfluencerTwitter(twitterAccounts, currentInfluencerAccount, tweets, 10, (response2) => {
+                self.getContentFromInfluencerTwitter(twitterAccounts, currentInfluencerAccount, tweets, limit, (response2) => {
                   if(response2.length != 0) {
                     self.storeTwitterContent(response2, 0, client, (response3) => {
-                      dbFunctions.getLatestPostsFromFollowedInfluencers(filterValue, 'twitter', 5, client, (response4) => {
-                        console.log("Heres comes response4!");
-                        console.log(response4);
-                        result = response4['rows'];
-                        console.log("final");
-                        for(var k = 0; k<result.length;k++) {
-                          console.log(k);
-                          resultObj.push(result[k]);
-                        }
-                        if(currentAssetNum != (assetTypes.length - 1)) {
-                          self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-                        }
-                        else {
-                          callback(resultObj);
-                        }
-                      });
+                      resultObj.push("Success");
+                      if(currentAssetNum != (assetTypes.length - 1)) {
+                        self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+                      }
+                      else {
+                        callback(resultObj);
+                      }
                     });
                   }
                   else {
@@ -225,16 +215,27 @@ var self = module.exports = {
             });
             break;
           default:
-            res.json({
-              errorMessage:
-                "The cloud component failed to provide any content"
-            });
+            callback("The cloud component failed to provide any content");
         }
         break;
-      case 'Instagram post':
+      case 'instagram post':
         switch (filterTypes[currentFilterNum]) {
-          case "user_id":
-            dbFunctions.getLatestPostsFromFollowedInfluencers(filterValue, 'instagram', 5, client, (response) => {
+          case "influencer":
+            dbFunctions.getContentFromInfluencer('instagram', filterValue[0], limit, filterValue[1], client, (response) => {
+              result = response['rows'];
+              for(var k = 0; k<result.length;k++) {
+                resultObj.push(result[k]);
+              }
+              if(currentAssetNum != (assetTypes.length - 1)) {
+                self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+              }
+              else {
+                callback(resultObj);
+              }
+            });
+            break;
+          case "user":
+            dbFunctions.getFollowedInfluencersPosts(filterValue, limit, 'instagram', client, (response) => {
               result = response['rows'];
               for(var k = 0; k<result.length;k++) {
                 resultObj.push(result[k]);
@@ -248,7 +249,7 @@ var self = module.exports = {
             });
             break;
           case "popular":
-            dbFunctions.getLatestPosts('instagram', 5, client, (response) => {
+            dbFunctions.getLatestPosts(filterValue, 'instagram', limit, client, (response) => {
               result = response['rows'];
               for(var k = 0; k<result.length;k++) {
                 resultObj.push(result[k]);
@@ -262,18 +263,15 @@ var self = module.exports = {
             });
             break;
           case "search":
-            res.json({
-              errorMessage:
-                "Search option is not available at the moment"
-            });
+            callback("Search option is not available at the moment");
             break;
           case "update":
             dbFunctions.getPlatformAccountsFromFollowedInfluencers(filterValue, undefined, client, (response1) => {
               var influencers = response1['rows'];
-              var twitterAccounts = [];
+              var accounts = [];
               for(var k = 0; k<influencers.length;k++) {
                 console.log(k);
-                resultObj.push(influencers[k]);
+                accounts.push(influencers[k]);
               }
               var currentInfluencerAccount = 0;
               if(currentInfluencerAccount < influencers.length) {
@@ -281,22 +279,13 @@ var self = module.exports = {
                 self.getContentFromInfluencerInstagram(influencers, currentInfluencerAccount, tweets, 10, (response2) => {
                   if(response2.length != 0) {
                     self.storeInstagramContent(response2, 0, client, (response3) => {
-                      dbFunctions.getLatestPostsFromFollowedInfluencers(filterValue, 'instagram', 5, client, (response4) => {
-                        console.log("Heres comes response4!");
-                        console.log(response4);
-                        result = response4['rows'];
-                        console.log("final");
-                        for(var k = 0; k<result.length;k++) {
-                          console.log(k);
-                          resultObj.push(result[k]);
-                        }
-                        if(currentAssetNum != (assetTypes.length - 1)) {
-                          self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-                        }
-                        else {
-                          callback(resultObj);
-                        }
-                      });
+                      resultObj.push("Success");
+                      if(currentAssetNum != (assetTypes.length - 1)) {
+                        self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+                      }
+                      else {
+                        callback(resultObj);
+                      }
                     });
                   }
                   else {
@@ -320,19 +309,34 @@ var self = module.exports = {
             });
             break;
           default:
-            res.json({
-              errorMessage:
-                "The cloud component failed to provide any content"
-            });
+            callback("The cloud component failed to provide any content");
         }
         break;
-      case "YouTube Video":
+      case "youtube video":
         switch (filterTypes[currentFilterNum]) {
-          case "user_id":
-            dbFunctions.getLatestPostsFromFollowedInfluencers(filterValue, 'youtube', 5, client, (response) => {
+          case "influencer":
+            dbFunctions.getContentFromInfluencer('youtube', filterValue[0], limit, filterValue[1], client, (response) => {
               result = response['rows'];
-              for(var k = 0; k<result.length;k++) {
-                resultObj.push(result[k]);
+              if(result != undefined) {
+                for(var k = 0; k<result.length;k++) {
+                  resultObj.push(result[k]);
+                }
+              }
+              if(currentAssetNum != (assetTypes.length - 1)) {
+                self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+              }
+              else {
+                callback(resultObj);
+              }
+            });
+            break;
+          case "user":
+            dbFunctions.getFollowedInfluencersPosts(filterValue, limit, 'youtube', client, (response) => {
+              result = response['rows'];
+              if(result != undefined) {
+                for(var k = 0; k<result.length;k++) {
+                  resultObj.push(result[k]);
+                }
               }
               if(currentAssetNum != (assetTypes.length - 1)) {
                 self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
@@ -343,10 +347,12 @@ var self = module.exports = {
             });
             break;
           case "popular":
-            dbFunctions.getLatestPosts('youtube', 5, client, (response) => {
+            dbFunctions.getLatestPosts(filterValue, 'youtube', limit, client, (response) => {
               result = response['rows'];
-              for(var k = 0; k<result.length;k++) {
-                resultObj.push(result[k]);
+              if(result != undefined) {
+                for(var k = 0; k<result.length;k++) {
+                  resultObj.push(result[k]);
+                }
               }
               if(currentAssetNum != (assetTypes.length - 1)) {
                 self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
@@ -356,19 +362,17 @@ var self = module.exports = {
               }
             });
             break;
-          case "Search":
-            res.json({
-              errorMessage:
-                "Search option is not available at the moment"
-            });
+          case "search":
+            callback("Search option is not available at the moment");
             break;
-          case "Update":
+          case "update":
             dbFunctions.getPlatformAccountsFromFollowedInfluencers(filterValue, undefined, client, (response1) => {
               var influencers = response1['rows'];
-              var twitterAccounts = [];
-              for(var k = 0; k<influencers.length;k++) {
-                console.log(k);
-                resultObj.push(influencers[k]);
+              var accounts = [];
+              if(influencers != undefined) {
+                for(var k = 0; k<result.length;k++) {
+                  accounts.push(influencers[k]);
+                }
               }
               var currentInfluencerAccount = 0;
               if(currentInfluencerAccount < influencers.length) {
@@ -376,22 +380,13 @@ var self = module.exports = {
                 self.getContentFromInfluencerYouTube(influencers, currentInfluencerAccount, tweets, 10, (response2) => {
                   if(response2.length != 0) {
                     self.storeYouTubeContent(response2, 0, client, (response3) => {
-                      dbFunctions.getLatestPostsFromFollowedInfluencers(filterValue, 'youtube', 5, client, (response4) => {
-                        console.log("Heres comes response4!");
-                        console.log(response4);
-                        result = response4['rows'];
-                        console.log("final");
-                        for(var k = 0; k<result.length;k++) {
-                          console.log(k);
-                          resultObj.push(result[k]);
-                        }
-                        if(currentAssetNum != (assetTypes.length - 1)) {
-                          self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-                        }
-                        else {
-                          callback(resultObj);
-                        }
-                      });
+                      resultObj.push("Success");
+                      if(currentAssetNum != (assetTypes.length - 1)) {
+                        self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+                      }
+                      else {
+                        callback(resultObj);
+                      }
                     });
                   }
                   else {
@@ -415,21 +410,34 @@ var self = module.exports = {
             });
             break;
           default:
-            res.json({
-              errorMessage:
-                "The cloud component failed to provide any content"
-            });
+            callback("The cloud component failed to provide any content");
         }
         break;
       case "all":
         switch (filterTypes[currentFilterNum]) {
-          case "influencer_id":
-            dbFunctions.getContentFromInfluencer
-          case "user_id":
-            dbFunctions.getLatestPostsFromFollowedInfluencers(filterValue, undefined, limit, client, (response) => {
+          case "influencer":
+            dbFunctions.getContentFromInfluencer('all', filterValue[0], limit, filterValue[1], client, (response) => {
               result = response['rows'];
-              for(var k = 0; k<result.length;k++) {
-                resultObj.push(result[k]);
+              if(result != undefined) {
+                for(var k = 0; k<result.length;k++) {
+                  resultObj.push(result[k]);
+                }
+              }
+              if(currentAssetNum != (assetTypes.length - 1)) {
+                self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+              }
+              else {
+                callback(resultObj);
+              }
+            });
+            break;
+          case "user_id":
+            dbFunctions.getFollowedInfluencersPosts(filterValue, limit, 'all', client, (response) => {
+              result = response['rows'];
+              if(result != undefined) {
+                for(var k = 0; k<result.length;k++) {
+                  resultObj.push(result[k]);
+                }
               }
               if(currentAssetNum != (assetTypes.length - 1)) {
                 self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
@@ -440,10 +448,12 @@ var self = module.exports = {
             });
             break;
           case "popular":
-            dbFunctions.getLatestPosts(undefined, limit, client, (response) => {
+            dbFunctions.getLatestPosts(filterValue, undefined, limit, client, (response) => {
               result = response['rows'];
-              for(var k = 0; k<result.length;k++) {
-                resultObj.push(result[k]);
+              if(result != undefined) {
+                for(var k = 0; k<result.length;k++) {
+                  resultObj.push(result[k]);
+                }
               }
               if(currentAssetNum != (assetTypes.length - 1)) {
                 self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
@@ -453,30 +463,24 @@ var self = module.exports = {
               }
             });
             break;
-          case "Search":
-            res.json({
-              errorMessage:
-                "Search option is not available at the moment"
-            });
+          case "search":
+            callback("Search option is not available at the moment");
             break;
           default:
-            res.json({
-              errorMessage:
-                "The cloud component failed to provide any content"
-            });
+            callback("The cloud component failed to provide any content");
         }
         break;
       default:
-        res.json({
-          errorMessage: "The cloud component failed to provide any content"
-        });
+        callback("The cloud component failed to provide any content");
       }
     },
 
     getContentFromInfluencersFromPlatform: function(userID, influencerAccounts, currentInfluencer, resultObj, client, platform, callback) {
       dbFunctions.getContentFromInfluencer(platform, influencerAccounts[currentInfluencer]['influencerid'], 5, userID, client, (response) => {
-        for(var k = 0; k<response.length;k++) {
-          resultObj.push(response[k]);
+        if(response != undefined) {
+          for(var k = 0; k<response.length;k++) {
+            resultObj.push(response[k]);
+          }
         }
         if(currentInfluencer != (influencerAccounts.length - 1)) {
           self.getContentFromInfluencersFromPlatform(userID, influencerAccounts, currentInfluencer + 1, resultObj, client, platform, callback);
@@ -495,7 +499,6 @@ var self = module.exports = {
         accessToken: process.env.TWITTER_ACCESS_TOKEN,
         accessSecret: process.env.TWITTER_ACCESS_SECRET,
         bearerToken: process.env.TWITTER_BEARER_TOKEN,
-        // TODO: Either get the user screen name or the ID, now the ID don't work so there's a static one from Bill Gates.
         userScreenName: influencers[currentInfluencer].actname, 
         count: limit
       }).exec((err, result) => {
@@ -505,6 +508,7 @@ var self = module.exports = {
           console.log(err);
         } else {
           for(var k = 0; k<result.length;k++) {
+            result[k].realInfluencerName = influencers[currentInfluencer].influencername
             resultObj.push(result[k]);
           }
           if(currentInfluencer != (influencers.length - 1)) {
@@ -518,7 +522,7 @@ var self = module.exports = {
     },
 
     storeTwitterContent: function(tweets, tweetNum, client, callback) {
-      dbFunctions.insertPost(tweets[tweetNum].user_name, tweets[tweetNum].tweet_favorite_count, tweets[tweetNum].platform, tweets[tweetNum].tweet_text, tweets[tweetNum].tweet_created_at, tweets[tweetNum].tweet_url, JSON.stringify(tweets[tweetNum]), client, (response) => {
+      dbFunctions.insertPost("Bill Gates", tweets[tweetNum].tweet_favorite_count, tweets[tweetNum].platform, tweets[tweetNum].tweet_text, tweets[tweetNum].tweet_created_at, tweets[tweetNum].tweet_id, tweets[tweetNum].tweet_url, JSON.stringify(tweets[tweetNum]), client, (response) => {
         if(tweetNum != tweets.length - 1) {
           self.storeTwitterContent(tweets, tweetNum + 1, client, callback);
         }
@@ -536,7 +540,7 @@ var self = module.exports = {
         accessToken: process.env.TWITTER_ACCESS_TOKEN,
         accessSecret: process.env.TWITTER_ACCESS_SECRET,
         bearerToken: process.env.TWITTER_BEARER_TOKEN,
-        userID: 50393960, //influencers[currentInfluencer]['influencerid'],
+        userScreenName: //influencers[currentInfluencer].actname,
         count: limit
       }).exec((err, result) => {
         console.log(result);
@@ -558,7 +562,7 @@ var self = module.exports = {
     },
 
     storeInstagramContent: function(posts, postNum, client, callback) {
-      dbFunctions.insertPost(posts[postNum].user_name, posts[tweetNum].post_favorite_count, posts[postNum].platform, posts[postNum].post_text, posts[postNum].post_created_at, posts[postNum].post_url, JSON.stringify(posts[postNum]), client, (response) => {
+      dbFunctions.insertPost(posts[postNum].realInfluencerName, posts[tweetNum].post_favorite_count, posts[postNum].platform, posts[postNum].post_text, posts[postNum].post_created_at, posts[postNum].post_url, posts[postNum], client, (response) => {
         if(postNum != posts.length - 1) {
           self.storeInstagramContent(posts, postNum + 1, client, callback);
         }
@@ -576,7 +580,7 @@ var self = module.exports = {
         accessToken: process.env.TWITTER_ACCESS_TOKEN,
         accessSecret: process.env.TWITTER_ACCESS_SECRET,
         bearerToken: process.env.TWITTER_BEARER_TOKEN,
-        userID: 50393960, //influencers[currentInfluencer]['platformID'],
+        userScreenName: influencers[currentInfluencer].actname,
         count: limit
       }).exec((err, result) => {
         console.log(result);

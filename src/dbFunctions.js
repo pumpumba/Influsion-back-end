@@ -17,25 +17,53 @@ var self = module.exports = {
         });
     },
 
-    insertPost: function(realName, numLikes, platform, userTextContent, datePosted, postUrl, jsonContent, client, callback) {
-        var names = ["real_name", "nr_likes", "platform", "usr_text_content", "date_posted", "post_url", "jsonContent"];
+    getFollowedInfluencersPosts: function(userID, limit, platform, client, callback) {
+        var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = "+userID+") ";  
+        if (platform != "all")
+            dbRequest = dbRequest+"AND platform = '"+platform+"'";
+
+        dbRequest = dbRequest+" ORDER BY POSTED DESC LIMIT "+limit+";";
+        client.query(dbRequest, (err, dbResult) => {
+            console.log(dbResult); //We get a problem if login is
+            var dbResults = dbResult;
+            if (dbResults != undefined && dbResults["rowCount"] >= 1) {
+                dbResults["retrieveSuccess"] = true;
+                callback(dbResults);
+            } else {
+                dbResults = err;
+                callback(false);
+                //dbResults["retrieveSuccess"] = false;
+            }
+            //callback(dbResults);
+        });
+    },
+
+    insertPost: function(realName, numLikes, platform, userTextContent, datePosted, postID, postUrl, jsonContent, client, callback) {
+        splitedDate = datePosted.split(" ");
+        var unixtime = new Date(datePosted).getTime();
+        var regex = /'/gi;
+        userTextContent = userTextContent.replace(regex, "''");
+        console.log(typeof(jsonContent));
+        jsonContent = jsonContent.replace(regex, "''");
         var dbRequest = "INSERT INTO POST(INFLID, NRLIKES, PLATFORM, USRTXTCONTENT, POSTED, POSTURL, PLATFORMCONTENT) \
             VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE REALNAME =\
             '"+realName+"'),\
             "+numLikes+", '"+platform+"',\
-            '"+userTextContent+"', "+datePosted+",\
-            '"+postUrl+"',"+jsonContent+");";
+            '"+userTextContent+"', to_timestamp("+unixtime+"),\
+            '"+postUrl+"', '"+jsonContent+"'::json);";
+        console.log(dbRequest);
+        
         client.query(dbRequest, (err, dbResult) => {
             console.log(dbResult);
             console.log(err);
-        var dbResults = dbResult;
-        if (dbResults != undefined && dbResults["rowCount"] == 1) {
-            dbResults["createSuccess"] = true;
-        } else {
-            dbResults = err;
-            dbResults["createSuccess"] = false;
-        }
-        callback(dbResults);
+            var dbResults = dbResult;
+            if (dbResults != undefined && dbResults["rowCount"] == 1) {
+                dbResults["createSuccess"] = true;
+            } else {
+                dbResults = err;
+                dbResults["createSuccess"] = false;
+            }
+                callback(dbResults);
         });
     },
 
@@ -194,7 +222,7 @@ var self = module.exports = {
             SELECT INFLID \
             FROM USRFLWINFL \
             WHERE FLWRID = "+userID+" \
-          ), P AS ( \
+            ), P AS ( \
             SELECT * FROM POST ";
             if (platform != undefined) {
               dbRequest = dbRequest+" WHERE PLATFORM  = '"+platform+"' ";
@@ -221,7 +249,11 @@ var self = module.exports = {
     getContentFromInfluencer: function(platform, influencerID, top, userID, client, callback) {
         var dbRequest = "WITH P AS ( \
             SELECT * FROM POST \
-            WHERE PLATFORM = '"+platform+"' AND INFLID = "+influencerID+" \
+            WHERE ";
+        if(platform != 'all') {
+            dbRequest = dbRequest + "PLATFORM = '"+platform+"' AND ";
+        }
+        dbRequest = dbRequest + "INFLID = "+influencerID+" \
             ORDER BY POSTED DESC \
           "
           if (top != undefined) {
