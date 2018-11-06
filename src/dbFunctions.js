@@ -18,7 +18,7 @@ var self = module.exports = {
     },
 
     getFollowedInfluencersPosts: function(userID, limit, platform, client, callback) {
-        var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = "+userID+") ";  
+        var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = "+userID+") ";
         if (platform != "all")
             dbRequest = dbRequest+"AND platform = '"+platform+"'";
 
@@ -52,7 +52,7 @@ var self = module.exports = {
             '"+userTextContent+"', to_timestamp("+unixtime+"),\
             '"+postUrl+"', '"+jsonContent+"'::json);";
         console.log(dbRequest);
-        
+
         client.query(dbRequest, (err, dbResult) => {
             console.log(dbResult);
             console.log(err);
@@ -192,12 +192,9 @@ var self = module.exports = {
     },
 
     insertionToDB: function(client, dbRequest, callback) {
-        client.query(dbRequest, (err, dbResult) => {
-
+          client.query(dbRequest, (err, dbResult) => {
           var dbResults = dbResult;
           if (dbResults != undefined && dbResults["rowCount"] == 1) {
-
-
             dbResults["createSuccess"] = true;
           } else {
             dbResults = err;

@@ -499,7 +499,7 @@ var self = module.exports = {
         accessToken: process.env.TWITTER_ACCESS_TOKEN,
         accessSecret: process.env.TWITTER_ACCESS_SECRET,
         bearerToken: process.env.TWITTER_BEARER_TOKEN,
-        userScreenName: influencers[currentInfluencer].actname, 
+        userScreenName: influencers[currentInfluencer].actname,
         count: limit
       }).exec((err, result) => {
         console.log(result);
@@ -533,19 +533,16 @@ var self = module.exports = {
     },
 
     getContentFromInfluencerInstagram: function(influencers, currentInfluencer, resultObj, limit, callback) {
-      //var Instagram = require("machinepack-instagramnodemachines"); here we get the nodemachines
-      /*Instagram.getUserPosts({
-        consumerKey: process.env.TWITTER_CONSUMER_KEY,
-        consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
-        accessToken: process.env.TWITTER_ACCESS_TOKEN,
-        accessSecret: process.env.TWITTER_ACCESS_SECRET,
-        bearerToken: process.env.TWITTER_BEARER_TOKEN,
-        userScreenName: //influencers[currentInfluencer].actname,
+      var Instagram = require("machinepack-instagramnodemachines"); //here we get the nodemachines
+      Instagram.getInstaPosts({
+        accessToken: process.env.INSTAGRAM_ACCESS_TOKEN,
+        id: process.env.INSTAGRAM_ID,
+        userScreenName: influencers[currentInfluencer].actname,
         count: limit
       }).exec((err, result) => {
         console.log(result);
         if (err) {
-          console.log("Error at getPopularTweets");
+          console.log("Error at getPopularPosts");
           console.log(err);
         } else {
           for(var k = 0; k<result.length;k++) {
@@ -558,11 +555,11 @@ var self = module.exports = {
             callback(resultObj);
           }
         }
-      }); */
+      });
     },
 
     storeInstagramContent: function(posts, postNum, client, callback) {
-      dbFunctions.insertPost(posts[postNum].realInfluencerName, posts[tweetNum].post_favorite_count, posts[postNum].platform, posts[postNum].post_text, posts[postNum].post_created_at, posts[postNum].post_url, posts[postNum], client, (response) => {
+      dbFunctions.insertPost(posts[postNum].user_name, posts[postNum].post_like_count, posts[postNum].platform, posts[postNum].post_text, posts[postNum].post_created_at, posts[postNum].post_url, posts[postNum], client, (response) => {
         if(postNum != posts.length - 1) {
           self.storeInstagramContent(posts, postNum + 1, client, callback);
         }
