@@ -57,7 +57,7 @@ var self = module.exports = {
       var successFlag = false;
       for (var i = 0; i < assetTypes.length; i++) {
         switch (assetTypes[i]) {
-          case "Instagram post":
+          case "instagram_post":
             for (var j = 0; j < filterTypes.length; j++) {
               switch (filterTypes[j]) {
                 case "user":

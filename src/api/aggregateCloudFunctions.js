@@ -56,7 +56,7 @@ var self = module.exports = {
             res.json(["Nothing available"]);
         }
         break;
-      case "Instagram post":
+      case "instagram_post":
         switch (filterType) {
           case "search":
             res.json(["<enter your influencers username>"]);
@@ -218,7 +218,7 @@ var self = module.exports = {
             callback("The cloud component failed to provide any content");
         }
         break;
-      case 'instagram post':
+      case 'instagram_post':
         switch (filterTypes[currentFilterNum]) {
           case "influencer":
             dbFunctions.getContentFromInfluencer('instagram', filterValue[0], limit, filterValue[1], client, (response) => {
@@ -270,15 +270,15 @@ var self = module.exports = {
               var influencers = response1['rows'];
               var accounts = [];
               for(var k = 0; k<influencers.length;k++) {
-                console.log(k);
                 accounts.push(influencers[k]);
               }
               var currentInfluencerAccount = 0;
               if(currentInfluencerAccount < influencers.length) {
-                var tweets = [];
-                self.getContentFromInfluencerInstagram(influencers, currentInfluencerAccount, tweets, 10, (response2) => {
+                var posts = [];
+                self.getContentFromInfluencerInstagram(influencers, currentInfluencerAccount, posts, 3, (response2) => {
                   if(response2.length != 0) {
                     self.storeInstagramContent(response2, 0, client, (response3) => {
+                      console.log(response2[0].platform);
                       resultObj.push("Success");
                       if(currentAssetNum != (assetTypes.length - 1)) {
                         self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
@@ -537,7 +537,8 @@ var self = module.exports = {
       Instagram.getInstaPosts({
         accessToken: process.env.INSTAGRAM_ACCESS_TOKEN,
         id: process.env.INSTAGRAM_ID,
-        userScreenName: influencers[currentInfluencer].actname,
+        // screenName: influencers[currentInfluencer].actname,
+        screenName: "joerogan",
         count: limit
       }).exec((err, result) => {
         console.log(result);
@@ -559,7 +560,8 @@ var self = module.exports = {
     },
 
     storeInstagramContent: function(posts, postNum, client, callback) {
-      dbFunctions.insertPost(posts[postNum].user_name, posts[postNum].post_like_count, posts[postNum].platform, posts[postNum].post_text, posts[postNum].post_created_at, posts[postNum].post_url, posts[postNum], client, (response) => {
+      console.log(posts[postNum].platform);
+      dbFunctions.insertPost(posts[postNum].user_name, posts[postNum].post_like_count, posts[postNum].platform, posts[postNum].post_text, posts[postNum].post_created_at, posts[postNum].post_id, posts[postNum].post_url, posts[postNum], client, (response) => {
         if(postNum != posts.length - 1) {
           self.storeInstagramContent(posts, postNum + 1, client, callback);
         }

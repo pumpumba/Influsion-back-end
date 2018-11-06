@@ -94,7 +94,7 @@ function formatJson(instagramResponse) {
 
   for (var i = 0; i < instagramResponse.business_discovery.media.data.length; i++) {
     var instaPost = {
-      "platform": "Instagram",
+      "platform": "instagram",
       "user_id": instagramResponse.business_discovery.id,
       "user_url": "",
       "user_name": instagramResponse.business_discovery.name,

@@ -39,17 +39,19 @@ var self = module.exports = {
     },
 
     insertPost: function(realName, numLikes, platform, userTextContent, datePosted, postID, postUrl, jsonContent, client, callback) {
-        splitedDate = datePosted.split(" ");
-        var unixtime = new Date(datePosted).getTime();
-        var regex = /'/gi;
-        userTextContent = userTextContent.replace(regex, "''");
-        console.log(typeof(jsonContent));
-        jsonContent = jsonContent.replace(regex, "''");
+      console.log(platform);
+      platform = platform.toLowerCase();
+
+      var regex = /'/gi;
+      userTextContent = userTextContent.replace(regex, "''");
+      console.log("HÄR CONSOLOLOG JSCONTENT");
+      console.log(jsonContent);
+      jsonContent = JSON.stringify(jsonContent).replace(regex, "''");
         var dbRequest = "INSERT INTO POST(INFLID, NRLIKES, PLATFORM, USRTXTCONTENT, POSTED, POSTURL, PLATFORMCONTENT) \
-            VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE REALNAME =\
+            VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE INFLUENCERNAME =\
             '"+realName+"'),\
             "+numLikes+", '"+platform+"',\
-            '"+userTextContent+"', to_timestamp("+unixtime+"),\
+            '"+userTextContent+"', to_timestamp("+Date.parse(datePosted)+"),\
             '"+postUrl+"', '"+jsonContent+"'::json);";
         console.log(dbRequest);
 

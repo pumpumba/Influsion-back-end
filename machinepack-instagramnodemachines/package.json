@@ -1,6 +1,6 @@
 {
   "name": "machinepack-instagramnodemachines",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Gets content from Instagram through the Instagram Graph API.",
   "scripts": {
     "test": "node ./node_modules/test-machinepack-mocha/bin/testmachinepack-mocha.js"
@@ -12,7 +12,7 @@
   ],
   "author": "",
   "license": "MIT",
-  "dependencies":{
+  "dependencies": {
     "machine": "^12.2.5"
   },
   "devDependencies": {
@@ -23,6 +23,9 @@
   "machinepack": {
     "friendlyName": "instagramnodemachines",
     "machineDir": "machines/",
-    "machines": ["getInstaPosts", "getPopularInstaPosts"]
+    "machines": [
+      "getInstaPosts",
+      "getPopularInstaPosts"
+    ]
   }
 }

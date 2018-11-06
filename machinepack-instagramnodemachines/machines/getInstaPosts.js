@@ -37,7 +37,7 @@ module.exports = {
       description: "Returns posts from User",
         /*example: [
         {
-        "platform": "Instagram",
+        "platform": "instagram",
         "user_id": 17841400842646374,
         "user_url": "https://instagram.com/katyperry/",
         "user_name": "KATY PERRY",
