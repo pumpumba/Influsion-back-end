@@ -53,7 +53,6 @@ function getChannel(channelID, callback) {
       if (err) {
         console.log("The API returned an error: " + err);
       } else {
-        console.log(res.data.items[0]);
         var formatedChannel = formatChannelJson(res.data.items[0])
         callback(formatedChannel);
       }

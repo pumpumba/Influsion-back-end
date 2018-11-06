@@ -1,0 +1,29 @@
+{
+  "name": "machinepack-youtubenodemachines",
+  "version": "0.1.0",
+  "description": "A Youtube machinepack",
+  "scripts": {
+    "test": "node ./node_modules/test-machinepack-mocha/bin/testmachinepack-mocha.js"
+  },
+  "keywords": [
+    "youtubenodemachines",
+    "machines",
+    "machinepack"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "machine": "^12.2.5"
+  },
+  "devDependencies": {
+    "test-machinepack-mocha": "^2.1.5"
+  },
+  "machinepack": {
+    "friendlyName": "youtubenodemachines",
+    "machineDir": "machines/",
+    "machines": [
+      "say-hello",
+      "getChannelYoutubeVideos"
+    ]
+  }
+}
