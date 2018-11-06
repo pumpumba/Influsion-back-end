@@ -73,14 +73,14 @@ module.exports = {
       );
     }
 
-    const access_token = inputs.accessToken;
-    const instagram_id = inputs.id;
+    const client = [];
+    client.push(inputs.accessToken);
+    clients.push(inputs.id);
 
     formatFunctions.getInstaPostsFromUser(
       inputs.screenName,
       inputs.count,
-      access_token,
-      instagram_id,
+      client,
       result => {
         return exits.success(result);
       }

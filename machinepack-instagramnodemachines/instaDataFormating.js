@@ -49,9 +49,9 @@ var self = module.exports = {
       }
       return formatedInstaPosts;
     },
-    getInstaPostsFromUser: function(username, postCount, access_token, instagram_id, callback) {
+    getInstaPostsFromUser: function(username, postCount, client, callback) {
       const https = require("https");
-      var url = "https://graph.facebook.com/" + instagram_id + "?fields=business_discovery.username(" + username + "){id, username, name, followers_count, profile_picture_url, media.limit(" + postCount + "){id,permalink,caption,timestamp,like_count,media_url, children{media_url}}}&access_token=" + access_token;
+      var url = "https://graph.facebook.com/" + client[1] + "?fields=business_discovery.username(" + username + "){id, username, name, followers_count, profile_picture_url, media.limit(" + postCount + "){id,permalink,caption,timestamp,like_count,media_url, children{media_url}}}&access_token=" + client[0];
       var instagramResponse;
 
       https
@@ -71,11 +71,11 @@ var self = module.exports = {
           console.log("Got an error: ", e);
         });
     },
-    getInstaPostsFromUsers: function(screen_names, postCount, access_token, instagram_id, callback) {
+    getInstaPostsFromUsers: function(screen_names, postCount, client, callback) {
       var popularPosts = [];
       var pushedCount = 0;
       for (var i = 0; i < screen_names.length; i++) {
-        self.getInstaPostsFromUser(screen_names[i], postCount, access_token, instagram_id, (result) => {
+        self.getInstaPostsFromUser(screen_names[i], postCount, client, (result) => {
           for(var j = 0; j < result.length;j++) {
               popularPosts.push(result[j]);
           }
