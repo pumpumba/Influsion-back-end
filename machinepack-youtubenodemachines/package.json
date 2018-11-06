@@ -22,7 +22,6 @@
     "friendlyName": "youtubenodemachines",
     "machineDir": "machines/",
     "machines": [
-      "say-hello",
       "getChannelYoutube",
       "getChannelYoutubeVideos"
     ]
