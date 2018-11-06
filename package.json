@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon src/index.js --legacy-watch",
-    "test": "mocha --timeout 10000"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",

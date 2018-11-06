@@ -4,15 +4,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.test
-    depends_on:
-      - "app"
-      - "db"
-  app:
-    container_name: docker-node-machine
-    restart: always
-    build:
-      context: .
-      dockerfile: Dockerfile.test
     ports:
       - "80:8080"
     volumes:
