@@ -2,7 +2,7 @@
 module.exports = {
   getChannel: function(channel_id, callback) {
     require("dotenv").load();
-    var YoutubeNodeMachine = require("../../machinepack-youtubenodemachines");
+    var YoutubeNodeMachine = require("machinepack-youtubenodemachines");
 
     YoutubeNodeMachine.getChannelYoutube({
       googleEmail: process.env.GOOGLE_CLIENT_EMAIL,

@@ -25,5 +25,9 @@
       "getChannelYoutube",
       "getChannelYoutubeVideos"
     ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pumpumba/project_TBD.git"
   }
 }
