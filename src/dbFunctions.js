@@ -293,7 +293,7 @@ var self = module.exports = {
                     if (resultCompare == true) {
                         dbResults["loginSuccess"] = true;
                     } else {
-                        dbResults = err;
+                        dbResults = {};
                         dbResults["loginSuccess"] = false;
                     }
                     callback({dbResults});
