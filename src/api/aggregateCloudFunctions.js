@@ -114,26 +114,26 @@ var self = module.exports = {
     var resultObj = [];
     var currentAsset = 0;
     var currentFilter = 0;
-    self.getContent(assetTypes, filterTypes, filterValue, context, limit,  currentAsset, currentFilter, resultObj, client, (response) => {
+    self.getContent(assetTypes, filterTypes, filterValue, context, limit, currentAsset, currentFilter, resultObj, client, (response) => {
       resultObj = response;
       res.json(resultObj);
     });
   },
 
-  getContent: function(assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, client, callback) {
+  getContent: function (assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, client, callback) {
     switch (assetTypes[currentAssetNum]) {
       case "tweet":
         switch (filterTypes[currentFilterNum]) {
           case "influencer":
             dbFunctions.getContentFromInfluencer('twitter', filterValue[0], limit, filterValue[1], client, (response) => {
               result = response['rows'];
-              if(result != undefined) {
-                for(var k = 0; k<result.length;k++) {
+              if (result != undefined) {
+                for (var k = 0; k < result.length; k++) {
                   resultObj.push(result[k]);
                 }
               }
 
-              if(currentAssetNum != (assetTypes.length - 1)) {
+              if (currentAssetNum != (assetTypes.length - 1)) {
                 self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
               }
               else {
@@ -144,12 +144,12 @@ var self = module.exports = {
           case "user":
             dbFunctions.getFollowedInfluencersPosts(filterValue, limit, 'twitter', client, (response) => {
               result = response['rows'];
-              if(result != undefined) {
-                for(var k = 0; k<result.length;k++) {
+              if (result != undefined) {
+                for (var k = 0; k < result.length; k++) {
                   resultObj.push(result[k]);
                 }
               }
-              if(currentAssetNum != (assetTypes.length - 1)) {
+              if (currentAssetNum != (assetTypes.length - 1)) {
                 self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
               }
               else {
@@ -162,12 +162,12 @@ var self = module.exports = {
               console.log(response)
               result = response['rows'];
               console.log(result);
-              if(result != undefined) {
-                for(var k = 0; k<result.length;k++) {
+              if (result != undefined) {
+                for (var k = 0; k < result.length; k++) {
                   resultObj.push(result[k]);
                 }
               }
-              if(currentAssetNum != (assetTypes.length - 1)) {
+              if (currentAssetNum != (assetTypes.length - 1)) {
                 self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
               }
               else {
@@ -182,19 +182,19 @@ var self = module.exports = {
             dbFunctions.getPlatformAccounts('twitter', client, (response1) => {
               var influencers = response1['rows'];
               var twitterAccounts = [];
-              if(influencers != undefined) {
-                for(var k = 0; k<influencers.length;k++) {
+              if (influencers != undefined) {
+                for (var k = 0; k < influencers.length; k++) {
                   twitterAccounts.push(influencers[k]);
                 }
               }
               var currentInfluencerAccount = 0;
-              if(currentInfluencerAccount < twitterAccounts.length) {
+              if (currentInfluencerAccount < twitterAccounts.length) {
                 var tweets = [];
                 self.getContentFromInfluencerTwitter(twitterAccounts, currentInfluencerAccount, tweets, limit, (response2) => {
-                  if(response2.length != 0) {
+                  if (response2.length != 0) {
                     self.storeTwitterContent(response2, 0, client, (response3) => {
                       resultObj.push("Success");
-                      if(currentAssetNum != (assetTypes.length - 1)) {
+                      if (currentAssetNum != (assetTypes.length - 1)) {
                         self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
                       }
                       else {
@@ -203,7 +203,7 @@ var self = module.exports = {
                     });
                   }
                   else {
-                    if(currentAssetNum != (assetTypes.length - 1)) {
+                    if (currentAssetNum != (assetTypes.length - 1)) {
                       self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
                     }
                     else {
@@ -213,7 +213,7 @@ var self = module.exports = {
                 });
               }
               else {
-                if(currentAssetNum != (assetTypes.length - 1)) {
+                if (currentAssetNum != (assetTypes.length - 1)) {
                   self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
                 }
                 else {
@@ -231,12 +231,12 @@ var self = module.exports = {
           case "influencer":
             dbFunctions.getContentFromInfluencer('instagram', filterValue[0], limit, filterValue[1], client, (response) => {
               result = response['rows'];
-              if(result != undefined) {
-                for(var k = 0; k<result.length;k++) {
+              if (result != undefined) {
+                for (var k = 0; k < result.length; k++) {
                   resultObj.push(result[k]);
                 }
               }
-              if(currentAssetNum != (assetTypes.length - 1)) {
+              if (currentAssetNum != (assetTypes.length - 1)) {
                 self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
               }
               else {
@@ -247,12 +247,12 @@ var self = module.exports = {
           case "user":
             dbFunctions.getFollowedInfluencersPosts(filterValue, limit, 'instagram', client, (response) => {
               result = response['rows'];
-              if(result != undefined) {
-                for(var k = 0; k<result.length;k++) {
+              if (result != undefined) {
+                for (var k = 0; k < result.length; k++) {
                   resultObj.push(result[k]);
                 }
               }
-              if(currentAssetNum != (assetTypes.length - 1)) {
+              if (currentAssetNum != (assetTypes.length - 1)) {
                 self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
               }
               else {
@@ -265,12 +265,12 @@ var self = module.exports = {
               console.log(response)
               result = response['rows'];
               console.log(result);
-              if(result != undefined) {
-                for(var k = 0; k<result.length;k++) {
+              if (result != undefined) {
+                for (var k = 0; k < result.length; k++) {
                   resultObj.push(result[k]);
                 }
               }
-              if(currentAssetNum != (assetTypes.length - 1)) {
+              if (currentAssetNum != (assetTypes.length - 1)) {
                 self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
               }
               else {
@@ -285,19 +285,19 @@ var self = module.exports = {
             dbFunctions.getPlatformAccounts('instagram', client, (response1) => {
               var influencers = response1['rows'];
               var twitterAccounts = [];
-              if(influencers != undefined) {
-                for(var k = 0; k<influencers.length;k++) {
+              if (influencers != undefined) {
+                for (var k = 0; k < influencers.length; k++) {
                   twitterAccounts.push(influencers[k]);
                 }
               }
               var currentInfluencerAccount = 0;
-              if(currentInfluencerAccount < twitterAccounts.length) {
+              if (currentInfluencerAccount < twitterAccounts.length) {
                 var tweets = [];
                 self.getContentFromInfluencerInstagram(twitterAccounts, currentInfluencerAccount, tweets, limit, (response2) => {
-                  if(response2.length != 0) {
+                  if (response2.length != 0) {
                     self.storeInstagramContent(response2, 0, client, (response3) => {
                       resultObj.push("Success");
-                      if(currentAssetNum != (assetTypes.length - 1)) {
+                      if (currentAssetNum != (assetTypes.length - 1)) {
                         self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
                       }
                       else {
@@ -306,7 +306,7 @@ var self = module.exports = {
                     });
                   }
                   else {
-                    if(currentAssetNum != (assetTypes.length - 1)) {
+                    if (currentAssetNum != (assetTypes.length - 1)) {
                       self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
                     }
                     else {
@@ -316,7 +316,7 @@ var self = module.exports = {
                 });
               }
               else {
-                if(currentAssetNum != (assetTypes.length - 1)) {
+                if (currentAssetNum != (assetTypes.length - 1)) {
                   self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
                 }
                 else {
@@ -334,12 +334,12 @@ var self = module.exports = {
           case "influencer":
             dbFunctions.getContentFromInfluencer('youtube', filterValue[0], limit, filterValue[1], client, (response) => {
               result = response['rows'];
-              if(result != undefined) {
-                for(var k = 0; k<result.length;k++) {
+              if (result != undefined) {
+                for (var k = 0; k < result.length; k++) {
                   resultObj.push(result[k]);
                 }
               }
-              if(currentAssetNum != (assetTypes.length - 1)) {
+              if (currentAssetNum != (assetTypes.length - 1)) {
                 self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
               }
               else {
@@ -350,12 +350,12 @@ var self = module.exports = {
           case "user":
             dbFunctions.getFollowedInfluencersPosts(filterValue, limit, 'youtube', client, (response) => {
               result = response['rows'];
-              if(result != undefined) {
-                for(var k = 0; k<result.length;k++) {
+              if (result != undefined) {
+                for (var k = 0; k < result.length; k++) {
                   resultObj.push(result[k]);
                 }
               }
-              if(currentAssetNum != (assetTypes.length - 1)) {
+              if (currentAssetNum != (assetTypes.length - 1)) {
                 self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
               }
               else {
@@ -368,12 +368,12 @@ var self = module.exports = {
               console.log(response)
               result = response['rows'];
               console.log(result);
-              if(result != undefined) {
-                for(var k = 0; k<result.length;k++) {
+              if (result != undefined) {
+                for (var k = 0; k < result.length; k++) {
                   resultObj.push(result[k]);
                 }
               }
-              if(currentAssetNum != (assetTypes.length - 1)) {
+              if (currentAssetNum != (assetTypes.length - 1)) {
                 self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
               }
               else {
@@ -385,22 +385,22 @@ var self = module.exports = {
             callback("Search option is not available at the moment");
             break;
           case "update":
-          dbFunctions.getPlatformAccounts('youtube', client, (response1) => {
+            dbFunctions.getPlatformAccounts('youtube', client, (response1) => {
               var influencers = response1['rows'];
               var twitterAccounts = [];
-              if(influencers != undefined) {
-                for(var k = 0; k<influencers.length;k++) {
+              if (influencers != undefined) {
+                for (var k = 0; k < influencers.length; k++) {
                   twitterAccounts.push(influencers[k]);
                 }
               }
               var currentInfluencerAccount = 0;
-              if(currentInfluencerAccount < twitterAccounts.length) {
+              if (currentInfluencerAccount < twitterAccounts.length) {
                 var tweets = [];
                 self.getContentFromInfluencerYouTube(twitterAccounts, currentInfluencerAccount, tweets, limit, (response2) => {
-                  if(response2.length != 0) {
+                  if (response2.length != 0) {
                     self.storeYouTubeContent(response2, 0, client, (response3) => {
                       resultObj.push("Success");
-                      if(currentAssetNum != (assetTypes.length - 1)) {
+                      if (currentAssetNum != (assetTypes.length - 1)) {
                         self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
                       }
                       else {
@@ -409,7 +409,7 @@ var self = module.exports = {
                     });
                   }
                   else {
-                    if(currentAssetNum != (assetTypes.length - 1)) {
+                    if (currentAssetNum != (assetTypes.length - 1)) {
                       self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
                     }
                     else {
@@ -419,7 +419,7 @@ var self = module.exports = {
                 });
               }
               else {
-                if(currentAssetNum != (assetTypes.length - 1)) {
+                if (currentAssetNum != (assetTypes.length - 1)) {
                   self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
                 }
                 else {
@@ -437,12 +437,12 @@ var self = module.exports = {
           case "influencer":
             dbFunctions.getContentFromInfluencer('all', filterValue[0], limit, filterValue[1], client, (response) => {
               result = response['rows'];
-              if(result != undefined) {
-                for(var k = 0; k<result.length;k++) {
+              if (result != undefined) {
+                for (var k = 0; k < result.length; k++) {
                   resultObj.push(result[k]);
                 }
               }
-              if(currentAssetNum != (assetTypes.length - 1)) {
+              if (currentAssetNum != (assetTypes.length - 1)) {
                 self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
               }
               else {
@@ -453,12 +453,12 @@ var self = module.exports = {
           case "user":
             dbFunctions.getFollowedInfluencersPosts(filterValue, limit, 'all', client, (response) => {
               result = response['rows'];
-              if(result != undefined) {
-                for(var k = 0; k<result.length;k++) {
+              if (result != undefined) {
+                for (var k = 0; k < result.length; k++) {
                   resultObj.push(result[k]);
                 }
               }
-              if(currentAssetNum != (assetTypes.length - 1)) {
+              if (currentAssetNum != (assetTypes.length - 1)) {
                 self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
               }
               else {
@@ -471,12 +471,12 @@ var self = module.exports = {
               console.log(response)
               result = response['rows'];
               console.log(result);
-              if(result != undefined) {
-                for(var k = 0; k<result.length;k++) {
+              if (result != undefined) {
+                for (var k = 0; k < result.length; k++) {
                   resultObj.push(result[k]);
                 }
               }
-              if(currentAssetNum != (assetTypes.length - 1)) {
+              if (currentAssetNum != (assetTypes.length - 1)) {
                 self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
               }
               else {
@@ -493,152 +493,191 @@ var self = module.exports = {
         break;
       default:
         callback("The cloud component failed to provide any content");
-      }
-    },
+    }
+  },
 
-    getContentFromInfluencersFromPlatform: function(userID, influencerAccounts, currentInfluencer, resultObj, client, platform, callback) {
-      dbFunctions.getContentFromInfluencer(platform, influencerAccounts[currentInfluencer]['influencerid'], 5, userID, client, (response) => {
-        if(response != undefined) {
-          for(var k = 0; k<response.length;k++) {
-            resultObj.push(response[k]);
+  getContentFromInfluencersFromPlatform: function (userID, influencerAccounts, currentInfluencer, resultObj, client, platform, callback) {
+    dbFunctions.getContentFromInfluencer(platform, influencerAccounts[currentInfluencer]['influencerid'], 5, userID, client, (response) => {
+      if (response != undefined) {
+        for (var k = 0; k < response.length; k++) {
+          resultObj.push(response[k]);
+        }
+      }
+      if (currentInfluencer != (influencerAccounts.length - 1)) {
+        self.getContentFromInfluencersFromPlatform(userID, influencerAccounts, currentInfluencer + 1, resultObj, client, platform, callback);
+      }
+      else {
+        callback(resultObj);
+      }
+    });
+  },
+
+  getContentFromInfluencerTwitter: function (influencers, currentInfluencer, resultObj, limit, callback) {
+    var Twitter = require("machinepack-twitternodemachines");
+    Twitter.getUserTweets({
+      consumerKey: process.env.TWITTER_CONSUMER_KEY,
+      consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
+      accessToken: process.env.TWITTER_ACCESS_TOKEN,
+      accessSecret: process.env.TWITTER_ACCESS_SECRET,
+      bearerToken: process.env.TWITTER_BEARER_TOKEN,
+      userScreenName: influencers[currentInfluencer].platformname,
+      count: limit
+    }).exec((err, result) => {
+      if (err) {
+        console.log("Error at getPopularTweets");
+        console.log(err);
+      } else {
+        if (result != undefined) {
+          for (var k = 0; k < result.length; k++) {
+            result[k].realInfluencerName = influencers[currentInfluencer].influencerid
+            resultObj.push(result[k]);
           }
         }
-        if(currentInfluencer != (influencerAccounts.length - 1)) {
-          self.getContentFromInfluencersFromPlatform(userID, influencerAccounts, currentInfluencer + 1, resultObj, client, platform, callback);
+        if (currentInfluencer != (influencers.length - 1)) {
+          self.getContentFromInfluencerTwitter(influencers, currentInfluencer + 1, resultObj, limit, callback);
         }
         else {
           callback(resultObj);
         }
-      });
-    },
+      }
+    });
+  },
 
-    getContentFromInfluencerTwitter: function(influencers, currentInfluencer, resultObj, limit, callback) {
-      var Twitter = require("machinepack-twitternodemachines");
-      Twitter.getUserTweets({
-        consumerKey: process.env.TWITTER_CONSUMER_KEY,
-        consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
-        accessToken: process.env.TWITTER_ACCESS_TOKEN,
-        accessSecret: process.env.TWITTER_ACCESS_SECRET,
-        bearerToken: process.env.TWITTER_BEARER_TOKEN,
-        userScreenName: influencers[currentInfluencer].platformname, 
-        count: limit
-      }).exec((err, result) => {
-        if (err) {
-          console.log("Error at getPopularTweets");
-          console.log(err);
-        } else {
-          if(result != undefined) {
-            for(var k = 0; k<result.length;k++) {
-              result[k].realInfluencerName = influencers[currentInfluencer].influencerid
-              resultObj.push(result[k]);
-            }
-          }
-          if(currentInfluencer != (influencers.length - 1)) {
-            self.getContentFromInfluencerTwitter(influencers, currentInfluencer + 1, resultObj, limit, callback);
-          }
-          else {
-            callback(resultObj);
-          }
-        }
-      });
-    },
+  storeTwitterContent: function (tweets, tweetNum, client, callback) {
+    var unixtime = new Date(tweets[tweetNum].tweet_created_at).getTime();
+    var regex = /'/gi;
+    var userTextContent = tweets[tweetNum].tweet_text.replace(regex, "''");
+    var jsonContent = JSON.stringify(tweets[tweetNum]).replace(regex, "''");
+    dbFunctions.insertPost(tweets[tweetNum].realInfluencerName, tweets[tweetNum].tweet_favorite_count, tweets[tweetNum].platform, userTextContent, unixtime, tweets[tweetNum].tweet_id, tweets[tweetNum].tweet_url, jsonContent, client, (response) => {
+      if (tweetNum != tweets.length - 1) {
+        self.storeTwitterContent(tweets, tweetNum + 1, client, callback);
+      }
+      else {
+        callback(response);
+      }
+    });
+  },
 
-    storeTwitterContent: function(tweets, tweetNum, client, callback) {
-      var unixtime =  new Date(tweets[tweetNum].tweet_created_at).getTime();
-      var regex = /'/gi;
-      var userTextContent = tweets[tweetNum].tweet_text.replace(regex, "''");
-      var jsonContent = JSON.stringify(tweets[tweetNum]).replace(regex, "''");
-      dbFunctions.insertPost(tweets[tweetNum].realInfluencerName, tweets[tweetNum].tweet_favorite_count, tweets[tweetNum].platform, userTextContent, unixtime, tweets[tweetNum].tweet_id, tweets[tweetNum].tweet_url, jsonContent, client, (response) => {
-        if(tweetNum != tweets.length - 1) {
-          self.storeTwitterContent(tweets, tweetNum + 1, client, callback);
-        }
-        else {
-          callback(response);
-        }
-      });
-    },
-
-    getContentFromInfluencerInstagram: function(influencers, currentInfluencer, resultObj, limit, callback) {
-      var Instagram = require("machinepack-instagramnodemachines2");
-      Instagram.getInstaPosts({
-        accessToken: process.env.INSTAGRAM_ACCESS_TOKEN,
-        id: process.env.INSTAGRAM_ID,
-        screenName: influencers[currentInfluencer].platformname,
-        count: limit
-      }).exec((err, result) => {
-        if (err) {
-          console.log("Error at getInstaPosts");
-          console.log(err);
-        } else {
-          if(result != undefined) {
-            for(var k = 0; k<result.length;k++) {
-              result[k].realInfluencerName = influencers[currentInfluencer].influencerid
-              resultObj.push(result[k]);
-            }
-          }
-          if(currentInfluencer != (influencers.length - 1)) {
-            self.getContentFromInfluencerInstagram(influencers, currentInfluencer + 1, resultObj, limit, callback);
-          }
-          else {
-            callback(resultObj);
-          }
-        }
-      });
-    },
-
-    storeInstagramContent: function(posts, postNum, client, callback) {
-      var platform = posts[postNum].platform.toLowerCase();
-      var regex = /'/gi;
-      var userTextContent = posts[postNum].post_text.replace(regex, "''");
-      var datePosted = Date.parse(posts[postNum].post_created_at);
-      var jsonContent = JSON.stringify(posts[postNum]).replace(regex, "''");
-      dbFunctions.insertPost(posts[postNum].realInfluencerName, posts[postNum].post_like_count, platform, userTextContent, datePosted, posts[postNum].post_id, posts[postNum].post_url, jsonContent, client, (response) => {
-        if(postNum != posts.length - 1) {
-          self.storeInstagramContent(posts, postNum + 1, client, callback);
-        }
-        else {
-          callback(response);
-        }
-      });
-    },
-
-    getContentFromInfluencerYouTube: function(influencers, currentInfluencer, resultObj, limit, callback) {
-      //var Youtube = require("machinepack-youtubenodemachines"); here we get the nodemachines
-      /*Youtube.getUserVideos({
-        consumerKey: process.env.TWITTER_CONSUMER_KEY,
-        consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
-        accessToken: process.env.TWITTER_ACCESS_TOKEN,
-        accessSecret: process.env.TWITTER_ACCESS_SECRET,
-        bearerToken: process.env.TWITTER_BEARER_TOKEN,
-        userScreenName: influencers[currentInfluencer].actname,
-        count: limit
-      }).exec((err, result) => {
-        console.log(result);
-        if (err) {
-          console.log("Error at getPopularTweets");
-          console.log(err);
-        } else {
-          for(var k = 0; k<result.length;k++) {
+  getContentFromInfluencerInstagram: function (influencers, currentInfluencer, resultObj, limit, callback) {
+    var Instagram = require("machinepack-instagramnodemachines2");
+    Instagram.getInstaPosts({
+      accessToken: process.env.INSTAGRAM_ACCESS_TOKEN,
+      id: process.env.INSTAGRAM_ID,
+      screenName: influencers[currentInfluencer].platformname,
+      count: limit
+    }).exec((err, result) => {
+      if (err) {
+        console.log("Error at getInstaPosts");
+        console.log(err);
+      } else {
+        if (result != undefined) {
+          for (var k = 0; k < result.length; k++) {
+            result[k].realInfluencerName = influencers[currentInfluencer].influencerid
             resultObj.push(result[k]);
           }
-          if(currentInfluencer != (influencers.length - 1)) {
-            self.getContentFromInfluencerYouTube(influencers, currentInfluencer + 1, resultObj, limit, callback);
-          }
-          else {
-            callback(resultObj);
-          }
         }
-      }); */
-    },
-
-    storeYouTubeContent: function(videos, videoNum, client, callback) {
-      dbFunctions.insertVideo(videos[videoNum].user_name, videos[videoNum].video_favorite_count, videos[videoNum].platform, videos[videoNum].video_text, videos[videoNum].video_created_at, videos[videoNum].video_url, JSON.stringify(videos[videoNum]), client, (response) => {
-        if(videoNum != videos.length - 1) {
-          self.storeYouTubeContent(videos, videoNum + 1, client, callback);
+        if (currentInfluencer != (influencers.length - 1)) {
+          self.getContentFromInfluencerInstagram(influencers, currentInfluencer + 1, resultObj, limit, callback);
         }
         else {
-          callback(response);
+          callback(resultObj);
         }
-      });
-    }
+      }
+    });
+  },
+
+  storeInstagramContent: function (posts, postNum, client, callback) {
+    var platform = posts[postNum].platform.toLowerCase();
+    var regex = /'/gi;
+    var userTextContent = posts[postNum].post_text.replace(regex, "''");
+    var datePosted = Date.parse(posts[postNum].post_created_at);
+    var jsonContent = JSON.stringify(posts[postNum]).replace(regex, "''");
+    dbFunctions.insertPost(posts[postNum].realInfluencerName, posts[postNum].post_like_count, platform, userTextContent, datePosted, posts[postNum].post_id, posts[postNum].post_url, jsonContent, client, (response) => {
+      if (postNum != posts.length - 1) {
+        self.storeInstagramContent(posts, postNum + 1, client, callback);
+      }
+      else {
+        callback(response);
+      }
+    });
+  },
+
+  getContentFromInfluencerYouTube: function (influencers, currentInfluencer, resultObj, limit, callback) {
+    console.log(influencers);
+    //var Youtube = require("machinepack-youtubenodemachines"); here we get the nodemachines
+    /*Youtube.getUserVideos({
+      consumerKey: process.env.TWITTER_CONSUMER_KEY,
+      consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
+      accessToken: process.env.TWITTER_ACCESS_TOKEN,
+      accessSecret: process.env.TWITTER_ACCESS_SECRET,
+      bearerToken: process.env.TWITTER_BEARER_TOKEN,
+      userScreenName: influencers[currentInfluencer].actname,
+      count: limit
+    }).exec((err, result) => {
+      console.log(result);
+      if (err) {
+        console.log("Error at getPopularTweets");
+        console.log(err);
+      } else {
+        for(var k = 0; k<result.length;k++) {
+          resultObj.push(result[k]);
+        }
+        if(currentInfluencer != (influencers.length - 1)) {
+          self.getContentFromInfluencerYouTube(influencers, currentInfluencer + 1, resultObj, limit, callback);
+        }
+        else {
+          callback(resultObj);
+        }
+      }
+    }); */
+
+    var YoutubeNodeMachine = require("machinepack-youtubenodemachines");
+    require("dotenv").load();
+    var google_mail = process.env.GOOGLE_CLIENT_EMAIL;
+    var google_key = process.env.GOOGLE_PRIVATE_KEY;
+    console.log(google_mail);
+    console.log(google_key);
+    YoutubeNodeMachine.getChannelYoutubeVideos({
+      googleEmail: process.env.GOOGLE_CLIENT_EMAIL,
+      googlePrivateKey: process.env.GOOGLE_PRIVATE_KEY,
+      channelName: influencers[currentInfluencer].platformname,
+      count: limit
+    }).exec((err, result) => {
+      if (err) {
+        console.log("Error at getPopularTweets");
+        console.log(err);
+      } else {
+
+        if (result != undefined) {
+          for (var k = 0; k < result.length; k++) {
+            result[k].realInfluencerName = influencers[currentInfluencer].influencerid
+            resultObj.push(result[k]);
+          }
+        }
+        if (currentInfluencer != (influencers.length - 1)) {
+          self.getContentFromInfluencerYouTube(influencers, currentInfluencer + 1, resultObj, limit, callback);
+        }
+        else {
+          callback(resultObj);
+        }
+      }
+    });
+  },
+
+  storeYouTubeContent: function (videos, videoNum, client, callback) {
+    var platform = videos[videoNum].platform.toLowerCase();
+    var splitedDate = videos[videoNum].video_created_at.split(" ");
+    var unixtime = new Date(splitedDate).getTime();
+    var regex = /'/gi;
+    var userTextContent = videos[videoNum].video_title.replace(regex, "''");
+    var jsonContent = JSON.stringify(videos[videoNum]).replace(regex, "''");
+    dbFunctions.insertPost(videos[videoNum].realInfluencerName, videos[videoNum].video_like_count, platform, userTextContent, unixtime, videos[videoNum].video_id, videos[videoNum].video_embeded_url, jsonContent, client, (response) => {
+      if (videoNum != videos.length - 1) {
+        self.storeYouTubeContent(videos, videoNum + 1, client, callback);
+      }
+      else {
+        callback(response);
+      }
+    });
   }
+}
