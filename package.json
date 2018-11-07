@@ -28,7 +28,7 @@
     "pg": "^7.4.3",
     "body-parser": "^1.18.3",
     "machinepack-twitternodemachines": "1.27.0",
-    "machinepack-instagramnodemachines2": "1.0.0",
+    "machinepack-instagramnodemachines2": "1.1.0",
     "bcrypt": "^3.0.1"
   },
   "devDependencies": {
