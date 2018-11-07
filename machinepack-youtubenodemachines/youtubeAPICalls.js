@@ -10,12 +10,12 @@ module.exports = {
   },
   getVideosUsername: function(auth, youtube, username, count, callback) {
    getChannelUsername(auth, youtube, username, (result) => {
-     if (result !== undefined) {
+     if (result === undefined || (Array.isArray(result) && (result.length == 0))) {
+       callback([]);
+     } else {
        getVideos(auth, youtube, result.channel_id, count, (result) => {
          callback(result);
        });
-     } else {
-       callback(undefined);
      }
    });
  }
@@ -34,11 +34,12 @@ function getChannel(auth, youtube, channelID, callback) {
       if (err) {
         console.log("The API returned an error: " + err);
       } else {
-        if (res.data.items !== undefined) {
+        if (res.data.items[0] !== undefined) {
+          console.log("----------------------------------------------------" + res.data.items);
           var formatedChannel = formatChannelJson(res.data.items[0])
           callback(formatedChannel);
         } else {
-            callback(undefined);
+            callback([]);
         }
       }
     }
@@ -62,7 +63,7 @@ function getChannelUsername(auth, youtube, username, callback) {
           var formatedChannel = formatChannelJson(res.data.items[0])
           callback(formatedChannel);
         } else {
-          callback(undefined);
+          callback([]);
         }
       }
     }
@@ -85,7 +86,7 @@ function getVideos(auth, youtube, channel_id, count, callback) {
       if (res.data.items !== undefined) {
         getVideoStatistics(auth, youtube, res.data.items, count, callback);
       } else {
-        callback(undefined);
+        callback([]);
       }
     }
   });

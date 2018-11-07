@@ -65,13 +65,13 @@ module.exports = {
       }
     });
 */
-    
+
     //require("dotenv").load();
 
     // Configure a JWT auth client
     let jwtClient = new google.auth.JWT(
       inputs.googleEmail,
-      null, 
+      null,
       inputs.googlePrivateKey,
       ["https://www.googleapis.com/auth/youtube"]
     );
@@ -85,7 +85,6 @@ module.exports = {
         console.log("Successfully connected!");
       }
     });
-    
 
     if (!_.isUndefined(inputs.channelID)) {
       youtubeAPICalls.getChannel(jwtClient, youtube, inputs.channelID, (result) => {
