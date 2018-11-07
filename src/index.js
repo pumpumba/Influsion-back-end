@@ -125,7 +125,7 @@ app.get("/db/get_followed_infl_posts", (req, res) => {
 
   });
 });
-// Unfollow an influencer by specifiying user_id for user, and influencer_id for influencer
+// Unfollocw an influencer by specifiying user_id for user, and influencer_id for influencer
 app.post("/db/unfollow_influencer", (req,res) => {
   var inputObj = req.body;
   var userID = inputObj.user_id;
@@ -140,6 +140,12 @@ app.post("/db/add_follow_influencer", (req,res) => {
   var inputObj = req.body;
   var userID = inputObj.user_id;
   var influencerID = inputObj.influencer_id;
+  var names = ["real_name", "influencer_id"];
+  for (i in inputObj) {
+      if (names.includes(i)) {
+        console.log("Yes!");
+      }
+  }
   dbFunctions.addFollowInfluencer(userID, influencerID, client, (response) => {
     res.json(response);
   });

@@ -39,12 +39,7 @@ var self = module.exports = {
         });
     },
 
-    insertPost: function(influencerID, numLikes, platform, userTextContent, datePosted, postID, postUrl, jsonContent, client, callback) {
-        splitedDate = datePosted.split(" ");
-        var unixtime = new Date(datePosted).getTime();
-        var regex = /'/gi;
-        userTextContent = userTextContent.replace(regex, "''");
-        jsonContent = jsonContent.replace(regex, "''");
+    insertPost: function(influencerID, numLikes, platform, userTextContent, unixtime, postID, postUrl, jsonContent, client, callback) {
         var dbRequest = "INSERT INTO POST(INFLID, NRLIKES, PLATFORM, USRTXTCONTENT, POSTED, POSTURL, PLATFORMCONTENT) \
             VALUES ("+influencerID+",\
             "+numLikes+", '"+platform+"',\
@@ -70,7 +65,7 @@ var self = module.exports = {
         console.log(dbRequest);
         client.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
-            if (dbResults != undefined && dbResults["rowCount"] >= 1) {
+            if (dbResults != undefined) {
                 dbResults["deleteSuccess"] = true;
             } else {
                 dbResults = err;
@@ -81,12 +76,6 @@ var self = module.exports = {
     },
 
     addFollowInfluencer: function(userID, influencerID, client, callback) {
-        var names = ["real_name", "influencer_id"];
-        for (i in inputObj) {
-            if (names.includes(i)) {
-            console.log("Yes!");
-            }
-        }
         var dbRequest = "INSERT INTO USRFLWINFL (FLWRID, INFLID) VALUES ("+userID+","+influencerID+");";
 
         client.query(dbRequest, (err, dbResult) => {
@@ -304,7 +293,7 @@ var self = module.exports = {
                     if (resultCompare == true) {
                         dbResults["loginSuccess"] = true;
                     } else {
-                        dbResults = err;
+                        dbResults = {};
                         dbResults["loginSuccess"] = false;
                     }
                     callback({dbResults});

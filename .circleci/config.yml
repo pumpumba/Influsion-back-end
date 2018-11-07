@@ -53,6 +53,7 @@ jobs:
       - run:
           name: Push database to docker hub
           command: |
+            docker login -u $DOCKER_LOGIN -p $DOCKER_PWD
             docker push mezzersmite/$BACK_END_DB_IMAGE_NAME:$TAG
       # run tests!
       #- run: roliga tests kanske
