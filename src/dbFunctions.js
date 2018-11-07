@@ -19,7 +19,7 @@ var self = module.exports = {
     },
 
     getFollowedInfluencersPosts: function(userID, limit, platform, client, callback) {
-        var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = "+userID+") ";  
+        var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = "+userID+") ";
         if (platform != "all")
             dbRequest = dbRequest+"AND platform = '"+platform+"'";
 
@@ -45,10 +45,10 @@ var self = module.exports = {
             "+numLikes+", '"+platform+"',\
             '"+userTextContent+"', to_timestamp("+unixtime+"),\
             '"+postUrl+"', '"+jsonContent+"'::json);";
-        
+
         client.query(dbRequest, (err, dbResult) => {
-            console.log(dbResult);
-            console.log(err);
+            //console.log(dbResult);
+            //console.log(err);
             var dbResults = dbResult;
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["createSuccess"] = true;
@@ -199,10 +199,10 @@ var self = module.exports = {
     },
 
     registerUser: function(password, username, age, email, sex, client, callback) {
+        var saltRounds = 10;
         bcrypt.hash(password, saltRounds, function(err, hash) {
             // Store hash in your password DB.
-              var dbRequest = "INSERT INTO USR (USRNAME, HASHEDPWD, EMAIL, AGE, SEX) VALUES ('"+username+"', '"+hash+"', '"+email+"', "+age+", '"+sex+"');";
-              console.log(dbRequest);
+              var dbRequest = "INSERT INTO USR (USRNAME, HASHEDPWD, EMAIL, AGE, SEX) VALUES ('"+username+"', '"+hash+"', '"+email+"', "+age+", '"+sex+"');"
               self.insertionToDB(client, dbRequest, (response) => {
                 callback(response);
               });

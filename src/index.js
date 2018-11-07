@@ -308,6 +308,63 @@ app.post("/db/register_user", (req, res)=> {
   });
 });
 
+app.post("/db/delete_user", (req, res) => {
+  var inputObj = req.body;
+  var usrID = inputObj.usrid;
+  var password = inputObj.password;
+  var dbRequest = "SELECT * FROM USR WHERE usrid = "+usrID+";";
+  console.log(dbRequest);
+  console.log("ASDASDASDASD");
+  client.query(dbRequest, (err, dbResult) => {
+    var dbResults = dbResult["rows"][0];
+    console.log("WE CAME HERE");
+    console.log(dbResults);
+    if (dbResults != undefined) {
+      var hashPassword = dbResult["rows"][0].hashedpwd;
+
+      bcrypt.compare(password, hashPassword, function(err, resultCompare) {
+        console.log(resultCompare);
+        if (resultCompare == true) {
+          var dbRequest = "BEGIN; \
+          DELETE FROM USRFLWINFL WHERE FLWRID = "+usrID+"; \
+          DELETE FROM USRLIKEPOST WHERE USRID = "+usrID+"; \
+          DELETE FROM USRVISIT WHERE usrid = "+usrID+"; \
+          DELETE FROM USR WHERE usrid = "+usrID+"; \
+          COMMIT;";
+          client.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+            if (dbResults != undefined) {
+
+
+              dbResults["deleteSuccess"] = true;
+            } else {
+              dbResults = err;
+              dbResults["deleteSuccess"] = false;
+            }
+
+            res.json(dbResults);
+          });
+
+        } else {
+          dbResults = err;
+          dbResults["deleteSuccess"] = false;
+        }
+
+        res.json({dbResults});
+      });
+    } else {
+      dbResults = {};
+      dbResults["loginSuccess"] = false;
+      res.json({dbResults});
+    }
+  });
+
+
+
+
+
+});
+
 app.post("/db/get_latest_posts", (req, res) => {
   var inputObj = req.body;
   dbFunctions.getLatestPosts(inputObj.user_id, inputObj.platform, inputObj.top, client, (response) => {
