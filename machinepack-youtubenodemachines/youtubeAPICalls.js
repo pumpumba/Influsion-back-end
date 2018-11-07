@@ -10,9 +10,13 @@ module.exports = {
   },
   getVideosUsername: function(auth, youtube, username, count, callback) {
    getChannelUsername(auth, youtube, username, (result) => {
-     getVideos(auth, youtube, result.channel_id, count, (result) => {
-       callback(result);
-     });
+     if (result !== undefined) {
+       getVideos(auth, youtube, result.channel_id, count, (result) => {
+         callback(result);
+       });
+     } else {
+       callback(undefined);
+     }
    });
  }
 };
@@ -30,8 +34,12 @@ function getChannel(auth, youtube, channelID, callback) {
       if (err) {
         console.log("The API returned an error: " + err);
       } else {
-        var formatedChannel = formatChannelJson(res.data.items[0])
-        callback(formatedChannel);
+        if (res.data.items !== undefined) {
+          var formatedChannel = formatChannelJson(res.data.items[0])
+          callback(formatedChannel);
+        } else {
+            callback(undefined);
+        }
       }
     }
   );
@@ -50,8 +58,12 @@ function getChannelUsername(auth, youtube, username, callback) {
       if (err) {
         console.log("The API returned an error: " + err);
       } else {
-        var formatedChannel = formatChannelJson(res.data.items[0])
-        callback(formatedChannel);
+        if (res.data.items[0] !== undefined) {
+          var formatedChannel = formatChannelJson(res.data.items[0])
+          callback(formatedChannel);
+        } else {
+          callback(undefined);
+        }
       }
     }
   );
@@ -70,7 +82,11 @@ function getVideos(auth, youtube, channel_id, count, callback) {
     if (err) {
       console.log("The API returned an error: " + err);
     } else {
-      getVideoStatistics(auth, youtube, res.data.items, count, callback);
+      if (res.data.items !== undefined) {
+        getVideoStatistics(auth, youtube, res.data.items, count, callback);
+      } else {
+        callback(undefined);
+      }
     }
   });
 }
