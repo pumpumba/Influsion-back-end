@@ -38,7 +38,7 @@ var self = module.exports = {
             res.json(["Nothing available"]);
         }
         break;
-      case "YouTube video":
+      case "youtube_video":
         switch (filterType) {
           case "search":
             res.json(["<enter your influencers username>"]);
@@ -312,7 +312,7 @@ var self = module.exports = {
             callback("The cloud component failed to provide any content");
         }
         break;
-      case "youtube video":
+      case "youtube_video":
         switch (filterTypes[currentFilterNum]) {
           case "influencer":
             dbFunctions.getContentFromInfluencer('youtube', filterValue[0], limit, filterValue[1], client, (response) => {
@@ -370,7 +370,7 @@ var self = module.exports = {
               var influencers = response1['rows'];
               var accounts = [];
               if(influencers != undefined) {
-                for(var k = 0; k<result.length;k++) {
+                for(var k = 0; k<influencers.length;k++) {
                   accounts.push(influencers[k]);
                 }
               }
@@ -499,7 +499,7 @@ var self = module.exports = {
         accessToken: process.env.TWITTER_ACCESS_TOKEN,
         accessSecret: process.env.TWITTER_ACCESS_SECRET,
         bearerToken: process.env.TWITTER_BEARER_TOKEN,
-        userScreenName: influencers[currentInfluencer].actname, 
+        userScreenName: influencers[currentInfluencer].actname,
         count: limit
       }).exec((err, result) => {
         console.log(result);
@@ -573,6 +573,9 @@ var self = module.exports = {
     },
 
     getContentFromInfluencerYouTube: function(influencers, currentInfluencer, resultObj, limit, callback) {
+      console.log("--------------------------------------------------");
+      console.log(influencers);
+
       //var Youtube = require("machinepack-youtubenodemachines"); here we get the nodemachines
       /*Youtube.getUserVideos({
         consumerKey: process.env.TWITTER_CONSUMER_KEY,

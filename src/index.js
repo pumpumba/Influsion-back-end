@@ -93,7 +93,23 @@ app.get("/api/youtube", (req, res) => {
     } else if (username != null) {
       youtube.getVideosUsername(username, count, (result) => {
         res.json(result);
-      })
+
+        if (Array.isArray(result)) {
+          var temp = 0;
+          for (var i = 0; i < result.length; i++) {
+
+            // insertPost: function(realName, numLikes, platform, userTextContent, datePosted, postID, postUrl, jsonContent, client, callback)
+            dbFunctions.insertPost("Bill Gates", result[i].video_like_count, result[i].platform, result[i].video_title, result[i].video_created_at, result[i].video_id, result[i].video_embeded_url, result[i], client, (response) => {
+              temp++;
+              console.log(temp);
+              if(temp == result.length - 1) {
+                console.log("Done!");
+              }
+            });
+
+          }
+        }
+      });
     }
   }
   else {

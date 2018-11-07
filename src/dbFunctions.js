@@ -18,7 +18,7 @@ var self = module.exports = {
     },
 
     getFollowedInfluencersPosts: function(userID, limit, platform, client, callback) {
-        var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = "+userID+") ";  
+        var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = "+userID+") ";
         if (platform != "all")
             dbRequest = dbRequest+"AND platform = '"+platform+"'";
 
@@ -39,12 +39,15 @@ var self = module.exports = {
     },
 
     insertPost: function(realName, numLikes, platform, userTextContent, datePosted, postID, postUrl, jsonContent, client, callback) {
+        platform = platform.toLowerCase();
+
         splitedDate = datePosted.split(" ");
         var unixtime = new Date(datePosted).getTime();
+
         var regex = /'/gi;
         userTextContent = userTextContent.replace(regex, "''");
         console.log(typeof(jsonContent));
-        jsonContent = jsonContent.replace(regex, "''");
+        jsonContent = JSON.stringify(jsonContent).replace(regex, "''");
         var dbRequest = "INSERT INTO POST(INFLID, NRLIKES, PLATFORM, USRTXTCONTENT, POSTED, POSTURL, PLATFORMCONTENT) \
             VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE REALNAME =\
             '"+realName+"'),\
@@ -52,7 +55,7 @@ var self = module.exports = {
             '"+userTextContent+"', to_timestamp("+unixtime+"),\
             '"+postUrl+"', '"+jsonContent+"'::json);";
         console.log(dbRequest);
-        
+
         client.query(dbRequest, (err, dbResult) => {
             console.log(dbResult);
             console.log(err);
