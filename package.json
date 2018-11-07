@@ -4,7 +4,8 @@
   "description": "A platform for enhanced influencer social media content",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon src/index.js --legacy-watch",
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js --legacy-watch",
     "test": "mocha"
   },
   "repository": {
@@ -22,18 +23,19 @@
     "sails": "^1.0.2",
     "twitter": "^1.7.1",
     "yo": "^2.0.5",
-    "nodemon": "^1.18.4",
     "dotenv": "^6.0.0",
     "wrappy": "^1.0.2",
     "pg": "^7.4.3",
     "body-parser": "^1.18.3",
-    "machinepack-twitternodemachines": "^1.17.0",
+    "machinepack-twitternodemachines": "1.27.0",
+    "machinepack-instagramnodemachines": "1.0.0",
     "bcrypt": "^3.0.1"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "chai-http": "^4.2.0",
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "nodemon": "^1.18.4"
   },
   "bugs": {
     "url": "https://github.com/pumpumba/project_TBD/issues"

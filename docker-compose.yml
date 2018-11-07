@@ -3,7 +3,9 @@ services:
   app:
     container_name: docker-node-machine
     restart: always
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
     ports:
       - "80:8080"
     volumes:
@@ -12,7 +14,7 @@ services:
       - "db"
     environment:
       - DATABASE_URL=postgres://pumbapumba:erikandfiliprules987@db:5432/pumbadb
-    command: bash -c 'while !</dev/tcp/db/5432; do sleep 10; done; echo Waiting for database; npm start'
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 10; done; echo Waiting for database; npm run dev'
   db:
     container_name: "postgres"
     image: "postgres"
