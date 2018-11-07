@@ -4,6 +4,11 @@ module.exports = {
   extendedDescription:
     "Get content from Youtube by providing...",
   inputs: {
+    googleEmail: {
+      example: "?",
+      description: "The required google private service account email.",
+      required: true
+    },
     googlePrivateKey: {
       example: "?",
       description: "The required google private service account key.",
@@ -12,7 +17,7 @@ module.exports = {
     channelID: {
       example: "?",
       description: "The channel ID",
-      required: true
+      required: false
     },
     channelName: {
       example: "Pewdiepie",
@@ -49,9 +54,9 @@ module.exports = {
 
     // Configure a JWT auth client
     let jwtClient = new google.auth.JWT(
-      privatekey.client_email,
+      inputs.googleEmail,
       null,
-      privatekey.private_key,
+      inputs.googlePrivateKey,
       ["https://www.googleapis.com/auth/youtube"]
     );
 
@@ -88,7 +93,7 @@ module.exports = {
     */
 
     if (!_.isUndefined(inputs.channelID)) {
-      youtubeAPICalls.getVideos(jwtClient, youtube, inputs.channelName, inputs.count, (result) => {
+      youtubeAPICalls.getVideos(jwtClient, youtube, inputs.channelID, inputs.count, (result) => {
         return exits.success(result);
       });
     } else if (!_.isUndefined(inputs.channelName)) {

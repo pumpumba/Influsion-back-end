@@ -1,6 +1,6 @@
 
 module.exports = {
-  getChannel: function(channel_id, count, callback) {
+  getChannel: function(channel_id, callback) {
     require("dotenv").load();
     var YoutubeNodeMachine = require("../../machinepack-youtubenodemachines");
 
@@ -13,7 +13,7 @@ module.exports = {
         console.log("Error at getChannelYoutube");
         console.log(err);
       } else {
-        res.json(result);
+        callback(result);
         successFlag = true;
       }
     });
@@ -31,7 +31,7 @@ module.exports = {
         console.log("Error at getChannelYoutube");
         console.log(err);
       } else {
-        res.json(result);
+        callback(result);
         successFlag = true;
       }
     });
@@ -49,7 +49,7 @@ module.exports = {
         console.log("Error at getChannelYoutubeVideos");
         console.log(err);
       } else {
-        res.json(result);
+        callback(result);
         successFlag = true;
       }
     });
@@ -67,7 +67,7 @@ module.exports = {
         console.log("Error at getChannelYoutubeVideos");
         console.log(err);
       } else {
-        res.json(result);
+        callback(result);
         successFlag = true;
       }
     });

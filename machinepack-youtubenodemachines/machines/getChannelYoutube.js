@@ -4,6 +4,11 @@ module.exports = {
   extendedDescription:
     "Get content from Youtube by providing...",
   inputs: {
+    googleEmail: {
+      example: "?",
+      description: "The required google private service account email.",
+      required: true
+    },
     googlePrivateKey: {
       example: "?",
       description: "The required google private service account key.",
@@ -12,7 +17,7 @@ module.exports = {
     channelID: {
       example: "?",
       description: "The channel ID",
-      required: true
+      required: false
     },
     channelName: {
       example: "Pewdiepie",
@@ -43,7 +48,7 @@ module.exports = {
     let youtube = google.youtube("v3");
 
     // Configure a JWT auth client
-    let jwtClient = new google.auth.JWT(
+/*    let jwtClient = new google.auth.JWT(
       privatekey.client_email,
       null,
       privatekey.private_key,
@@ -59,15 +64,15 @@ module.exports = {
         console.log("Successfully connected!");
       }
     });
-
-    /*
-    require("dotenv").load();
+*/
+    
+    //require("dotenv").load();
 
     // Configure a JWT auth client
     let jwtClient = new google.auth.JWT(
-      process.env.GOOGLE_CLIENT_EMAIL,
-      null,
-      process.env.GOOGLE_PRIVATE_KEY,
+      inputs.googleEmail,
+      null, 
+      inputs.googlePrivateKey,
       ["https://www.googleapis.com/auth/youtube"]
     );
 
@@ -80,10 +85,10 @@ module.exports = {
         console.log("Successfully connected!");
       }
     });
-    */
+    
 
     if (!_.isUndefined(inputs.channelID)) {
-      youtubeAPICalls.getChannel(jwtClient, youtube, inputs.channelName, (result) => {
+      youtubeAPICalls.getChannel(jwtClient, youtube, inputs.channelID, (result) => {
         return exits.success(result);
       });
     } else if (!_.isUndefined(inputs.channelName)) {

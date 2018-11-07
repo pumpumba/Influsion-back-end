@@ -70,11 +70,38 @@ function getVideos(auth, youtube, channel_id, count, callback) {
     if (err) {
       console.log("The API returned an error: " + err);
     } else {
-      var formatedVideos = formatVideosJson(res.data.items);
-      callback(formatedVideos);
+      getVideoStatistics(auth, youtube, res.data.items, count, callback);
+    }
+  });
+}
+
+function getVideoStatistics(auth, youtube, items, count, callback) {
+  var IDs = "";
+  if (Array.isArray(items)) {
+    for (var i = 0; i < items.length; i++) {
+      if (i != 0) {
+        IDs += ", "
+      }
+      IDs += items[i].id.videoId;
     }
   }
-);
+
+  youtube.videos.list(
+    {
+      auth: auth,
+      part: "statistics",
+      id: IDs,
+      maxResults: count //integer 0-50, default 5
+    },
+    function(err, res) {
+      if (err) {
+        console.log("The API returned an error: " + err);
+      } else {
+        var formatedVideos = formatVideosJson(items, res.data.items);
+        callback(formatedVideos);
+      }
+    }
+  );
 }
 
 function formatChannelJson(channel) {
@@ -91,11 +118,10 @@ function formatChannelJson(channel) {
   };
 }
 
-function formatVideosJson(videos) {
+function formatVideosJson(videos, statistics) {
   var formatedVideos = []
 
   if (Array.isArray(videos)) {
-
     for (var i = 0; i < videos.length; i++) {
       var video = {
         "platform": "Youtube",
@@ -104,15 +130,31 @@ function formatVideosJson(videos) {
         "channel_title": videos[i].snippet.channelTitle,
         "video_id": videos[i].id.videoId,
         "video_url": "",
+        "video_embeded_url": "",
         "video_title": videos[i].snippet.title,
         "video_description": videos[i].snippet.description,
         "video_created_at": (new Date(videos[i].snippet.publishedAt).toISOString()),
-        "video_thumbnail_url": videos[i].snippet.thumbnails.high.url
+        "video_thumbnail_url": videos[i].snippet.thumbnails.high.url,
+        "video_view_count": "",
+        "video_like_count": "",
+        "video_dislike_count": "",
+        "video_comment_count": ""
       };
       video.channel_url = "https://www.youtube.com/channel/" + video.channel_id;
       video.video_url = "https://www.youtube.com/watch?v=" + video.video_id;
+      video.video_embeded_url = "https://www.youtube.com/embed/" + video.video_id;
 
       formatedVideos.push(video);
+    }
+  }
+
+  // Add statistics
+  if (Array.isArray(statistics)) {
+    for (var i = 0; i < statistics.length; i++) {
+      formatedVideos[i].video_view_count = statistics[i].statistics.viewCount;
+      formatedVideos[i].video_like_count = statistics[i].statistics.likeCount;
+      formatedVideos[i].video_dislike_count = statistics[i].statistics.dislikeCount;
+      formatedVideos[i].video_comment_count = statistics[i].statistics.commentCount;
     }
   }
 
