@@ -603,6 +603,7 @@ var self = module.exports = {
     },
 
     getContentFromInfluencerYouTube: function(influencers, currentInfluencer, resultObj, limit, callback) {
+      console.log(influencers);
       //var Youtube = require("machinepack-youtubenodemachines"); here we get the nodemachines
       /*Youtube.getUserVideos({
         consumerKey: process.env.TWITTER_CONSUMER_KEY,
@@ -629,10 +630,42 @@ var self = module.exports = {
           }
         }
       }); */
+
+      var YoutubeNodeMachine = require("machinepack-youtubenodemachines");
+      YoutubeNodeMachine.getChannelYoutubeVideos({
+        googleEmail: process.env.GOOGLE_CLIENT_EMAIL,
+        googlePrivateKey: process.env.GOOGLE_PRIVATE_KEY,
+        channelName: influencers[currentInfluencer].platformname,
+        count: limit
+      }).exec((err, result) => {
+        if (err) {
+          console.log("Error at getPopularTweets");
+          console.log(err);
+        } else {
+          if(result != undefined) {
+            for(var k = 0; k<result.length;k++) {
+              result[k].realInfluencerName = influencers[currentInfluencer].influencerid
+              resultObj.push(result[k]);
+            }
+          }
+          if(currentInfluencer != (influencers.length - 1)) {
+            self.getContentFromInfluencerTwitter(influencers, currentInfluencer + 1, resultObj, limit, callback);
+          }
+          else {
+            callback(resultObj);
+          }
+        }
+      });
     },
 
     storeYouTubeContent: function(videos, videoNum, client, callback) {
-      dbFunctions.insertVideo(videos[videoNum].user_name, videos[videoNum].video_favorite_count, videos[videoNum].platform, videos[videoNum].video_text, videos[videoNum].video_created_at, videos[videoNum].video_url, JSON.stringify(videos[videoNum]), client, (response) => {
+      var platform = videos[videoNum].platform.toLowerCase();
+      var splitedDate = videos[videoNum].video_created_at.split(" ");
+      var unixtime = new Date(splitedDate).getTime();
+      var regex = /'/gi;
+      var userTextContent = videos[videoNum].video_title.replace(regex, "''");
+      var jsonContent = JSON.stringify(jsonContent).replace(regex, "''");
+      dbFunctions.insertVideo(videos[videoNum].realInfluencerName, videos[videoNum].video_like_count, platform, userTextContent, unixtime, videos[videoNum].video_id, videos[videoNum].video_embeded_url, jsonContent, client, (response) => {
         if(videoNum != videos.length - 1) {
           self.storeYouTubeContent(videos, videoNum + 1, client, callback);
         }
