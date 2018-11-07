@@ -94,23 +94,27 @@ function formatChannelJson(channel) {
 function formatVideosJson(videos) {
   var formatedVideos = []
 
-  for (var i = 0; i < videos.length; i++) {
-    var video = {
-      "platform": "Youtube",
-      "channel_id": videos[i].snippet.channelId,
-      "channel_url": "",
-      "channel_title": videos[i].snippet.channelTitle,
-      "video_id": videos[i].id.videoId,
-      "video_url": "",
-      "video_title": videos[i].snippet.title,
-      "video_description": videos[i].snippet.description,
-      "video_created_at": (new Date(videos[i].snippet.publishedAt).toISOString()),
-      "video_thumbnail_url": videos[i].snippet.thumbnails.high.url
-    };
-    video.channel_url = "https://www.youtube.com/channel/" + video.channel_id;
-    video.video_url = "https://www.youtube.com/watch?v=" + video.video_id;
+  if (Array.isArray(videos)) {
 
-    formatedVideos.push(video);
+    for (var i = 0; i < videos.length; i++) {
+      var video = {
+        "platform": "Youtube",
+        "channel_id": videos[i].snippet.channelId,
+        "channel_url": "",
+        "channel_title": videos[i].snippet.channelTitle,
+        "video_id": videos[i].id.videoId,
+        "video_url": "",
+        "video_title": videos[i].snippet.title,
+        "video_description": videos[i].snippet.description,
+        "video_created_at": (new Date(videos[i].snippet.publishedAt).toISOString()),
+        "video_thumbnail_url": videos[i].snippet.thumbnails.high.url
+      };
+      video.channel_url = "https://www.youtube.com/channel/" + video.channel_id;
+      video.video_url = "https://www.youtube.com/watch?v=" + video.video_id;
+
+      formatedVideos.push(video);
+    }
   }
+
   return formatedVideos;
 }
