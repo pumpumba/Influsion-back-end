@@ -35,7 +35,6 @@ function getChannel(auth, youtube, channelID, callback) {
         console.log("The API returned an error: " + err);
       } else {
         if (res.data.items[0] !== undefined) {
-          console.log("----------------------------------------------------" + res.data.items);
           var formatedChannel = formatChannelJson(res.data.items[0])
           callback(formatedChannel);
         } else {
