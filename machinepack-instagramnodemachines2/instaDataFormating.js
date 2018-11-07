@@ -7,7 +7,9 @@ var self = module.exports = {
     },
     formatJson: function(instagramResponse) {
       var formatedInstaPosts = []
+      console.log(instagramResponse);
       if(!(instagramResponse.hasOwnProperty("error"))) {
+        if((instagramResponse.hasOwnProperty("media"))){
         for (var i = 0; i < instagramResponse.business_discovery.media.data.length; i++) {
           var instaPost = {
             "platform": "instagram",
@@ -47,6 +49,7 @@ var self = module.exports = {
 
           formatedInstaPosts.push(instaPost);
         }
+      }
       }
       return formatedInstaPosts;
     },
