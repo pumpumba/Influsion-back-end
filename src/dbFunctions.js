@@ -47,8 +47,8 @@ var self = module.exports = {
             '"+postUrl+"', '"+jsonContent+"'::json);";
         
         client.query(dbRequest, (err, dbResult) => {
-            console.log(dbResult);
-            console.log(err);
+            //console.log(dbResult);
+            //console.log(err);
             var dbResults = dbResult;
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["createSuccess"] = true;
