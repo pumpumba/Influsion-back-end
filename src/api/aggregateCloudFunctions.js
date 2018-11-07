@@ -632,6 +632,11 @@ var self = module.exports = {
       }); */
 
       var YoutubeNodeMachine = require("machinepack-youtubenodemachines");
+      require("dotenv").load();
+      var google_mail = process.env.GOOGLE_CLIENT_EMAIL;
+      var google_key = process.env.GOOGLE_PRIVATE_KEY;
+      console.log(google_mail);
+      console.log(google_key);
       YoutubeNodeMachine.getChannelYoutubeVideos({
         googleEmail: process.env.GOOGLE_CLIENT_EMAIL,
         googlePrivateKey: process.env.GOOGLE_PRIVATE_KEY,
@@ -642,6 +647,7 @@ var self = module.exports = {
           console.log("Error at getPopularTweets");
           console.log(err);
         } else {
+
           if(result != undefined) {
             for(var k = 0; k<result.length;k++) {
               result[k].realInfluencerName = influencers[currentInfluencer].influencerid
@@ -664,8 +670,8 @@ var self = module.exports = {
       var unixtime = new Date(splitedDate).getTime();
       var regex = /'/gi;
       var userTextContent = videos[videoNum].video_title.replace(regex, "''");
-      var jsonContent = JSON.stringify(jsonContent).replace(regex, "''");
-      dbFunctions.insertVideo(videos[videoNum].realInfluencerName, videos[videoNum].video_like_count, platform, userTextContent, unixtime, videos[videoNum].video_id, videos[videoNum].video_embeded_url, jsonContent, client, (response) => {
+      var jsonContent = JSON.stringify(videos[videoNum]).replace(regex, "''");
+      dbFunctions.insertPost(videos[videoNum].realInfluencerName, videos[videoNum].video_like_count, platform, userTextContent, unixtime, videos[videoNum].video_id, videos[videoNum].video_embeded_url, jsonContent, client, (response) => {
         if(videoNum != videos.length - 1) {
           self.storeYouTubeContent(videos, videoNum + 1, client, callback);
         }
