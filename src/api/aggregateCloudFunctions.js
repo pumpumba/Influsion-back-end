@@ -132,6 +132,7 @@ var self = module.exports = {
                   resultObj.push(result[k]);
                 }
               }
+
               if(currentAssetNum != (assetTypes.length - 1)) {
                 self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
               }
@@ -558,7 +559,7 @@ var self = module.exports = {
     },
 
     getContentFromInfluencerInstagram: function(influencers, currentInfluencer, resultObj, limit, callback) {
-      var Instagram = require("machinepack-instagramnodemachines");
+      var Instagram = require("machinepack-instagramnodemachines2");
       Instagram.getInstaPosts({
         accessToken: process.env.INSTAGRAM_ACCESS_TOKEN,
         id: process.env.INSTAGRAM_ID,
@@ -591,7 +592,7 @@ var self = module.exports = {
       var userTextContent = posts[postNum].post_text.replace(regex, "''");
       var datePosted = Date.parse(posts[postNum].post_created_at);
       var jsonContent = JSON.stringify(posts[postNum]).replace(regex, "''");
-      dbFunctions.insertPost(posts[postNum].realInfluencerName, posts[tweetNum].post_favorite_count, platform, userTextContent, datePosted, posts[postNum].post_url, jsonContent, client, (response) => {
+      dbFunctions.insertPost(posts[postNum].realInfluencerName, posts[postNum].post_like_count, platform, userTextContent, datePosted, posts[postNum].post_id, posts[postNum].post_url, jsonContent, client, (response) => {
         if(postNum != posts.length - 1) {
           self.storeInstagramContent(posts, postNum + 1, client, callback);
         }
