@@ -1,3 +1,4 @@
+-- With this file, hardcoded influencers, their names and their accounts on the different platforms are added into the database.
 INSERT INTO INFLUENCER (INFLUENCERNAME) VALUES ('Gary Vaynerchuck');
 INSERT INTO INFLUENCER (INFLUENCERNAME) VALUES ('Joe Rogan');
 INSERT INTO INFLUENCER (INFLUENCERNAME) VALUES ('Kylie Jenner');
@@ -22,7 +23,9 @@ INSERT INTO INFLUENCER (INFLUENCERNAME) VALUES ('Jimmy Chin');
 INSERT INTO INFLUENCER (INFLUENCERNAME) VALUES ('Justin Bieber');
 INSERT INTO INFLUENCER (INFLUENCERNAME) VALUES ('Donald Trump');
 INSERT INTO INFLUENCER (INFLUENCERNAME) VALUES ('Barack Obama');
-
+INSERT INTO INFLUENCER (INFLUENCERNAME) VALUES ('Alexander Pärleros');
+INSERT INTO INFLUENCER (INFLUENCERNAME) VALUES ('Bianca Ingrosso');
+INSERT INTO INFLUENCER (INFLUENCERNAME) VALUES ('Mattias Hargin');
 
 
 -- Insert Twitter accounts

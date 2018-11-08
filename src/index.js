@@ -40,7 +40,6 @@ client.connect();
 
 client.query("SELECT NOW()", (err, res) => {
   console.log(err, res);
-  //client.end();
 });
 
 app.use(function(req, res, next) {
@@ -80,7 +79,7 @@ app.get("/api/instagram", (req, res) => {
 
 app.use(bodyParser.urlencoded({
   extended: true
-}))
+}));
 
 app.use(bodyParser.json());
 
@@ -103,15 +102,12 @@ app.post("/db/insert_post", (req, res) => {
     });
 });
 
+// Returns posts from all influencers that a user follows.
 app.get("/db/get_followed_infl_posts", (req, res) => {
-  // dbFunctions.getFollowedInfluencersPosts(userID, client, (response) => {
-
-  //})
-  var usrID = req["query"]["userid"]
-
+  var usrID = req["query"]["userid"];
   var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = "+usrID+") ORDER BY POSTED DESC;"
   client.query(dbRequest, (err, dbResult) => {
-    console.log(dbResult); //We get a problem if login is
+    console.log(dbResult); //TODO: We get a problem if login is WHAT? Who wrote this?
     var dbResults = dbResult;
 
     if (dbResults != undefined && dbResults["rowCount"] >= 1) {
@@ -125,27 +121,23 @@ app.get("/db/get_followed_infl_posts", (req, res) => {
 
   });
 });
-// Unfollocw an influencer by specifiying user_id for user, and influencer_id for influencer
+
+// Unfollow an influencer by specifiying user_id for user, and influencer_id for influencer
 app.post("/db/unfollow_influencer", (req,res) => {
   var inputObj = req.body;
   var userID = inputObj.user_id;
   var influencerID = inputObj.influencer_id;
   dbFunctions.unfollowInfluencer(userID, influencerID, client, (response) => {
     res.json(response);
-
   });
 });
 
+// Makes a user follow an influencer.
 app.post("/db/add_follow_influencer", (req,res) => {
   var inputObj = req.body;
   var userID = inputObj.user_id;
   var influencerID = inputObj.influencer_id;
   var names = ["real_name", "influencer_id"];
-  for (i in inputObj) {
-      if (names.includes(i)) {
-        console.log("Yes!");
-      }
-  }
   dbFunctions.addFollowInfluencer(userID, influencerID, client, (response) => {
     res.json(response);
   });
@@ -157,14 +149,12 @@ app.post("/db/get_platf_accs_flwdinfls", (req, res) => {
   var userID = inputObj.user_id; //ss
   var orderBy = inputObj.order_by;
   dbFunctions.getPlatformAccountsFromFollowedInfluencers(userID, orderBy, client, (response) => {
-    for(var i = 0; i < response['rows'].length; i++) {
-      console.log(response['rows'][i]['influencerid']);
-    }
-    console.log(response['rows'])
     res.json(response);
   });
 });
 
+// Returns the influencerID, the influencer account name and the platform linked to the account name in a string.
+// TODO: Not really a good function; should rather return a json object.
 app.post("/db/get_follow_list_accounts", (req, res) => {
   var inputObj = req.body;
   var userID = inputObj.user_id;
@@ -173,17 +163,15 @@ app.post("/db/get_follow_list_accounts", (req, res) => {
   });
 });
 
+// Creates a tv operator account.
 app.post("/db/create_tv_operator", (req, res) => {
   var inputObj = req.body;
   var tv_op_name = inputObj.operatorname;
   var pwd = inputObj.password;
   bcrypt.hash(pwd, saltRounds, function(err, hash) {
-
-
   var dbRequest = "INSERT INTO TVOPERATOR (TVOPERATORNAME, HASHEDPWD) VALUES ('"+tv_op_name+"', '"+hash+"');"
 
   insertionToDB(client, dbRequest, (response) => {
-
     res.json(response);
   });
 
@@ -191,15 +179,12 @@ app.post("/db/create_tv_operator", (req, res) => {
 
 });
 
+// Logs in a tv operator.
 app.post("/db/login_tv_operator", (req, res) => {
   var inputObj = req.body;
-  //console.log(inputObj.username);
   var password = inputObj.password; //TODO: Change to hashed version of password
   var tv_op_name = inputObj.operatorname;
-
   var dbRequest = "SELECT * FROM TVOPERATOR WHERE TVOPERATORNAME = '"+tv_op_name+"'";
-  //var dbRequest = "SELECT * FROM usr WHERE (usrname = '"+usrname+"' AND HASHEDPWD = '"+hashedPwd+"')"
-
   client.query(dbRequest, (err, dbResult) => {
     var dbResults = dbResult["rows"][0];
 
@@ -213,7 +198,6 @@ app.post("/db/login_tv_operator", (req, res) => {
           dbResults = {};
           dbResults["loginSuccess"] = false;
         }
-
         res.json({dbResults});
       });
     } else {
@@ -224,49 +208,39 @@ app.post("/db/login_tv_operator", (req, res) => {
   });
 });
 
+// Returns a user based on user id (sent in as usrid)
 app.get("/db/get_user", (req, res) => {
-
   var usrID = req["query"]["usrid"];
-  //console.log("HEHEHEHEHEHEHEH");
-  //console.log(req);
   var dbRequest = "SELECT * FROM USR WHERE usrid = "+usrID+";";
-  console.log(dbRequest);
   client.query(dbRequest, (err, dbResult) => {
-    console.log(err);
-    console.log(dbResult);
     var dbResults = dbResult;
     if (dbResults != undefined) {
-
-
       dbResults["retrieveSuccess"] = true;
     } else {
       dbResults = err;
       dbResults["retrieveSuccess"] = false;
     }
-
     res.json(dbResults);
   });
 });
 
+// Returns all users stored in the database.
 app.get("/db/get_all_users", (req, res) => {
   var dbRequest = "SELECT * FROM USR;";
   client.query(dbRequest, (err, dbResult) => {
-    console.log(err);
-    console.log(dbResult);
     var dbResults = dbResult;
     if (dbResults != undefined) {
-
-
       dbResults["retrieveSuccess"] = true;
     } else {
       dbResults = err;
       dbResults["retrieveSuccess"] = false;
     }
-
     res.json(dbResults);
   });
 });
 
+// Adds a visit from a user (send in user_id) to an influencer (send in influencer_id)
+// Send in also, which type of vist (as type_of_visit). Can be 'profilevisit', 'instagrampost', 'twitterpost' or 'youtubevideo'
 app.post("/db/add_user_visit", (req, res) =>  {
   var inputObj = req.body;
   var userID = inputObj.user_id;
@@ -277,6 +251,7 @@ app.post("/db/add_user_visit", (req, res) =>  {
   });
 });
 
+// Modifies a user's information. All information needs to be sent in, or error will be returned. If something is not changed, send in the old information.
 app.post("/db/modify_user", (req,res) => {
   var inputObj = req.body;
   var password = inputObj.password; //TODO: Change to hashed version of password
@@ -291,12 +266,12 @@ app.post("/db/modify_user", (req,res) => {
 });
 app.use(bodyParser.urlencoded({
   extended: true
-}))
+}));
 
 app.use(bodyParser.json());
+
+//Registers a user. Send in all the information. If something is not specified, send in null
 app.post("/db/register_user", (req, res)=> {
-  console.log("ASDASDASD");
-  console.log(req.body);
   var inputObj = req.body;
   var password = inputObj.password;
   var username = inputObj.username;
@@ -308,22 +283,21 @@ app.post("/db/register_user", (req, res)=> {
   });
 });
 
+// Deletes a user and
 app.post("/db/delete_user", (req, res) => {
   var inputObj = req.body;
   var usrID = inputObj.usrid;
   var password = inputObj.password;
   var dbRequest = "SELECT * FROM USR WHERE usrid = "+usrID+";";
-  console.log(dbRequest);
-  console.log("ASDASDASDASD");
+
   client.query(dbRequest, (err, dbResult) => {
     var dbResults = dbResult["rows"][0];
-    console.log("WE CAME HERE");
-    console.log(dbResults);
+
     if (dbResults != undefined) {
       var hashPassword = dbResult["rows"][0].hashedpwd;
 
       bcrypt.compare(password, hashPassword, function(err, resultCompare) {
-        console.log(resultCompare);
+
         if (resultCompare == true) {
           var dbRequest = "BEGIN; \
           DELETE FROM USRFLWINFL WHERE FLWRID = "+usrID+"; \
@@ -334,14 +308,11 @@ app.post("/db/delete_user", (req, res) => {
           client.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
             if (dbResults != undefined) {
-
-
               dbResults["deleteSuccess"] = true;
             } else {
               dbResults = err;
               dbResults["deleteSuccess"] = false;
             }
-
             res.json(dbResults);
           });
 
@@ -358,23 +329,19 @@ app.post("/db/delete_user", (req, res) => {
       res.json({dbResults});
     }
   });
-
-
-
-
-
 });
 
+// Returns the latest posts
 app.post("/db/get_latest_posts", (req, res) => {
   var inputObj = req.body;
   dbFunctions.getLatestPosts(inputObj.user_id, inputObj.platform, inputObj.top, client, (response) => {
     res.json(response);
   });
-  /*dbFunctions.getLatestPostsFromFollowedInfluencers(inputObj.user_id, inputObj.platform, inputObj.top, client, (response) => {
-    res.json(response);
-  }); */
+
 });
 
+// Returns all the content from an influencer (send in influencerID, platform (can be 'all'))
+// Send in top (optional) which limits the number of posts.
 app.post("/db/get_content_from_infl", (req, res) => {
   var inputObj = req.body;
   dbFunctions.getContentFromInfluencer(inputObj.platform, inputObj.influencer_id, inputObj.top, inputObj.user_id, client, (response) => {
@@ -382,29 +349,23 @@ app.post("/db/get_content_from_infl", (req, res) => {
   });
 });
 
+// Same as modify user but for tv operators.
 app.post("/db/change_tv_op_info", (req, res) => {
   var inputObj = req.body;
   var tv_op_id = inputObj.tv_op_id;
   var tv_op_name = inputObj.operatorname;
   var pwd = inputObj.password;
-
   bcrypt.hash(pwd, saltRounds, function(err, hash) {
-
-
   var dbRequest = "UPDATE TVOPERATOR SET TVOPERATORNAME = '"+tv_op_name+"', HASHEDPWD = '"+hash+"' WHERE TVOPERATORID = "+tv_op_id+";"
-
   insertionToDB(client, dbRequest, (response) => {
-
     res.json(response);
   });
-
   });
-
 });
 
+// Logs in a user by checking password and username.
 app.post("/db/login", (req, res) => {
   var inputObj = req.body;
-  //console.log(inputObj.username);
   var password = inputObj.password; //TODO: Change to hashed version of password
   var username = inputObj.username;
   dbFunctions.login(password, username, client, (response) => {
@@ -418,34 +379,41 @@ app.get("/db/get_influencer", (req, res) => {
   });
 });
 
-// Jesper test av users. Kan/ska tas bort
-app.get("/db/get_user", (req, res) => {
-  dbRequest = "SELECT * FROM USR";
-  client.query(dbRequest, (err, dbResult) => {
-    res.json(dbResult["rows"]);
-  });
-
-});
-
-
 
 //TODO: THIS ONE SHOULD NOT BE GET, IT SHOULD BE POST, RIGHT?
+//TODO: This one should be changed to actually be able to add any influencer.
 app.get("/db/add_influencer", (req, res) => {
-  //db/get_influencer?realname=FilipCornell&Influencer_name=FilipCornell&age=24
 
-  //dbRequest = "INSERT INTO INFLUENCER (INFLUENCERNAME, REALNAME, AGE) VALUES ("++"'Jockiboi', 'Joakim Lundell', 33);";
+
   dbRequest = "INSERT INTO INFLUENCER (INFLUENCERNAME, REALNAME, AGE) VALUES ('Jockiboi', 'Joakim Lundell', 33);";
   client.query(dbRequest, (err, dbResult) => {
-    //console.log(err, res);
+
     res.json(dbResult);
-    //client.end();
+
   });
+});
+
+app.post("/db/search_influencer", (req, res) => {
+  var inputObj = req.body;
+  var keyword = inputObj.keyword;
+
+  // Make to lowercase
+  keyword = keyword.toLowerCase();
+  var dbRequest = "SELECT DISTINCT ON (I.INFLUENCERID, I.INFLUENCERNAME, I.REALNAME) I.INFLUENCERID, I.INFLUENCERNAME, I.REALNAME, P.IMGURL FROM INFLUENCER AS I \
+    INNER JOIN PLATFORMACCOUNT AS P ON I.INFLUENCERID = P.INFLID \
+    WHERE LOWER(I.INFLUENCERNAME) LIKE '%"+keyword+"%' OR LOWER(I.REALNAME) LIKE '%"+keyword+"%' OR LOWER(P.ACTNAME) LIKE '%"+keyword+"%';";
+  client.query(dbRequest, (err, dbResult) => {
+
+    res.json(dbResult);
+
+  });
+
+
 });
 
 //Twitter routing
 app.get("/api/twitter", (req, res) => {
   var reqType = req["query"]["request_type"];
-
   if (reqType === "get_user_tweets") {
     var username = req["query"]["username"];
     var tweetCount = req["query"]["count"];
