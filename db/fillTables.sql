@@ -207,27 +207,61 @@ SELECT * FROM (
 --               AND INFLUENCER.INFLUENCERID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = 1)
 --               )
 
-WITH IMGURLS AS (
-  SELECT PACC.INFLID, json_build_object('pics',
+WITH PLATFORMACCOUNTS AS (
+  SELECT PACC.INFLID, json_build_object('platformaccounts',
     json_agg(
-      json_build_object('platform',
+      json_build_object('nr_flwrs',
+        PACC.NRFLWRS,
+        'member_since',
+        PACC.MEMBERSINCE,
+        'act_url',
+        PACC.ACTURL,
+        'is_verified',
+        PACC.VERIFIED,
+        'usr_desc',
+        PACC.USRDESC,
+        'platform',
         PACC.platform,
         'piclink',
         PACC.imgurl,
         'actname',
-        PACC.actname)))
-        AS pics FROM PLATFORMACCOUNT AS PACC WHERE PACC.IMGURL IS NOT NULL
+        PACC.actname,
+        'platform_content',
+        PACC.platformcontent)))
+        AS PFACCS FROM PLATFORMACCOUNT AS PACC
+        GROUP BY INFLID
+), USERPOSTS AS (
+  SELECT P.INFLID, json_build_object('platformaccounts',
+    json_agg(
+      json_build_object('post_id',
+        P.POSTID,
+        'nr_likes',
+        P.NRLIKES,
+        'platform',
+        P.PLATFORM,
+        'usr_text_content',
+        P.USRTXTCONTENT,
+        'posted',
+        P.POSTED,
+        'post_platform_id',
+        P.POSTPLATFORMID,
+        'platform_content',
+        P.platformcontent)))
+        AS posts FROM POST AS P
         GROUP BY INFLID
 ), IPC AS (
-  SELECT INFLUENCER.INFLUENCERID, INFLUENCER.INFLUENCERNAME, INFLUENCER.REALNAME, PLATFORMACCOUNT.ACTNAME, platformaccount.imgurl FROM INFLUENCER
-  INNER JOIN PLATFORMACCOUNT ON
-  INFLUENCER.INFLUENCERID = PLATFORMACCOUNT.INFLID
-  WHERE LOWER(INFLUENCERNAME) LIKE '%anna%' OR LOWER(REALNAME) LIKE '%anna%' OR LOWER(ACTNAME) LIKE '%anna%'
+  SELECT INFLUENCER.*, USERPOSTS.POSTS, PLATFORMACCOUNTS.PFACCS FROM INFLUENCER
+  INNER JOIN PLATFORMACCOUNTS ON
+  INFLUENCER.INFLUENCERID = PLATFORMACCOUNTS.INFLID
+  INNER JOIN USERPOSTS ON
+  PLATFORMACCOUNTS.INFLID = USERPOSTS.INFLID
+  --WHERE LOWER(INFLUENCERNAME) LIKE '%anna%' OR LOWER(REALNAME) LIKE '%anna%' OR LOWER(ACTNAME) LIKE '%anna%'
   --GROUP BY INFLUENCERID, INFLUENCERNAME, ACTNAME
 ), FINALTABLE AS (
   SELECT * FROM IMGURLS INNER JOIN IPC ON IPC.INFLUENCERID = IMGURLS.INFLID
 )
  SELECT DISTINCT ON (INFLID, INFLUENCERNAME, REALNAME) INFLID, INFLUENCERNAME, REALNAME, PICS FROM FINALTABLE;
+
 
 
 -- Search alternative if it would be too heavy to do the query above.
@@ -253,3 +287,59 @@ SELECT * FROM POST WHERE POST.POSTID = ANY(
 
 --Update a post
 UPDATE POST SET platform = ('twitter') WHERE postid = 1;
+
+
+-- Fetch ALL information related to a specific influencer, including account information etc.
+
+WITH PLATFORMACCOUNTS AS (
+  SELECT PACC.INFLID, json_build_object('platformaccounts',
+    json_agg(
+      json_build_object('nr_flwrs',
+        PACC.NRFLWRS,
+        'member_since',
+        PACC.MEMBERSINCE,
+        'act_url',
+        PACC.ACTURL,
+        'is_verified',
+        PACC.VERIFIED,
+        'usr_desc',
+        PACC.USRDESC,
+        'platform',
+        PACC.platform,
+        'piclink',
+        PACC.imgurl,
+        'actname',
+        PACC.actname,
+        'platform_content',
+        PACC.platformcontent)))
+        AS PFACCS FROM PLATFORMACCOUNT AS PACC
+        WHERE INFLID = 1
+        GROUP BY INFLID
+), USERPOSTS AS (
+  SELECT P.INFLID, json_build_object('platformaccounts',
+    json_agg(
+      json_build_object('post_id',
+        P.POSTID,
+        'nr_likes',
+        P.NRLIKES,
+        'platform',
+        P.PLATFORM,
+        'usr_text_content',
+        P.USRTXTCONTENT,
+        'posted',
+        P.POSTED,
+        'post_platform_id',
+        P.POSTPLATFORMID,
+        'platform_content',
+        P.platformcontent)))
+        AS posts FROM POST AS P
+        WHERE INFLID = 1
+        GROUP BY INFLID
+), IPC AS (
+  SELECT INFLUENCER.*, USERPOSTS.POSTS, PLATFORMACCOUNTS.PFACCS FROM INFLUENCER
+  INNER JOIN PLATFORMACCOUNTS ON
+  INFLUENCER.INFLUENCERID = PLATFORMACCOUNTS.INFLID
+  INNER JOIN USERPOSTS ON
+  PLATFORMACCOUNTS.INFLID = USERPOSTS.INFLID
+)
+SELECT * FROM IPC;

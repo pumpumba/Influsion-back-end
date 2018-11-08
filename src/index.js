@@ -487,3 +487,76 @@ app.post("/db/update_platform_acc", (req, res) => {
   // Here, I just send back the actual db request. Should be different when actually implementing it for real.
   res.send(dbRequest);
 });
+
+
+app.get("/db/get_all_info_infl", (req, res) => {
+  var infl_id = req["query"]["influencer_id"];
+  var dbRequest = "WITH PLATFORMACCOUNTS AS ( \
+    SELECT PACC.INFLID, json_build_object('platformaccounts', \
+      json_agg( \
+        json_build_object('nr_flwrs', \
+          PACC.NRFLWRS, \
+          'member_since', \
+          PACC.MEMBERSINCE, \
+          'act_url', \
+          PACC.ACTURL, \
+          'is_verified', \
+          PACC.VERIFIED, \
+          'usr_desc', \
+          PACC.USRDESC, \
+          'platform', \
+          PACC.platform, \
+          'piclink', \
+          PACC.imgurl, \
+          'actname', \
+          PACC.actname, \
+          'platform_content', \
+          PACC.platformcontent))) \
+          AS PFACCS FROM PLATFORMACCOUNT AS PACC \
+          WHERE INFLID = "+infl_id+" \
+          GROUP BY INFLID \
+  ), USERPOSTS AS ( \
+    SELECT P.INFLID, json_build_object('platformaccounts', \
+      json_agg( \
+        json_build_object('post_id', \
+          P.POSTID, \
+          'nr_likes', \
+          P.NRLIKES, \
+          'platform', \
+          P.PLATFORM, \
+          'usr_text_content', \
+          P.USRTXTCONTENT, \
+          'posted', \
+          P.POSTED, \
+          'post_platform_id', \
+          P.POSTPLATFORMID, \
+          'platform_content', \
+          P.platformcontent))) \
+          AS posts FROM POST AS P \
+          WHERE INFLID = "+infl_id;
+    if (req["query"]["post_platform"] != undefined) {
+      dbRequest = dbRequest + " AND platform = '"+req["query"]["post_platform"]+"'";
+    }
+
+          dbRequest = dbRequest +" GROUP BY INFLID \
+  ), IPC AS ( \
+    SELECT INFLUENCER.*, USERPOSTS.POSTS, PLATFORMACCOUNTS.PFACCS FROM INFLUENCER \
+    INNER JOIN PLATFORMACCOUNTS ON \
+    INFLUENCER.INFLUENCERID = PLATFORMACCOUNTS.INFLID \
+    INNER JOIN USERPOSTS ON \
+    PLATFORMACCOUNTS.INFLID = USERPOSTS.INFLID \
+  ) \
+  SELECT * FROM IPC;"
+  console.log()
+  client.query(dbRequest, (err, dbResult) => {
+    var dbResults = dbResult;
+    if (dbResults != undefined) {
+      dbResults["retrieveSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["retrieveSuccess"] = false;
+    }
+    res.json(dbResults);
+  });
+
+});
