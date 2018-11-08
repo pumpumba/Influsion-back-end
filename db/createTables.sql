@@ -33,9 +33,6 @@ CREATE TABLE INFLUENCER (
   AGE INT, -- How old the influencer is
   SEX SEXX, -- Enum type. Can be 'Male' or 'Female' (case-sensitive)
   PICLINK TEXT,
-  --TWITTERPIC TEXT, -- TODO: Add link for a profile picture HOW TO IMPLEMENT
-  --INSTAPIC TEXT, -- TODO: Add link for a profile picture
-  --YOUTUBEPIC TEXT, -- TODO: Add link for a profile picture
   COUNTRYID INTEGER REFERENCES LOCATION(LOCATIONID) DEFAULT NULL, -- Which country the influencer lives in
   CITYID INTEGER REFERENCES LOCATION(LOCATIONID) DEFAULT NULL -- Which city the influencer lives in
 );

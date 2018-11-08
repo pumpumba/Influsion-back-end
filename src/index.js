@@ -432,3 +432,58 @@ app.get("/api/twitter", (req, res) => {
 
 app.listen(port, hostname);
 console.log(`Running on http://${hostname}.${port}`);
+
+// Updates a platformaccount with the info sent in.
+/* OBSERVE: THIS FUNCTION ONLY RETURNS THE CORRECT REQUEST. I HAVE TRIED THE REQUESTS IN TERMINAL,
+  BUT IT STILL REMAINS TO IMPLEMENT COMPLETE FUNCTIONALITY, BUT THIS SHOULD BE DONE IN ANOTHER PLACE.
+*/
+app.post("/db/update_platform_acc", (req, res) => {
+  var inputObj = req.body;
+
+  //Put everything into a json object.
+  var jsonObj = {
+    "ACTNAME" : inputObj.actname, //check
+    "PLATFORM" : inputObj.platform, //not necessary to implement below
+    "NRFLWRS" : inputObj.nr_flwrs, //check
+    "MEMBERSINCE" : inputObj.member_since, //MUST BE UNIX TIME FORMAT
+    "ACTURL" : inputObj.act_url, //check
+    "IMGURL" : inputObj.img_url, //check
+    "VERIFIED" : inputObj.is_verified, //check
+    "PLATFORMCONTENT" : inputObj.platform_content
+  }
+  console.log(jsonObj);
+  // We loop through the json object. If something is not defined,
+  // then we simply do not add this to the request.
+  var dbRequest = "UPDATE PLATFORMACCOUNT SET ";
+  for (key in jsonObj) {
+    if (jsonObj[key] != undefined) {
+      switch(key) {
+        case "ACTNAME":
+        case "ACTURL":
+        case "IMGURL":
+          dbRequest = dbRequest + key + " = '"+jsonObj[key]+"', ";
+          break;
+        case "NRFLWRS":
+        case "VERIFIED":
+          dbRequest = dbRequest + key + " = "+jsonObj[key]+", ";
+          break;
+        case "MEMBERSINCE":
+          dbRequest = dbRequest + key + " = to_timestamp("+jsonObj[key]+"), ";
+          break;
+        case "PLATFORMCONTENT":
+          // Do note that we might have to do regex if we send in json objects here, and replace ' with '' to escape.
+          // in that case, do regex on jsonObj[key]
+          dbRequest = dbRequest + key + " = '"+jsonObj[key]+"'::json, ";
+          break;
+      }
+    }
+
+
+  }
+  // Remove the last , and space, and add the last bit of the request to finish it
+  dbRequest = dbRequest.substr(0, dbRequest.length-2);
+  dbRequest = dbRequest+" WHERE INFLID = "+inputObj.inflid+" AND PLATFORM = '"+inputObj.platform+"';";
+
+  // Here, I just send back the actual db request. Should be different when actually implementing it for real.
+  res.send(dbRequest);
+});
