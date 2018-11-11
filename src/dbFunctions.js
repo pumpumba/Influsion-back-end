@@ -11,7 +11,7 @@ var self = module.exports = {
             if (dbResults != undefined && dbResults["rowCount"] >= 1) {
             dbResults["retrieveSuccess"] = true;
             } else {
-            dbResults = err;
+            dbResults = {};
             dbResults["retrieveSuccess"] = false;
             }
             callback(dbResults);
