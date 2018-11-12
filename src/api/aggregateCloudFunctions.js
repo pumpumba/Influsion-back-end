@@ -11,16 +11,16 @@ var self = module.exports = {
     var assetType = req["query"]["assetType"];
     switch (assetType) {
       case "all":
-        filterSwitch(assetType, filterType);
+        res.json(filterSwitch(assetType, filterType));
         break;
       case "tweet":
-        filterSwitch(assetType, filterType);
+        res.json(filterSwitch(assetType, filterType));
         break;
       case "youtube video":
-        filterSwitch(assetType, filterType);
+        res.json(filterSwitch(assetType, filterType));
         break;
       case "instagram post":
-        filterSwitch(assetType, filterType);
+        res.json(filterSwitch(assetType, filterType));
         break;
       default:
         res.json(["Nothing available"]);
@@ -192,7 +192,7 @@ var filterSwitch = function(assetType, filterType) {
       return(["<enter your influencers username>"]);
       break;
     case "influencer":
-      return(["<enter your influencers id>", "<enter your users ID">]);
+      return(["<enter your influencers id>", "<enter your users ID>"]);
       break;
     case "user":
       return(['<enter your user ID here>']);
