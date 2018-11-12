@@ -27,7 +27,7 @@ var self = module.exports = {
     }
   },
   //This is the aggregate/content call
-  content: function (req, res, client) {
+  content: function (req, res, databaseClient) {
     var inputObj = req.body;
     var context = inputObj.context;
     if (inputObj.filterType == undefined) {
@@ -62,7 +62,7 @@ var self = module.exports = {
     var currentAsset = 0;
     var currentFilter = 0;
     //Enters the recursive getContent loop, works like a for loop, but once it gets into a callback it start the next iteration.
-    getContent(assetTypes, filterTypes, filterValue, context, limit, currentAsset, currentFilter, resultObject, client, (response) => {
+    getContent(assetTypes, filterTypes, filterValue, context, limit, currentAsset, currentFilter, resultObject, databaseClient, (response) => {
       resultObject = response;
       res.json(resultObject);
     });
@@ -70,10 +70,10 @@ var self = module.exports = {
 };
 
 //get content from specific asset type, continuation from getContent
-var getContentFromAsset = function(platform, assetType, assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, client, callback) {
+var getContentFromAsset = function(platform, assetType, assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback) {
   switch (filterTypes[currentFilterNum]) {
     case "influencer":
-      dbFunctions.getContentFromInfluencer(platform, filterValue[0], limit, filterValue[1], client, (response) => {
+      dbFunctions.getContentFromInfluencer(platform, filterValue[0], limit, filterValue[1], databaseClient, (response) => {
         result = response['rows'];
         if (result != undefined) {
           for (var k = 0; k < result.length; k++) {
@@ -92,7 +92,7 @@ var getContentFromAsset = function(platform, assetType, assetTypes, filterTypes,
       });
       break;
     case "user":
-      dbFunctions.getFollowedInfluencersPosts(filterValue, limit, platform, client, (response) => {
+      dbFunctions.getFollowedInfluencersPosts(filterValue, limit, platform, databaseClient, (response) => {
         result = response['rows'];
         if (result != undefined) {
           for (var k = 0; k < result.length; k++) {
@@ -110,7 +110,7 @@ var getContentFromAsset = function(platform, assetType, assetTypes, filterTypes,
       });
       break;
     case "popular":
-      dbFunctions.getLatestPosts(filterValue, platform, limit, client, (response) => {
+      dbFunctions.getLatestPosts(filterValue, platform, limit, databaseClient, (response) => {
         result = response['rows'];
         if (result != undefined) {
           for (var k = 0; k < result.length; k++) {
@@ -137,7 +137,7 @@ var getContentFromAsset = function(platform, assetType, assetTypes, filterTypes,
         callback('Can not update all platform at once. Update each one by one.');
       }
       else {
-        dbFunctions.getPlatformAccounts(platform, client, (response1) => {
+        dbFunctions.getPlatformAccounts(platform, databaseClient, (response1) => {
           var influencers = response1['rows'];
           var accounts = [];
           if (influencers != undefined) {
@@ -150,7 +150,7 @@ var getContentFromAsset = function(platform, assetType, assetTypes, filterTypes,
             var posts = [];
             getContentFromInfluencerFromAPI(assetType, accounts, currentInfluencerAccount, posts, limit, (response2) => {
               if (response2.length != 0) {
-                storeContent(assetType, response2, 0, client, (response3) => {
+                storeContent(assetType, response2, 0, databaseClient, (response3) => {
                   resultObj.push("Success");
                   if (currentAssetNum != (assetTypes.length - 1)) {
                     getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
@@ -213,34 +213,34 @@ var filterSwitch = function(assetType, filterType) {
   }
 };
 //The main content function
-var getContent = function (assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, client, callback) {
+var getContent = function (assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback) {
   switch (assetTypes[currentAssetNum]) {
     case "tweet":
-      getContentFromAsset('twitter', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, client, callback);
+      getContentFromAsset('twitter', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
       break;
     case "instagram post":
-      getContentFromAsset('instagram', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, client, callback);
+      getContentFromAsset('instagram', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
       break;
     case "youtube video":
-      getContentFromAsset('youtube', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, client, callback);
+      getContentFromAsset('youtube', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
       break;
     case "all":
-      getContentFromAsset('all', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, client, callback);
+      getContentFromAsset('all', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
       break;
     default:
       callback("The cloud component failed to provide any content");
   }
 };
 //Gets content from the specified influencers from a specific social media platform from our database.
-var getContentFromInfluencersFromPlatform = function (userID, influencerAccounts, currentInfluencer, resultObj, client, platform, callback) {
-  dbFunctions.getContentFromInfluencer(platform, influencerAccounts[currentInfluencer]['influencerid'], 5, userID, client, (response) => {
+var getContentFromInfluencersFromPlatform = function (userID, influencerAccounts, currentInfluencer, resultObj, databaseClient, platform, callback) {
+  dbFunctions.getContentFromInfluencer(platform, influencerAccounts[currentInfluencer]['influencerid'], 5, userID, databaseClient, (response) => {
     if (response != undefined) {
       for (var k = 0; k < response.length; k++) {
         resultObj.push(response[k]);
       }
     }
     if (currentInfluencer != (influencerAccounts.length - 1)) {
-      getContentFromInfluencersFromPlatform(userID, influencerAccounts, currentInfluencer + 1, resultObj, client, platform, callback);
+      getContentFromInfluencersFromPlatform(userID, influencerAccounts, currentInfluencer + 1, resultObj, databaseClient, platform, callback);
     }
     else {
       callback(resultObj);
