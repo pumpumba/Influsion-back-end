@@ -1,5 +1,6 @@
 
 module.exports = {
+  //Gets a Youtube channel based on the channel id
   getChannel: function(channel_id, callback) {
     require("dotenv").load();
     var YoutubeNodeMachine = require("../../machinepack-youtubenodemachines");
@@ -18,6 +19,7 @@ module.exports = {
       }
     });
   },
+  //Gets a Youtube channel based on the channel name
   getChannelUsername: function(username, callback) {
     require("dotenv").load();
     var YoutubeNodeMachine = require("../../machinepack-youtubenodemachines");
@@ -36,6 +38,7 @@ module.exports = {
       }
     });
   },
+  //Gets a number of videos from a specified channel based on count (number of videos) and channel id
   getVideos: function(channel_id, count, callback) {
     require("dotenv").load();
     var YoutubeNodeMachine = require("../../machinepack-youtubenodemachines");
@@ -54,6 +57,7 @@ module.exports = {
       }
     });
   },
+  //Gets a number of videos from a specified channel based on count (number of videos) and channel name
   getVideosUsername: function(username, count, callback) {
     require("dotenv").load();
     var YoutubeNodeMachine = require("../../machinepack-youtubenodemachines");

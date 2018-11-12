@@ -1,21 +1,21 @@
 module.exports = {
   friendlyName: "Get Channel Youtube Videos",
-  description: "Get Youtube videos from a channelr",
+  description: "Get Youtube videos from a channel",
   extendedDescription:
     "Get content from Youtube by providing...",
   inputs: {
     googleEmail: {
-      example: "?",
+      example: "SERVICE_ACCOUNT_NAME@PROJECT_ID.iam.gserviceaccount.com",
       description: "The required google private service account email.",
       required: true
     },
     googlePrivateKey: {
-      example: "?",
+      example: "vNIXE0xscrmjlyV-12Nj_BvUPaw=",
       description: "The required google private service account key.",
       required: true
     },
     channelID: {
-      example: "?",
+      example: "UC-lHJZR3Gqxm24_Vd_AJ5Yw",
       description: "The channel ID",
       required: false
     },
