@@ -5,74 +5,22 @@ var self = module.exports = {
       "<h1>Hello! Welcome to Pumba!</h1> <p> For Twitter API alternative, go to ./api/twitter </p>"
     );
   },
+
   filters: function (req, res) {
     var filterType = req["query"]["filterType"];
     var assetType = req["query"]["assetType"];
     switch (assetType) {
-      case "content":
-        switch (filterType) {
-          case "influencer":
-            res.json(['Popular', "<enter your influencers username>"])
-            break;
-          case 'user':
-            res.json(['<enter your user ID here']);
-            break;
-          default:
-            res.json(['Nothing available']);
-        }
+      case "all":
+        filterSwitch(assetType, filterType);
+        break;
       case "tweet":
-        switch (filterType) {
-          case "search":
-            res.json(["<enter your influencers username>"]);
-            break;
-          case "user_id":
-            res.json(['<enter your user ID here>']);
-            break;
-          case "popular":
-            res.json(['<no entry needed>']);
-            break;
-          case "update":
-            res.json(['<enter your user ID here>']);
-            break;
-          default:
-            res.json(["Nothing available"]);
-        }
+        filterSwitch(assetType, filterType);
         break;
-      case "YouTube video":
-        switch (filterType) {
-          case "search":
-            res.json(["<enter your influencers username>"]);
-            break;
-          case "user_id":
-            res.json(['<enter your user ID here>']);
-            break;
-          case "popular":
-            res.json(['<no entry needed>']);
-            break;
-          case "update":
-            res.json(['<enter your user ID here>']);
-            break;
-          default:
-            res.json(["Nothing available"]);
-        }
+      case "youtube video":
+        filterSwitch(assetType, filterType);
         break;
-      case "Instagram post":
-        switch (filterType) {
-          case "search":
-            res.json(["<enter your influencers username>"]);
-            break;
-          case "user_id":
-            res.json(['<enter your user ID here>']);
-            break;
-          case "popular":
-            res.json(['<no entry needed>']);
-            break;
-          case "update":
-            res.json(['<enter your user ID here>']);
-            break;
-          default:
-            res.json(["Nothing available"]);
-        }
+      case "instagram post":
+        filterSwitch(assetType, filterType);
         break;
       default:
         res.json(["Nothing available"]);
@@ -110,13 +58,13 @@ var self = module.exports = {
     } else {
       var limit = parseInt(inputObj.limit, 10);
     }
-    var resultObj = [];
+    var resultObject = [];
     var currentAsset = 0;
     var currentFilter = 0;
     //Enters the recursive getContent loop, works like a for loop, but once it gets into a callback it start the next iteration.
-    getContent(assetTypes, filterTypes, filterValue, context, limit, currentAsset, currentFilter, resultObj, client, (response) => {
-      resultObj = response;
-      res.json(resultObj);
+    getContent(assetTypes, filterTypes, filterValue, context, limit, currentAsset, currentFilter, resultObject, client, (response) => {
+      resultObject = response;
+      res.json(resultObject);
     });
   }
 };
@@ -237,6 +185,33 @@ var getContentFromAsset = function(platform, assetType, assetTypes, filterTypes,
       callback("The cloud component failed to provide any content");
   }
 };
+//A switch function for the aggregate/filters call
+var filterSwitch = function(assetType, filterType) {
+  switch (filterType) {
+    case "search":
+      return(["<enter your influencers username>"]);
+      break;
+    case "influencer":
+      return(["<enter your influencers id>", "<enter your users ID">]);
+      break;
+    case "user":
+      return(['<enter your user ID here>']);
+      break;
+    case "popular":
+      return(['<no entry needed>']);
+      break;
+    case "update":
+      if(assetType != 'all') {
+        return(['<no entry needed>']);
+      }
+      else {
+        return(['<update is not available for asset type "all">']);
+      }
+      break;
+    default:
+      return(["Nothing available"]);
+  }
+};
 //The main content function
 var getContent = function (assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, client, callback) {
   switch (assetTypes[currentAssetNum]) {
@@ -274,7 +249,7 @@ var getContentFromInfluencersFromPlatform = function (userID, influencerAccounts
 };
 
 //Stores content into our database.
-var storeContent = function(assetType, posts, postNum, client, callback) {
+var storeContent = function(assetType, posts, postNum, databaseClient, callback) {
   var regex = /'/gi;
   var jsonContent = JSON.stringify(posts[postNum]).replace(regex, "''");
   var platform = posts[postNum].platform.toLowerCase();
@@ -282,26 +257,26 @@ var storeContent = function(assetType, posts, postNum, client, callback) {
     case 'tweet':
       var unixtime = new Date(posts[postNum].tweet_created_at).getTime();
       var userTextContent = posts[postNum].tweet_text.replace(regex, "''");
-      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerID, posts[postNum].tweet_favorite_count, platform, userTextContent, unixtime, posts[postNum].tweet_id, posts[postNum].tweet_url, jsonContent, client, callback);
+      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerID, posts[postNum].tweet_favorite_count, platform, userTextContent, unixtime, posts[postNum].tweet_id, posts[postNum].tweet_url, jsonContent, databaseClient, callback);
       break;
     case 'instagram post':
       var userTextContent = posts[postNum].post_text.replace(regex, "''");
       var datePosted = Date.parse(posts[postNum].post_created_at);
-      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerID, posts[postNum].post_like_count, platform, userTextContent, datePosted, posts[postNum].post_id, posts[postNum].post_url, jsonContent, client, callback);
+      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerID, posts[postNum].post_like_count, platform, userTextContent, datePosted, posts[postNum].post_id, posts[postNum].post_url, jsonContent, databaseClient, callback);
       break;
     case 'youtube video':
       var splitedDate = posts[postNum].video_created_at.split(" ");
       var unixtime = new Date(splitedDate).getTime();
       var userTextContent = posts[postNum].video_title.replace(regex, "''");
-      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerID, posts[postNum].video_like_count, platform, userTextContent, unixtime, posts[postNum].video_id, posts[postNum].video_embeded_url, jsonContent, client, callback);
+      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerID, posts[postNum].video_like_count, platform, userTextContent, unixtime, posts[postNum].video_id, posts[postNum].video_embeded_url, jsonContent, databaseClient, callback);
       break;
   }
 };
 //Just a continuation of storeContent, the actual insertion.
-var insertContentToDB = function(assetType, posts, postNum, influencerID, likeCount, platform, userTextContent, unixTime, post_id, url, jsonContent, client, callback) {
-  dbFunctions.insertPost(influencerID, likeCount, platform, userTextContent, unixTime, post_id, url, jsonContent, client, (response) => {
+var insertContentToDB = function(assetType, posts, postNum, influencerID, likeCount, platform, userTextContent, unixTime, postID, url, jsonContent, databaseClient, callback) {
+  dbFunctions.insertPost(influencerID, likeCount, platform, userTextContent, unixTime, postID, url, jsonContent, databaseClient, (response) => {
     if (postNum != posts.length - 1) {
-      storeContent(assetType, posts, postNum + 1, client, callback);
+      storeContent(assetType, posts, postNum + 1, databaseClient, callback);
     }
     else {
       callback(response);
