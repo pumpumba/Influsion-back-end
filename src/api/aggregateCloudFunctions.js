@@ -56,7 +56,7 @@ var self = module.exports = {
             res.json(["Nothing available"]);
         }
         break;
-      case "instagram_post":
+      case "instagram post":
         switch (filterType) {
           case "search":
             res.json(["<enter your influencers username>"]);
@@ -78,9 +78,8 @@ var self = module.exports = {
         res.json(["Nothing available"]);
     }
   },
+  //This is the aggregate/content call
   content: function (req, res, client) {
-    //var Instagram = require("../../machinepack-instagramnodemachines");
-    //var Youtube = require("../../machinepack-youtubenodemachines");
     var inputObj = req.body;
     var context = inputObj.context;
     if (inputObj.filterType == undefined) {
@@ -114,384 +113,205 @@ var self = module.exports = {
     var resultObj = [];
     var currentAsset = 0;
     var currentFilter = 0;
-    self.getContent(assetTypes, filterTypes, filterValue, context, limit,  currentAsset, currentFilter, resultObj, client, (response) => {
+    //Enters the recursive getContent loop, works like a for loop, but once it gets into a callback it start the next iteration.
+    getContent(assetTypes, filterTypes, filterValue, context, limit, currentAsset, currentFilter, resultObj, client, (response) => {
       resultObj = response;
       res.json(resultObj);
     });
-  },
+  }
+};
 
-  getContent: function(assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, client, callback) {
-    switch (assetTypes[currentAssetNum]) {
-      case "tweet":
-        switch (filterTypes[currentFilterNum]) {
-          case "influencer":
-            dbFunctions.getContentFromInfluencer('twitter', filterValue[0], limit, filterValue[1], client, (response) => {
-              result = response['rows'];
-              for(var k = 0; k<result.length;k++) {
-                resultObj.push(result[k]);
-              }
-              if(currentAssetNum != (assetTypes.length - 1)) {
-                self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-              }
-              else {
-                callback(resultObj);
-              }
-            });
-            break;
-          case "user":
-            dbFunctions.getFollowedInfluencersPosts(filterValue, limit, 'twitter', client, (response) => {
-              result = response['rows'];
-              for(var k = 0; k<result.length;k++) {
-                resultObj.push(result[k]);
-              }
-              if(currentAssetNum != (assetTypes.length - 1)) {
-                self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-              }
-              else {
-                callback(resultObj);
-              }
-            });
-            break;
-          case "popular":
-            dbFunctions.getLatestPosts(filterValue, 'twitter', limit, client, (response) => {
-              console.log(response)
-              result = response['rows'];
-              console.log(result);
-              for(var k = 0; k<result.length;k++) {
-                resultObj.push(result[k]);
-              }
-              if(currentAssetNum != (assetTypes.length - 1)) {
-                self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-              }
-              else {
-                callback(resultObj);
-              }
-            });
-            break;
-          case "search":
-            callback("Search option is not available at the moment");
-            break;
-          case "update":
-            dbFunctions.getPlatformAccountsFromFollowedInfluencers(filterValue, undefined, client, (response1) => {
-              var influencers = response1['rows'];
-              var twitterAccounts = [];
-              for(var k = 0; k<influencers.length;k++) {
-                console.log(k);
-                twitterAccounts.push(influencers[k]);
-              }
-              var currentInfluencerAccount = 0;
-              if(currentInfluencerAccount < twitterAccounts.length) {
-                var tweets = [];
-                self.getContentFromInfluencerTwitter(twitterAccounts, currentInfluencerAccount, tweets, limit, (response2) => {
-                  if(response2.length != 0) {
-                    self.storeTwitterContent(response2, 0, client, (response3) => {
-                      resultObj.push("Success");
-                      if(currentAssetNum != (assetTypes.length - 1)) {
-                        self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-                      }
-                      else {
-                        callback(resultObj);
-                      }
-                    });
-                  }
-                  else {
-                    if(currentAssetNum != (assetTypes.length - 1)) {
-                      self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-                    }
-                    else {
-                      callback(resultObj);
-                    }
-                  }
-                });
-              }
-              else {
-                if(currentAssetNum != (assetTypes.length - 1)) {
-                  self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-                }
-                else {
-                  callback(resultObj);
-                }
-              }
-            });
-            break;
-          default:
-            callback("The cloud component failed to provide any content");
-        }
-        break;
-      case 'instagram_post':
-        switch (filterTypes[currentFilterNum]) {
-          case "influencer":
-            dbFunctions.getContentFromInfluencer('instagram', filterValue[0], limit, filterValue[1], client, (response) => {
-              result = response['rows'];
-              for(var k = 0; k<result.length;k++) {
-                resultObj.push(result[k]);
-              }
-              if(currentAssetNum != (assetTypes.length - 1)) {
-                self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-              }
-              else {
-                callback(resultObj);
-              }
-            });
-            break;
-          case "user":
-            dbFunctions.getFollowedInfluencersPosts(filterValue, limit, 'instagram', client, (response) => {
-              result = response['rows'];
-              for(var k = 0; k<result.length;k++) {
-                resultObj.push(result[k]);
-              }
-              if(currentAssetNum != (assetTypes.length - 1)) {
-                self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-              }
-              else {
-                callback(resultObj);
-              }
-            });
-            break;
-          case "popular":
-            dbFunctions.getLatestPosts(filterValue, 'instagram', limit, client, (response) => {
-              result = response['rows'];
-              for(var k = 0; k<result.length;k++) {
-                resultObj.push(result[k]);
-              }
-              if(currentAssetNum != (assetTypes.length - 1)) {
-                self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-              }
-              else {
-                callback(resultObj);
-              }
-            });
-            break;
-          case "search":
-            callback("Search option is not available at the moment");
-            break;
-          case "update":
-            dbFunctions.getPlatformAccountsFromFollowedInfluencers(filterValue, undefined, client, (response1) => {
-              var influencers = response1['rows'];
-              var accounts = [];
-              for(var k = 0; k<influencers.length;k++) {
-                accounts.push(influencers[k]);
-              }
-              var currentInfluencerAccount = 0;
-              if(currentInfluencerAccount < influencers.length) {
-                var posts = [];
-                self.getContentFromInfluencerInstagram(influencers, currentInfluencerAccount, posts, 3, (response2) => {
-                  if(response2.length != 0) {
-                    self.storeInstagramContent(response2, 0, client, (response3) => {
-                      console.log(response2[0].platform);
-                      resultObj.push("Success");
-                      if(currentAssetNum != (assetTypes.length - 1)) {
-                        self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-                      }
-                      else {
-                        callback(resultObj);
-                      }
-                    });
-                  }
-                  else {
-                    if(currentAssetNum != (assetTypes.length - 1)) {
-                      self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-                    }
-                    else {
-                      callback(resultObj);
-                    }
-                  }
-                });
-              }
-              else {
-                if(currentAssetNum != (assetTypes.length - 1)) {
-                  self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-                }
-                else {
-                  callback(resultObj);
-                }
-              }
-            });
-            break;
-          default:
-            callback("The cloud component failed to provide any content");
-        }
-        break;
-      case "youtube video":
-        switch (filterTypes[currentFilterNum]) {
-          case "influencer":
-            dbFunctions.getContentFromInfluencer('youtube', filterValue[0], limit, filterValue[1], client, (response) => {
-              result = response['rows'];
-              if(result != undefined) {
-                for(var k = 0; k<result.length;k++) {
-                  resultObj.push(result[k]);
-                }
-              }
-              if(currentAssetNum != (assetTypes.length - 1)) {
-                self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-              }
-              else {
-                callback(resultObj);
-              }
-            });
-            break;
-          case "user":
-            dbFunctions.getFollowedInfluencersPosts(filterValue, limit, 'youtube', client, (response) => {
-              result = response['rows'];
-              if(result != undefined) {
-                for(var k = 0; k<result.length;k++) {
-                  resultObj.push(result[k]);
-                }
-              }
-              if(currentAssetNum != (assetTypes.length - 1)) {
-                self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-              }
-              else {
-                callback(resultObj);
-              }
-            });
-            break;
-          case "popular":
-            dbFunctions.getLatestPosts(filterValue, 'youtube', limit, client, (response) => {
-              result = response['rows'];
-              if(result != undefined) {
-                for(var k = 0; k<result.length;k++) {
-                  resultObj.push(result[k]);
-                }
-              }
-              if(currentAssetNum != (assetTypes.length - 1)) {
-                self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-              }
-              else {
-                callback(resultObj);
-              }
-            });
-            break;
-          case "search":
-            callback("Search option is not available at the moment");
-            break;
-          case "update":
-            dbFunctions.getPlatformAccountsFromFollowedInfluencers(filterValue, undefined, client, (response1) => {
-              var influencers = response1['rows'];
-              var accounts = [];
-              if(influencers != undefined) {
-                for(var k = 0; k<result.length;k++) {
-                  accounts.push(influencers[k]);
-                }
-              }
-              var currentInfluencerAccount = 0;
-              if(currentInfluencerAccount < influencers.length) {
-                var tweets = [];
-                self.getContentFromInfluencerYouTube(influencers, currentInfluencerAccount, tweets, 10, (response2) => {
-                  if(response2.length != 0) {
-                    self.storeYouTubeContent(response2, 0, client, (response3) => {
-                      resultObj.push("Success");
-                      if(currentAssetNum != (assetTypes.length - 1)) {
-                        self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-                      }
-                      else {
-                        callback(resultObj);
-                      }
-                    });
-                  }
-                  else {
-                    if(currentAssetNum != (assetTypes.length - 1)) {
-                      self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-                    }
-                    else {
-                      callback(resultObj);
-                    }
-                  }
-                });
-              }
-              else {
-                if(currentAssetNum != (assetTypes.length - 1)) {
-                  self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-                }
-                else {
-                  callback(resultObj);
-                }
-              }
-            });
-            break;
-          default:
-            callback("The cloud component failed to provide any content");
-        }
-        break;
-      case "all":
-        switch (filterTypes[currentFilterNum]) {
-          case "influencer":
-            dbFunctions.getContentFromInfluencer('all', filterValue[0], limit, filterValue[1], client, (response) => {
-              result = response['rows'];
-              if(result != undefined) {
-                for(var k = 0; k<result.length;k++) {
-                  resultObj.push(result[k]);
-                }
-              }
-              if(currentAssetNum != (assetTypes.length - 1)) {
-                self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-              }
-              else {
-                callback(resultObj);
-              }
-            });
-            break;
-          case "user_id":
-            dbFunctions.getFollowedInfluencersPosts(filterValue, limit, 'all', client, (response) => {
-              result = response['rows'];
-              if(result != undefined) {
-                for(var k = 0; k<result.length;k++) {
-                  resultObj.push(result[k]);
-                }
-              }
-              if(currentAssetNum != (assetTypes.length - 1)) {
-                self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-              }
-              else {
-                callback(resultObj);
-              }
-            });
-            break;
-          case "popular":
-            dbFunctions.getLatestPosts(filterValue, undefined, limit, client, (response) => {
-              result = response['rows'];
-              if(result != undefined) {
-                for(var k = 0; k<result.length;k++) {
-                  resultObj.push(result[k]);
-                }
-              }
-              if(currentAssetNum != (assetTypes.length - 1)) {
-                self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-              }
-              else {
-                callback(resultObj);
-              }
-            });
-            break;
-          case "search":
-            callback("Search option is not available at the moment");
-            break;
-          default:
-            callback("The cloud component failed to provide any content");
-        }
-        break;
-      default:
-        callback("The cloud component failed to provide any content");
-      }
-    },
-
-    getContentFromInfluencersFromPlatform: function(userID, influencerAccounts, currentInfluencer, resultObj, client, platform, callback) {
-      dbFunctions.getContentFromInfluencer(platform, influencerAccounts[currentInfluencer]['influencerid'], 5, userID, client, (response) => {
-        if(response != undefined) {
-          for(var k = 0; k<response.length;k++) {
-            resultObj.push(response[k]);
+//get content from specific asset type, continuation from getContent
+var getContentFromAsset = function(platform, assetType, assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, client, callback) {
+  switch (filterTypes[currentFilterNum]) {
+    case "influencer":
+      dbFunctions.getContentFromInfluencer(platform, filterValue[0], limit, filterValue[1], client, (response) => {
+        result = response['rows'];
+        if (result != undefined) {
+          for (var k = 0; k < result.length; k++) {
+            resultObj.push(result[k]);
           }
         }
-        if(currentInfluencer != (influencerAccounts.length - 1)) {
-          self.getContentFromInfluencersFromPlatform(userID, influencerAccounts, currentInfluencer + 1, resultObj, client, platform, callback);
+
+        if (currentAssetNum != (assetTypes.length - 1)) {
+          //Go into next iteration of getContent
+          getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
         }
         else {
+          //All iterations done, send back the result
           callback(resultObj);
         }
       });
-    },
+      break;
+    case "user":
+      dbFunctions.getFollowedInfluencersPosts(filterValue, limit, platform, client, (response) => {
+        result = response['rows'];
+        if (result != undefined) {
+          for (var k = 0; k < result.length; k++) {
+            resultObj.push(result[k]);
+          }
+        }
+        if (currentAssetNum != (assetTypes.length - 1)) {
+          //Go into next iteration of getContent
+          getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+        }
+        else {
+          //All iterations done, send back the result
+          callback(resultObj);
+        }
+      });
+      break;
+    case "popular":
+      dbFunctions.getLatestPosts(filterValue, platform, limit, client, (response) => {
+        result = response['rows'];
+        if (result != undefined) {
+          for (var k = 0; k < result.length; k++) {
+            resultObj.push(result[k]);
+          }
+        }
+        if (currentAssetNum != (assetTypes.length - 1)) {
+          //Go into next iteration of getContent
+          getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+        }
+        else {
+          //All iterations done, send back the result
+          callback(resultObj);
+        }
+      });
+      break;
+    //Search should be a functions that searches for influencers in our database
+    case "search":
+      callback("Search option is not available at the moment");
+      break;
+    //Updates the database with new content from our social media API:s
+    case "update":
+      if(platform == 'all') {
+        callback('Can not update all platform at once. Update each one by one.');
+      }
+      else {
+        dbFunctions.getPlatformAccounts(platform, client, (response1) => {
+          var influencers = response1['rows'];
+          var accounts = [];
+          if (influencers != undefined) {
+            for (var k = 0; k < influencers.length; k++) {
+              accounts.push(influencers[k]);
+            }
+          }
+          var currentInfluencerAccount = 0;
+          if (currentInfluencerAccount < accounts.length) {
+            var posts = [];
+            getContentFromInfluencerFromAPI(assetType, accounts, currentInfluencerAccount, posts, limit, (response2) => {
+              if (response2.length != 0) {
+                storeContent(assetType, response2, 0, client, (response3) => {
+                  resultObj.push("Success");
+                  if (currentAssetNum != (assetTypes.length - 1)) {
+                    getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+                  }
+                  else {
+                    callback(resultObj);
+                  }
+                });
+              }
+              else {
+                if (currentAssetNum != (assetTypes.length - 1)) {
+                  getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+                }
+                else {
+                  callback(resultObj);
+                }
+              }
+            });
+          }
+          else {
+            if (currentAssetNum != (assetTypes.length - 1)) {
+              getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+            }
+            else {
+              callback(resultObj);
+            }
+          }
+        });
+      }
+      break;
+    default:
+      callback("The cloud component failed to provide any content");
+  }
+};
+//The main content function
+var getContent = function (assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, client, callback) {
+  switch (assetTypes[currentAssetNum]) {
+    case "tweet":
+      getContentFromAsset('twitter', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, client, callback);
+      break;
+    case "instagram post":
+      getContentFromAsset('instagram', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, client, callback);
+      break;
+    case "youtube video":
+      getContentFromAsset('youtube', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, client, callback);
+      break;
+    case "all":
+      getContentFromAsset('all', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, client, callback);
+      break;
+    default:
+      callback("The cloud component failed to provide any content");
+  }
+};
+//Gets content from the specified influencers from a specific social media platform from our database.
+var getContentFromInfluencersFromPlatform = function (userID, influencerAccounts, currentInfluencer, resultObj, client, platform, callback) {
+  dbFunctions.getContentFromInfluencer(platform, influencerAccounts[currentInfluencer]['influencerid'], 5, userID, client, (response) => {
+    if (response != undefined) {
+      for (var k = 0; k < response.length; k++) {
+        resultObj.push(response[k]);
+      }
+    }
+    if (currentInfluencer != (influencerAccounts.length - 1)) {
+      getContentFromInfluencersFromPlatform(userID, influencerAccounts, currentInfluencer + 1, resultObj, client, platform, callback);
+    }
+    else {
+      callback(resultObj);
+    }
+  });
+};
 
-    getContentFromInfluencerTwitter: function(influencers, currentInfluencer, resultObj, limit, callback) {
+//Stores content into our database.
+var storeContent = function(assetType, posts, postNum, client, callback) {
+  var regex = /'/gi;
+  var jsonContent = JSON.stringify(posts[postNum]).replace(regex, "''");
+  var platform = posts[postNum].platform.toLowerCase();
+  switch(assetType) {
+    case 'tweet':
+      var unixtime = new Date(posts[postNum].tweet_created_at).getTime();
+      var userTextContent = posts[postNum].tweet_text.replace(regex, "''");
+      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerID, posts[postNum].tweet_favorite_count, platform, userTextContent, unixtime, posts[postNum].tweet_id, posts[postNum].tweet_url, jsonContent, client, callback);
+      break;
+    case 'instagram post':
+      var userTextContent = posts[postNum].post_text.replace(regex, "''");
+      var datePosted = Date.parse(posts[postNum].post_created_at);
+      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerID, posts[postNum].post_like_count, platform, userTextContent, datePosted, posts[postNum].post_id, posts[postNum].post_url, jsonContent, client, callback);
+      break;
+    case 'youtube video':
+      var splitedDate = posts[postNum].video_created_at.split(" ");
+      var unixtime = new Date(splitedDate).getTime();
+      var userTextContent = posts[postNum].video_title.replace(regex, "''");
+      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerID, posts[postNum].video_like_count, platform, userTextContent, unixtime, posts[postNum].video_id, posts[postNum].video_embeded_url, jsonContent, client, callback);
+      break;
+  }
+};
+//Just a continuation of storeContent, the actual insertion.
+var insertContentToDB = function(assetType, posts, postNum, influencerID, likeCount, platform, userTextContent, unixTime, post_id, url, jsonContent, client, callback) {
+  dbFunctions.insertPost(influencerID, likeCount, platform, userTextContent, unixTime, post_id, url, jsonContent, client, (response) => {
+    if (postNum != posts.length - 1) {
+      storeContent(assetType, posts, postNum + 1, client, callback);
+    }
+    else {
+      callback(response);
+    }
+  });
+};
+//Gets content from a specific influencer from a social media API.
+var getContentFromInfluencerFromAPI = function(assetType, influencers, currentInfluencer, resultObj, limit, callback) {
+  switch(assetType) {
+    case 'tweet':
       var Twitter = require("machinepack-twitternodemachines");
       Twitter.getUserTweets({
         consumerKey: process.env.TWITTER_CONSUMER_KEY,
@@ -499,116 +319,54 @@ var self = module.exports = {
         accessToken: process.env.TWITTER_ACCESS_TOKEN,
         accessSecret: process.env.TWITTER_ACCESS_SECRET,
         bearerToken: process.env.TWITTER_BEARER_TOKEN,
-        userScreenName: influencers[currentInfluencer].actname,
+        userScreenName: influencers[currentInfluencer].platformname,
         count: limit
       }).exec((err, result) => {
-        console.log(result);
-        if (err) {
-          console.log("Error at getPopularTweets");
-          console.log(err);
-        } else {
-          for(var k = 0; k<result.length;k++) {
-            result[k].realInfluencerName = influencers[currentInfluencer].influencername
-            resultObj.push(result[k]);
-          }
-          if(currentInfluencer != (influencers.length - 1)) {
-            self.getContentFromInfluencerTwitter(influencers, currentInfluencer + 1, resultObj, limit, callback);
-          }
-          else {
-            callback(resultObj);
-          }
-        }
+        contentCallback('tweet', err, result, influencers, currentInfluencer, resultObj, limit, callback);
       });
-    },
-
-    storeTwitterContent: function(tweets, tweetNum, client, callback) {
-      dbFunctions.insertPost("Bill Gates", tweets[tweetNum].tweet_favorite_count, tweets[tweetNum].platform, tweets[tweetNum].tweet_text, tweets[tweetNum].tweet_created_at, tweets[tweetNum].tweet_id, tweets[tweetNum].tweet_url, JSON.stringify(tweets[tweetNum]), client, (response) => {
-        if(tweetNum != tweets.length - 1) {
-          self.storeTwitterContent(tweets, tweetNum + 1, client, callback);
-        }
-        else {
-          callback(response);
-        }
-      });
-    },
-
-    //Getting the content from the api.
-    getContentFromInfluencerInstagram: function(influencers, currentInfluencer, resultObj, limit, callback) {
-      var Instagram = require("machinepack-instagramnodemachines"); //here we get the nodemachines
-      Instagram.getInstaPosts({
+      break;
+    case 'instagram post':
+      var Instagram = require("machinepack-instagramnodemachines2");
+      Instagram.getInstagramPosts({
         accessToken: process.env.INSTAGRAM_ACCESS_TOKEN,
         id: process.env.INSTAGRAM_ID,
-        screenName: influencers[currentInfluencer].actname,
-        postCount: limit
-      }).exec((err, result) => {
-        console.log(result);
-        if (err) {
-          console.log("Error at getPopularPosts");
-          console.log(err);
-        } else {
-          for(var k = 0; k<result.length;k++) {
-            resultObj.push(result[k]);
-          }
-          if(currentInfluencer != (influencers.length - 1)) {
-            self.getContentFromInfluencerInstagram(influencers, currentInfluencer + 1, resultObj, limit, callback);
-          }
-          else {
-            callback(resultObj);
-          }
-        }
-      });
-    },
-
-    //Storing the content in the database.
-    storeInstagramContent: function(posts, postNum, client, callback) {
-      console.log(posts[postNum].platform);
-      dbFunctions.insertPost(posts[postNum].userName, posts[postNum].postLikeCount, posts[postNum].platform, posts[postNum].postText, posts[postNum].postCreatedAt, posts[postNum].postId, posts[postNum].postUrl, posts[postNum], client, (response) => {
-        if(postNum != posts.length - 1) {
-          self.storeInstagramContent(posts, postNum + 1, client, callback);
-        }
-        else {
-          callback(response);
-        }
-      });
-    },
-
-    getContentFromInfluencerYouTube: function(influencers, currentInfluencer, resultObj, limit, callback) {
-      //var Youtube = require("machinepack-youtubenodemachines"); here we get the nodemachines
-      /*Youtube.getUserVideos({
-        consumerKey: process.env.TWITTER_CONSUMER_KEY,
-        consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
-        accessToken: process.env.TWITTER_ACCESS_TOKEN,
-        accessSecret: process.env.TWITTER_ACCESS_SECRET,
-        bearerToken: process.env.TWITTER_BEARER_TOKEN,
-        userScreenName: influencers[currentInfluencer].actname,
+        screenName: influencers[currentInfluencer].platformname,
         count: limit
       }).exec((err, result) => {
-        console.log(result);
-        if (err) {
-          console.log("Error at getPopularTweets");
-          console.log(err);
-        } else {
-          for(var k = 0; k<result.length;k++) {
-            resultObj.push(result[k]);
-          }
-          if(currentInfluencer != (influencers.length - 1)) {
-            self.getContentFromInfluencerYouTube(influencers, currentInfluencer + 1, resultObj, limit, callback);
-          }
-          else {
-            callback(resultObj);
-          }
-        }
-      }); */
-    },
-
-    storeYouTubeContent: function(videos, videoNum, client, callback) {
-      dbFunctions.insertVideo(videos[videoNum].user_name, videos[videoNum].video_favorite_count, videos[videoNum].platform, videos[videoNum].video_text, videos[videoNum].video_created_at, videos[videoNum].video_url, JSON.stringify(videos[videoNum]), client, (response) => {
-        if(videoNum != videos.length - 1) {
-          self.storeYouTubeContent(videos, videoNum + 1, client, callback);
-        }
-        else {
-          callback(response);
-        }
+        contentCallback('instagram post', err, result, influencers, currentInfluencer, resultObj, limit, callback);
       });
+      break;
+    case 'youtube video':
+      var YoutubeNodeMachine = require("machinepack-youtubenodemachines");
+      require("dotenv").load();
+      YoutubeNodeMachine.getChannelYoutubeVideos({
+        googleEmail: process.env.GOOGLE_CLIENT_EMAIL,
+        googlePrivateKey: process.env.GOOGLE_PRIVATE_KEY,
+        channelName: influencers[currentInfluencer].platformname,
+        count: limit
+      }).exec((err, result) => {
+        contentCallback('youtube video', err, result, influencers, currentInfluencer, resultObj, limit, callback);
+      });
+      break;
+  }
+};
+
+var contentCallback = function(assetType, err, result, influencers, currentInfluencer, resultObj, limit, callback) {
+  if (err) {
+    console.log("Error at getContentFromInfluencerFromAPI");
+    console.log(err);
+  } else {
+    if (result != undefined) {
+      for (var k = 0; k < result.length; k++) {
+        result[k].influencerID = influencers[currentInfluencer].influencerid
+        resultObj.push(result[k]);
+      }
+    }
+    if (currentInfluencer != (influencers.length - 1)) {
+      getContentFromInfluencerFromAPI(assetType, influencers, currentInfluencer + 1, resultObj, limit, callback);
+    }
+    else {
+      callback(resultObj);
     }
   }
+};

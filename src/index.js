@@ -141,7 +141,7 @@ app.get("/db/get_followed_infl_posts", (req, res) => {
 
   });
 });
-// Unfollow an influencer by specifiying user_id for user, and influencer_id for influencer
+// Unfollocw an influencer by specifiying user_id for user, and influencer_id for influencer
 app.post("/db/unfollow_influencer", (req,res) => {
   var inputObj = req.body;
   var userID = inputObj.user_id;
@@ -156,6 +156,12 @@ app.post("/db/add_follow_influencer", (req,res) => {
   var inputObj = req.body;
   var userID = inputObj.user_id;
   var influencerID = inputObj.influencer_id;
+  var names = ["real_name", "influencer_id"];
+  for (i in inputObj) {
+      if (names.includes(i)) {
+        console.log("Yes!");
+      }
+  }
   dbFunctions.addFollowInfluencer(userID, influencerID, client, (response) => {
     res.json(response);
   });
@@ -289,13 +295,13 @@ app.post("/db/add_user_visit", (req, res) =>  {
 
 app.post("/db/modify_user", (req,res) => {
   var inputObj = req.body;
-  var hashedPassword = inputObj.password; //TODO: Change to hashed version of password
+  var password = inputObj.password; //TODO: Change to hashed version of password
   var username = inputObj.username;
   var age = inputObj.age; //TODO: Change to hashed version of password
   var email = inputObj.email;
   var sex = inputObj.sex;
   var userID = inputObj.usrid;
-  dbFunctions.modifyUser(hashedPassword, username, age, email, sex, userID, client, (response) => {
+  dbFunctions.modifyUser(password, username, age, email, sex, userID, client, (response) => {
     res.json(response);
   });
 });
@@ -305,15 +311,74 @@ app.use(bodyParser.urlencoded({
 
 app.use(bodyParser.json());
 app.post("/db/register_user", (req, res)=> {
+  console.log("ASDASDASD");
+  console.log(req.body);
   var inputObj = req.body;
-  var password = inputObj.password; //TODO: Change to hashed version of password
+  var password = inputObj.password;
   var username = inputObj.username;
-  var age = inputObj.age; //TODO: Change to hashed version of password
+  var age = inputObj.age;
   var email = inputObj.email;
   var sex = inputObj.sex;
   dbFunctions.registerUser(password, username, age, email, sex, client, (response) => {
     res.json(response);
   });
+});
+
+app.post("/db/delete_user", (req, res) => {
+  var inputObj = req.body;
+  var usrID = inputObj.usrid;
+  var password = inputObj.password;
+  var dbRequest = "SELECT * FROM USR WHERE usrid = "+usrID+";";
+  console.log(dbRequest);
+  console.log("ASDASDASDASD");
+  client.query(dbRequest, (err, dbResult) => {
+    var dbResults = dbResult["rows"][0];
+    console.log("WE CAME HERE");
+    console.log(dbResults);
+    if (dbResults != undefined) {
+      var hashPassword = dbResult["rows"][0].hashedpwd;
+
+      bcrypt.compare(password, hashPassword, function(err, resultCompare) {
+        console.log(resultCompare);
+        if (resultCompare == true) {
+          var dbRequest = "BEGIN; \
+          DELETE FROM USRFLWINFL WHERE FLWRID = "+usrID+"; \
+          DELETE FROM USRLIKEPOST WHERE USRID = "+usrID+"; \
+          DELETE FROM USRVISIT WHERE usrid = "+usrID+"; \
+          DELETE FROM USR WHERE usrid = "+usrID+"; \
+          COMMIT;";
+          client.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+            if (dbResults != undefined) {
+
+
+              dbResults["deleteSuccess"] = true;
+            } else {
+              dbResults = err;
+              dbResults["deleteSuccess"] = false;
+            }
+
+            res.json(dbResults);
+          });
+
+        } else {
+          dbResults = err;
+          dbResults["deleteSuccess"] = false;
+        }
+
+        res.json({dbResults});
+      });
+    } else {
+      dbResults = {};
+      dbResults["loginSuccess"] = false;
+      res.json({dbResults});
+    }
+  });
+
+
+
+
+
 });
 
 app.post("/db/get_latest_posts", (req, res) => {
@@ -359,7 +424,7 @@ app.post("/db/login", (req, res) => {
   var password = inputObj.password; //TODO: Change to hashed version of password
   var username = inputObj.username;
   dbFunctions.login(password, username, client, (response) => {
-    res.json(response);
+      res.json(response);
   });
 });
 
