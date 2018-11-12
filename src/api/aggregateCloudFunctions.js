@@ -285,9 +285,9 @@ var storeContent = function(assetType, posts, postNum, client, callback) {
       insertContentToDB(assetType, posts, postNum, posts[postNum].influencerID, posts[postNum].tweet_favorite_count, platform, userTextContent, unixtime, posts[postNum].tweet_id, posts[postNum].tweet_url, jsonContent, client, callback);
       break;
     case 'instagram post':
-      var userTextContent = posts[postNum].post_text.replace(regex, "''");
-      var datePosted = Date.parse(posts[postNum].post_created_at);
-      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerID, posts[postNum].post_like_count, platform, userTextContent, datePosted, posts[postNum].post_id, posts[postNum].post_url, jsonContent, client, callback);
+      var userTextContent = posts[postNum].postText.replace(regex, "''");
+      var datePosted = Date.parse(posts[postNum].postCreatedAt);
+      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerID, posts[postNum].postLikeCount, platform, userTextContent, datePosted, posts[postNum].postId, posts[postNum].postUrl, jsonContent, client, callback);
       break;
     case 'youtube video':
       var splitedDate = posts[postNum].video_created_at.split(" ");
@@ -329,9 +329,9 @@ var getContentFromInfluencerFromAPI = function(assetType, influencers, currentIn
       var Instagram = require("machinepack-instagramnodemachines2");
       Instagram.getInstagramPosts({
         accessToken: process.env.INSTAGRAM_ACCESS_TOKEN,
-        id: process.env.INSTAGRAM_ID,
+        accessId: process.env.INSTAGRAM_ID,
         screenName: influencers[currentInfluencer].platformname,
-        count: limit
+        postCount: limit
       }).exec((err, result) => {
         contentCallback('instagram post', err, result, influencers, currentInfluencer, resultObj, limit, callback);
       });
