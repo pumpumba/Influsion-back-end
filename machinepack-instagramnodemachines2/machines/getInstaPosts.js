@@ -1,3 +1,4 @@
+//This node machine contains the function call for getting content from instagram.
 module.exports = {
   friendlyName: "Get Insta Posts",
   description: "Gets instagram posts from a user",
@@ -9,7 +10,7 @@ module.exports = {
       description: "Your Instagram access API token.",
       required: true
     },
-    id: {
+    accessId: {
       example: "73264732487234723",
       description: "Your Instagram business account ID",
       required: true
@@ -19,7 +20,7 @@ module.exports = {
       description: "The Instagram username of the person you want posts from",
       required: true
     },
-    count: {
+    postCount: {
       example: 20,
       description: "The maximum amount of posts you want",
       required: true
@@ -60,8 +61,8 @@ module.exports = {
   fn: function(inputs, exits) {
     var util = require("util");
     var _ = require("lodash");
-    //require("dotenv").config({ path: __dirname + "/./../../.env" });
     var formatFunctions = require("../instaDataFormating");
+    //If one of the credentials is not given, an error will occur.
     if (
       _.isUndefined(inputs.id) ||
       _.isUndefined(inputs.accessToken)
@@ -73,14 +74,17 @@ module.exports = {
       );
     }
 
-    const client = [];
+    //An array with the credentials for calling the api is created.
+    const instagramClient = [];
     client.push(inputs.accessToken);
-    client.push(inputs.id);
+    client.push(inputs.accessId);
 
+    //This function calls the instaDataFormating-file with a username, post count wanted and credentials.
+    //The expected return/result is one or several Json objects containing the content wanted.
     formatFunctions.getInstaPostsFromUser(
       inputs.screenName,
-      inputs.count,
-      client,
+      inputs.postCount,
+      instagramClient,
       result => {
         return exits.success(result);
       }

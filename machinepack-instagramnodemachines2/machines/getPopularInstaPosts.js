@@ -1,3 +1,4 @@
+//This node machine contains the function call for getting sorted content from instagram, it is sorted by likes.
 module.exports = {
   friendlyName: "Get Popular Insta Posts",
   description: "Gets popular instagram posts from a different users",
@@ -9,7 +10,7 @@ module.exports = {
       description: "Your Instagram access API token.",
       required: true
     },
-    id: {
+    instagramId: {
       example: "73264732487234723",
       description: "Your Instagram business account ID",
       required: true
@@ -20,7 +21,7 @@ module.exports = {
       description: "The Instagram username of the persons you want posts from",
       required: true
     },
-    count: {
+    postCount: {
       example: 20,
       description: "The maximum amount of posts you want",
       required: true
@@ -61,8 +62,8 @@ module.exports = {
   fn: function(inputs, exits) {
     var util = require("util");
     var _ = require("lodash");
-    //require("dotenv").config({ path: __dirname + "/./../../.env" });
     var formatFunctions = require("../instaDataFormating");
+    //If one of the credentials is not given, an error will occur.
     if (
       _.isUndefined(inputs.id) ||
       _.isUndefined(inputs.accessToken)
@@ -74,14 +75,18 @@ module.exports = {
       );
     }
 
-    const client = [];
-    client.push(inputs.accessToken);
-    client.push(inputs.id);
+    //Initiate an array with the instagram credentials.
+    const instagramClient = [];
+    instagramClient.push(inputs.accessToken);
+    instagramClient.push(inputs.instagramId);
 
+    //This function calls the instaDataFormating-file with an array of usernames, post count wanted and credentials.
+    //The expected return/result is one or several Json objects containing the content wanted. This result
+    //is then sent to the sorting fuction that sorts the array by likes.
     formatFunctions.getInstaPostsFromUsers(
       inputs.screenNames,
-      inputs.count,
-      client,
+      inputs.postCount,
+      instagramClient,
       result => {
         return exits.success(formatFunctions.popularPostsLoaded(result));
       }

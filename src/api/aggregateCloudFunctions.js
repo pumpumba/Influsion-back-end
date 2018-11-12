@@ -532,14 +532,14 @@ var self = module.exports = {
       });
     },
 
+    //Getting the content from the api.
     getContentFromInfluencerInstagram: function(influencers, currentInfluencer, resultObj, limit, callback) {
       var Instagram = require("machinepack-instagramnodemachines"); //here we get the nodemachines
       Instagram.getInstaPosts({
         accessToken: process.env.INSTAGRAM_ACCESS_TOKEN,
         id: process.env.INSTAGRAM_ID,
-        // screenName: influencers[currentInfluencer].actname,
-        screenName: "joerogan",
-        count: limit
+        screenName: influencers[currentInfluencer].actname,
+        postCount: limit
       }).exec((err, result) => {
         console.log(result);
         if (err) {
@@ -559,9 +559,10 @@ var self = module.exports = {
       });
     },
 
+    //Storing the content in the database.
     storeInstagramContent: function(posts, postNum, client, callback) {
       console.log(posts[postNum].platform);
-      dbFunctions.insertPost(posts[postNum].user_name, posts[postNum].post_like_count, posts[postNum].platform, posts[postNum].post_text, posts[postNum].post_created_at, posts[postNum].post_id, posts[postNum].post_url, posts[postNum], client, (response) => {
+      dbFunctions.insertPost(posts[postNum].userName, posts[postNum].postLikeCount, posts[postNum].platform, posts[postNum].postText, posts[postNum].postCreatedAt, posts[postNum].postId, posts[postNum].postUrl, posts[postNum], client, (response) => {
         if(postNum != posts.length - 1) {
           self.storeInstagramContent(posts, postNum + 1, client, callback);
         }

@@ -1,50 +1,56 @@
+//This file contains functions for the instagram graph api.
+//They are sorting an array, formating a Json object the way we want it,
+//getting content from one user and getting content from several users.
 var self = module.exports = {
+    //A function that takes an array of Json objects and sorts it by likes.
     popularPostsLoaded: function(popularPosts) {
         popularPosts.sort(function(a, b) {
             return a.like_count - b.like_count;
         });
         return popularPosts;
     },
+    //This function takes the recieved content as an Json object and formats it the way we want it.
     formatJson: function(instagramResponse) {
-      var formatedInstaPosts = []
-      console.log(instagramResponse);
-      if(!(instagramResponse.hasOwnProperty("error"))) {
-        if((instagramResponse.hasOwnProperty("media"))){
+      var formatedInstaPosts = [];
+      if(!(instagramResponse.hasOwnProperty("error"))) { //Taking care of empty posts.
+        if((instagramResponse.business_discovery.hasOwnProperty("media"))){
+        //Loop through the number of Json objects.
         for (var i = 0; i < instagramResponse.business_discovery.media.data.length; i++) {
           var instaPost = {
             "platform": "instagram",
-            "user_id": instagramResponse.business_discovery.id,
-            "user_url": "",
-            "user_name": instagramResponse.business_discovery.name,
-            "user_screen_name": instagramResponse.business_discovery.username,
-            "user_followers_count": instagramResponse.business_discovery.followers_count,
-            // "user_verified": instagramResponse[i].user.verified,
-            "user_profile_image_url": instagramResponse.business_discovery.profile_picture_url,
-            "post_like_count" : instagramResponse.business_discovery.media.data[i].like_count,
-            "post_id": instagramResponse.business_discovery.media.data[i].id,
-            "post_url": instagramResponse.business_discovery.media.data[i].permalink,
-            "post_text": instagramResponse.business_discovery.media.data[i].caption,
-            "post_created_at": instagramResponse.business_discovery.media.data[i].timestamp,
-            "post_media": [],
-            "post_hashtags": []
+            "userId": instagramResponse.business_discovery.id,
+            "userUrl": "",
+            "userName": instagramResponse.business_discovery.name,
+            "userScreenName": instagramResponse.business_discovery.username,
+            "userFollowersCount": instagramResponse.business_discovery.followers_count,
+            "userProfileImageUrl": instagramResponse.business_discovery.profile_picture_url,
+            "postLikeCount" : instagramResponse.business_discovery.media.data[i].like_count,
+            "postId": instagramResponse.business_discovery.media.data[i].id,
+            "postUrl": instagramResponse.business_discovery.media.data[i].permalink,
+            "postText": instagramResponse.business_discovery.media.data[i].caption,
+            "postCreatedAt": instagramResponse.business_discovery.media.data[i].timestamp,
+            "postMedia": [],
+            "postHashtags": []
           };
 
-          instaPost.user_url = "https://instagram.com/" + instaPost.user_screen_name + "/";
+          instaPost.userUrl = "https://instagram.com/" + instaPost.userScreenName + "/";
 
-          //get post_hashtags
+          //We retrieve the hashtags from a post by going through the posts caption.
           var regex = /(?:^|\s)(?:#)([a-zA-Z\d]+)/gm;
           var match;
-          while ((match = regex.exec(instaPost.post_text))) {
-              instaPost.post_hashtags.push(match[1]);
+          while ((match = regex.exec(instaPost.postText))) {
+              instaPost.postHashtags.push(match[1]);
           }
 
+          //If there is a image carousel in the post we get all of the photos, otherwise we
+          //just add the single photo.
           if(instagramResponse.business_discovery.media.data[i].children){
             for(var j=0; j < instagramResponse.business_discovery.media.data[i].children.data.length; j++){
-              instaPost.post_media.push(instagramResponse.business_discovery.media.data[i].children.data[j].media_url);
+              instaPost.postMedia.push(instagramResponse.business_discovery.media.data[i].children.data[j].media_url);
             }
           }
           else{
-            instaPost.post_media.push(instagramResponse.business_discovery.media.data[i].media_url);
+            instaPost.postMedia.push(instagramResponse.business_discovery.media.data[i].media_url);
           };
 
           formatedInstaPosts.push(instaPost);
@@ -53,9 +59,16 @@ var self = module.exports = {
       }
       return formatedInstaPosts;
     },
-    getInstaPostsFromUser: function(username, postCount, client, callback) {
+    //This function gets content from an instagram user by making a call. Takes in a user name,
+    //number of posts wanted and the credentials. Returns a Json object of content.
+    getInstagramPostsFromUser: function(userName, postCount, instagramClient, callback) {
       const https = require("https");
-      var url = "https://graph.facebook.com/" + client[1] + "?fields=business_discovery.username(" + username + "){id, username, name, followers_count, profile_picture_url, media.limit(" + postCount + "){id,permalink,caption,timestamp,like_count,media_url, children{media_url}}}&access_token=" + client[0];
+      //The url we make the call with.
+      var url = "https://graph.facebook.com/" + instagramClient[1] + "?fields=business_discovery.username("
+                + userName + "){id, username, name, followers_count, profile_picture_url, media.limit("
+                + postCount + "){id,permalink,caption,timestamp,like_count,media_url, children{media_url}}}&access_token="
+                + client[0];
+
       var instagramResponse;
 
       https
@@ -75,16 +88,19 @@ var self = module.exports = {
           console.log("Got an error: ", e);
         });
     },
-    getInstaPostsFromUsers: function(screen_names, postCount, client, callback) {
+    //This function gets content from several instagram users by making a call to the function
+    //getInstagramPostsFromUser. Takes in an array of user names, number of posts wanted and the credentials.
+    //Returns an array of Json objects with content.
+    getInstagramPostsFromUsers: function(screenNames, postCount, instagramClient, callback) {
       var popularPosts = [];
       var pushedCount = 0;
-      for (var i = 0; i < screen_names.length; i++) {
-        self.getInstaPostsFromUser(screen_names[i], postCount, client, (result) => {
+      for (var i = 0; i < screenNames.length; i++) {
+        self.getInstaPostsFromUser(screenNames[i], postCount, instagramClient, (result) => {
           for(var j = 0; j < result.length;j++) {
               popularPosts.push(result[j]);
           }
           pushedCount += 1;
-          if(pushedCount == screen_names.length) {
+          if(pushedCount == screenNames.length) {
               callback(popularPosts);
           }
         });
