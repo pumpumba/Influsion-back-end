@@ -22,7 +22,7 @@ var self = module.exports = {
       }
     },
     content: function(req, res) {
-      var Instagram = require("../../machinepack-instagramnodemachines");
+      var Instagram = require("../../machinepack-instagramnodemachines2");
       var inputObj = req.body;
       var context = inputObj.context;
       if (inputObj.filterType == undefined) {
@@ -57,7 +57,7 @@ var self = module.exports = {
       var successFlag = false;
       for (var i = 0; i < assetTypes.length; i++) {
         switch (assetTypes[i]) {
-          case "instagram_post":
+          case "instagram post":
             for (var j = 0; j < filterTypes.length; j++) {
               switch (filterTypes[j]) {
                 case "user":
@@ -66,9 +66,9 @@ var self = module.exports = {
                     var screenNames = ["katyperry", "joerogan", "joakimlundell", "biancaingrosso", "garyvee"];
                       Instagram.getPopularInstaPosts({
                         accessToken: process.env.INSTAGRAM_ACCESS_TOKEN,
-                        id: process.env.INSTAGRAM_ID,
+                        accessId: process.env.INSTAGRAM_ID,
                         screenNames: screenNames,
-                        count: limit
+                        postCount: limit
                       }).exec((err, result) => {
                         if (err) {
                           console.log("Error at getPopularInstaPosts");
@@ -86,9 +86,9 @@ var self = module.exports = {
                     default:
                       Instagram.getInstaPosts({
                         accessToken: process.env.INSTAGRAM_ACCESS_TOKEN,
-                        id: process.env.INSTAGRAM_ID,
+                        accessId: process.env.INSTAGRAM_ID,
                         screenName: filterValue,
-                        count: limit
+                        postCount: limit
                       }).exec((err, result) => {
                         if (err) {
                           console.log("Error at getInstaPosts");

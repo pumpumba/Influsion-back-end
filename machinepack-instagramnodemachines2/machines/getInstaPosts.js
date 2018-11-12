@@ -64,7 +64,7 @@ module.exports = {
     var formatFunctions = require("../instaDataFormating");
     //If one of the credentials is not given, an error will occur.
     if (
-      _.isUndefined(inputs.id) ||
+      _.isUndefined(inputs.accessId) ||
       _.isUndefined(inputs.accessToken)
     ) {
       return exits.error(
@@ -76,12 +76,12 @@ module.exports = {
 
     //An array with the credentials for calling the api is created.
     const instagramClient = [];
-    client.push(inputs.accessToken);
-    client.push(inputs.accessId);
+    instagramClient.push(inputs.accessToken);
+    instagramClient.push(inputs.accessId);
 
     //This function calls the instaDataFormating-file with a username, post count wanted and credentials.
     //The expected return/result is one or several Json objects containing the content wanted.
-    formatFunctions.getInstaPostsFromUser(
+    formatFunctions.getInstagramPostsFromUser(
       inputs.screenName,
       inputs.postCount,
       instagramClient,

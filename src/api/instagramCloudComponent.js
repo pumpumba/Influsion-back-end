@@ -5,12 +5,6 @@ module.exports = (function() {
 
   app = express.Router();
 
-  app.get("/", (req, res) => {
-    res.send(
-      "<h1>Hello! Welcome to Pumba!</h1> <p> For Instagram API alternative, go to ./api/instagram </p>"
-    );
-  });
-
   app.get("/health", (req, res) => {
     functions.health(req, res);
   });

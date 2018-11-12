@@ -67,7 +67,7 @@ var self = module.exports = {
       var url = "https://graph.facebook.com/" + instagramClient[1] + "?fields=business_discovery.username("
                 + userName + "){id, username, name, followers_count, profile_picture_url, media.limit("
                 + postCount + "){id,permalink,caption,timestamp,like_count,media_url, children{media_url}}}&access_token="
-                + client[0];
+                + instagramClient[0];
 
       var instagramResponse;
 
@@ -95,7 +95,7 @@ var self = module.exports = {
       var popularPosts = [];
       var pushedCount = 0;
       for (var i = 0; i < screenNames.length; i++) {
-        self.getInstaPostsFromUser(screenNames[i], postCount, instagramClient, (result) => {
+        self.getInstagramPostsFromUser(screenNames[i], postCount, instagramClient, (result) => {
           for(var j = 0; j < result.length;j++) {
               popularPosts.push(result[j]);
           }

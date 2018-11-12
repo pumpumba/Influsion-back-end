@@ -10,7 +10,7 @@ module.exports = {
       description: "Your Instagram access API token.",
       required: true
     },
-    instagramId: {
+    accessId: {
       example: "73264732487234723",
       description: "Your Instagram business account ID",
       required: true
@@ -65,7 +65,7 @@ module.exports = {
     var formatFunctions = require("../instaDataFormating");
     //If one of the credentials is not given, an error will occur.
     if (
-      _.isUndefined(inputs.id) ||
+      _.isUndefined(inputs.accessId) ||
       _.isUndefined(inputs.accessToken)
     ) {
       return exits.error(
@@ -78,12 +78,12 @@ module.exports = {
     //Initiate an array with the instagram credentials.
     const instagramClient = [];
     instagramClient.push(inputs.accessToken);
-    instagramClient.push(inputs.instagramId);
+    instagramClient.push(inputs.accessId);
 
     //This function calls the instaDataFormating-file with an array of usernames, post count wanted and credentials.
     //The expected return/result is one or several Json objects containing the content wanted. This result
     //is then sent to the sorting fuction that sorts the array by likes.
-    formatFunctions.getInstaPostsFromUsers(
+    formatFunctions.getInstagramPostsFromUsers(
       inputs.screenNames,
       inputs.postCount,
       instagramClient,
