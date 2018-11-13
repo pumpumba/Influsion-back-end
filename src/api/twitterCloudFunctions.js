@@ -65,14 +65,14 @@ var self = module.exports = {
   }
 };
 
-var callbackFunction = function(result, assetTypes, filterTypes, filterValue, context, currentAssetNum, currentFilterNum, resultObj, callback) {
+var callbackFunction = function(result, assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, callback) {
   if (result != undefined) {
     for (var k = 0; k < result.length; k++) {
       resultObj.push(result[k]);
     }
   }
   if (currentAssetNum != (assetTypes.length - 1)) {
-    self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+    getContent(assetTypes, filterTypes, filterValue, context, limit, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
   }
   else {
     callback(resultObj);
@@ -94,7 +94,7 @@ var getContent = function(assetTypes, filterTypes, filterValue, context, limit, 
               userScreenName: filterValue,
               count: limit
             }).exec((err, response) => {
-              callbackFunction(response, assetTypes, filterTypes, filterValue, context, currentAssetNum, currentFilterNum, resultObj, callback);
+              callbackFunction(response, assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, callback);
             });
             break;
           case "popular":
@@ -108,7 +108,7 @@ var getContent = function(assetTypes, filterTypes, filterValue, context, limit, 
               userScreenNames: screenNames,
               count: limit
             }).exec((err, response) => {
-              callbackFunction(response, assetTypes, filterTypes, filterValue, context, currentAssetNum, currentFilterNum, resultObj, callback);
+              callbackFunction(response, assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, callback);
             });
             break;
           default:
