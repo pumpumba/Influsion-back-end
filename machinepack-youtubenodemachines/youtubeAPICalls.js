@@ -1,19 +1,22 @@
+
+// This file contains all the functions that the youtube node machines use
+
 module.exports = {
-  getChannel: function(auth, youtube, channel_id, callback) {
+  getChannel: function(auth, youtube, channel_id, callback) { // Get a Youtube channel via channel ID
     getChannel(auth, youtube, channel_id, callback);
   },
-  getChannelUsername: function(auth, youtube, username, callback) {
+  getChannelUsername: function(auth, youtube, username, callback) { // Get a Youtube channel via channel name
       getChannelUsername(auth, youtube, username, callback);
   },
-  getVideos: function(auth, youtube, channel_id, count, callback) {
+  getVideos: function(auth, youtube, channel_id, count, callback) { // Get Youtube videos via channel ID
       getVideos(auth, youtube, channel_id, count, callback);
   },
-  getVideosUsername: function(auth, youtube, username, count, callback) {
-   getChannelUsername(auth, youtube, username, (result) => {
-     if (result === undefined || (Array.isArray(result) && (result.length == 0))) {
+  getVideosUsername: function(auth, youtube, username, count, callback) { // Get Youtube videos via channel name
+   getChannelUsername(auth, youtube, username, (result) => { // Get the channel
+     if (result === undefined || (Array.isArray(result) && (result.length == 0))) { // Check if a result was not found
        callback([]);
      } else {
-       getVideos(auth, youtube, result.channel_id, count, (result) => {
+       getVideos(auth, youtube, result.channel_id, count, (result) => { // Get the videos
          callback(result);
        });
      }
@@ -21,21 +24,22 @@ module.exports = {
  }
 };
 
+// Get a Youtube channel via channel ID
 function getChannel(auth, youtube, channelID, callback) {
-  youtube.channels.list(
+  youtube.channels.list( // Call the Youtube API
     {
       auth: auth,
       part: "snippet, statistics",
       order: "date",
       id: channelID,
-      maxResults: 1 //integer 0-50, default 5
+      maxResults: 1 // Integer 0-50, default 5
     },
     function(err, res) {
       if (err) {
         console.log("The API returned an error: " + err);
       } else {
-        if (res.data.items[0] !== undefined) {
-          var formatedChannel = formatChannelJson(res.data.items[0])
+        if (res.data.items[0] !== undefined) { // Check if a result was found
+          var formatedChannel = formatChannelJson(res.data.items[0]) // Format the recieved JSON object
           callback(formatedChannel);
         } else {
             callback([]);
@@ -45,21 +49,22 @@ function getChannel(auth, youtube, channelID, callback) {
   );
 }
 
+// Get a Youtube channel via channel name
 function getChannelUsername(auth, youtube, username, callback) {
-  youtube.channels.list(
+  youtube.channels.list( // Call the Youtube API
     {
       auth: auth,
       part: "snippet, statistics",
       order: "date",
       forUsername: username,
-      maxResults: 1 //integer 0-50, default 5
+      maxResults: 1 // Integer 0-50, default 5
     },
     function(err, res) {
       if (err) {
         console.log("The API returned an error: " + err);
       } else {
-        if (res.data.items[0] !== undefined) {
-          var formatedChannel = formatChannelJson(res.data.items[0])
+        if (res.data.items[0] !== undefined) { // Check if a result was found
+          var formatedChannel = formatChannelJson(res.data.items[0]) // Format the recieved JSON object
           callback(formatedChannel);
         } else {
           callback([]);
@@ -69,8 +74,9 @@ function getChannelUsername(auth, youtube, username, callback) {
   );
 }
 
+// Get Youtube videos via channel ID
 function getVideos(auth, youtube, channel_id, count, callback) {
-  youtube.search.list(
+  youtube.search.list( // Call the Youtube API
   {
     auth: auth,
     part: "snippet",
@@ -82,8 +88,8 @@ function getVideos(auth, youtube, channel_id, count, callback) {
     if (err) {
       console.log("The API returned an error: " + err);
     } else {
-      if (res.data.items !== undefined) {
-        getVideoStatistics(auth, youtube, res.data.items, count, callback);
+      if (res.data.items !== undefined) { // Check if a result was found
+        getVideoStatistics(auth, youtube, res.data.items, count, callback); // Get video statistics
       } else {
         callback([]);
       }
@@ -91,7 +97,10 @@ function getVideos(auth, youtube, channel_id, count, callback) {
   });
 }
 
+// Get video statistics
 function getVideoStatistics(auth, youtube, items, count, callback) {
+
+  // Convert the video ID:s of the provided videos to the appropriate format
   var IDs = "";
   if (Array.isArray(items)) {
     for (var i = 0; i < items.length; i++) {
@@ -102,24 +111,24 @@ function getVideoStatistics(auth, youtube, items, count, callback) {
     }
   }
 
-  youtube.videos.list(
-    {
-      auth: auth,
-      part: "statistics",
-      id: IDs,
-      maxResults: count //integer 0-50, default 5
-    },
-    function(err, res) {
-      if (err) {
-        console.log("The API returned an error: " + err);
-      } else {
-        var formatedVideos = formatVideosJson(items, res.data.items);
-        callback(formatedVideos);
-      }
+  youtube.videos.list( // Call the Youtube API
+  {
+    auth: auth,
+    part: "statistics",
+    id: IDs,
+    maxResults: count //integer 0-50, default 5
+  },
+  function(err, res) {
+    if (err) {
+      console.log("The API returned an error: " + err);
+    } else {
+      var formatedVideos = formatVideosJson(items, res.data.items); // Format the recieved JSON object filled with videos
+      callback(formatedVideos);
     }
-  );
+  });
 }
 
+// Format the JSON object containing the channel data
 function formatChannelJson(channel) {
   return formatedChannel = {
     "channel_id": channel.id,
@@ -134,6 +143,7 @@ function formatChannelJson(channel) {
   };
 }
 
+// Format the JSON object containing the video data
 function formatVideosJson(videos, statistics) {
   var formatedVideos = []
 

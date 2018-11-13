@@ -1,8 +1,11 @@
+
+// The getChannelYoutubeVideos node machine
+
 module.exports = {
   friendlyName: "Get Channel Youtube Videos",
   description: "Get Youtube videos from a channel",
   extendedDescription:
-    "Get content from Youtube by providing...",
+    "Get content from Youtube by providing Google email, Google private key, a channel ID or channel name, and a count of results.",
   inputs: {
     googleEmail: {
       example: "SERVICE_ACCOUNT_NAME@PROJECT_ID.iam.gserviceaccount.com",
@@ -42,11 +45,8 @@ module.exports = {
     }
   },
   fn: function(inputs, exits) {
-    var util = require("util");
+    // Define required variables
     var _ = require("lodash");
-
-    //let privatekey = require("./pumbagoogleprivatekey.json");
-
     const { google } = require("googleapis");
     var youtubeAPICalls = require("../youtubeAPICalls");
     var privatekey = inputs.googlePrivateKey;
@@ -60,7 +60,7 @@ module.exports = {
       ["https://www.googleapis.com/auth/youtube"]
     );
 
-    // Authenticate request
+    // Authenticate
     jwtClient.authorize(function(err, tokens) {
       if (err) {
         console.log(err);
@@ -70,33 +70,14 @@ module.exports = {
       }
     });
 
-    require("dotenv").load();
-
-    /*
-    // Configure a JWT auth client
-    let jwtClient = new google.auth.JWT(
-      process.env.GOOGLE_CLIENT_EMAIL,
-      null,
-      process.env.GOOGLE_PRIVATE_KEY,
-      ["https://www.googleapis.com/auth/youtube"]
-    );
-
-    // Authenticate request
-    jwtClient.authorize(function(err, tokens) {
-      if (err) {
-        console.log(err);
-        return;
-      } else {
-        console.log("Successfully connected!");
-      }
-    });
-    */
-
+    // Make sure that either a channel ID or channel name is specified
     if (!_.isUndefined(inputs.channelID)) {
+      // Call the getVideos function
       youtubeAPICalls.getVideos(jwtClient, youtube, inputs.channelID, inputs.count, (result) => {
         return exits.success(result);
       });
     } else if (!_.isUndefined(inputs.channelName)) {
+      // Call the getVideosUsername function
       youtubeAPICalls.getVideosUsername(jwtClient, youtube, inputs.channelName, inputs.count, (result) => {
         return exits.success(result);
       });

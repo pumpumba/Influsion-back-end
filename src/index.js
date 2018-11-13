@@ -1,7 +1,4 @@
 const express = require("express");
-const twitterNodeMachine = require("./api/twitterNodeMachine");
-instagram = require("./api/instagram");
-youtube = require("./api/youtubeMachineTest");
 const { Pool, Client } = require("pg");
 const bodyParser = require("body-parser");
 const bcrypt = require('bcrypt');
@@ -51,76 +48,14 @@ app.use(function(req, res, next) {
   next();
 });
 
-var twitterCloudComponent = require("./api/twitterCloudComponent");
-app.use("/twitter", twitterCloudComponent);
 var aggregateCloudComponent = require("./api/aggregateCloudComponent").getRoutes(client);
 app.use("/aggregate", aggregateCloudComponent);
 
 //Main page routing
 app.get("/", (req, res) => {
   res.send(
-    "<h1>Hello, friends! Welcome to Pumba!</h1> <p> For Instagram API, go to ./api/instagram <br>For Twitter API, go to ./api/twitter <br>For Youtube API, go to ./api/youtube </p>"
+    "<h1>Hello! Welcome to Pumba!</h1> <p>See the project Wiki for more information.</p>"
   );
-});
-
-//Youtube routing
-app.get("/api/youtube", (req, res) => {
-  var reqType = req["query"]["request_type"];
-
-  if (reqType === "get_channel") {
-    var channelID = req["query"]["channel_id"];
-    var username = req["query"]["username"];
-
-    if (channelID != null) {
-      youtube.getChannel(channelID, result => {
-        res.json(result);
-      });
-    } else if (username != null) {
-      youtube.getChannelUsername(username, result => {
-        res.json(result);
-      });
-    }
-  } else if (reqType === "get_videos") {
-    var channelID = req["query"]["channel_id"];
-    var username = req["query"]["username"];
-    var count = req["query"]["count"];
-
-    if (channelID != null) {
-      youtube.getVideos(channelID, count, (result) => {
-        res.json(result);
-      })
-    } else if (username != null) {
-      youtube.getVideosUsername(username, count, (result) => {
-        res.json(result);
-
-        if (Array.isArray(result)) {
-          var temp = 0;
-          for (var i = 0; i < result.length; i++) {
-
-            // insertPost: function(realName, numLikes, platform, userTextContent, datePosted, postID, postUrl, jsonContent, client, callback)
-            dbFunctions.insertPost("Bill Gates", result[i].video_like_count, result[i].platform, result[i].video_title, result[i].video_created_at, result[i].video_id, result[i].video_embeded_url, result[i], client, (response) => {
-              temp++;
-              console.log(temp);
-              if(temp == result.length - 1) {
-                console.log("Done!");
-              }
-            });
-
-          }
-        }
-      });
-    }
-  }
-  else {
-    res.send("Error: This request type is not defined");
-  }
-});
-
-//Instagram routing
-app.get("/api/instagram", (req, res) => {
-  var result = instagram.getInsta(result => {
-    res.json(result);
-  });
 });
 
 app.use(bodyParser.urlencoded({
@@ -455,25 +390,6 @@ app.post("/db/search_influencer", (req, res) => {
   });
 
 
-});
-
-//Twitter routing
-app.get("/api/twitter", (req, res) => {
-  var reqType = req["query"]["request_type"];
-  if (reqType === "get_user_tweets") {
-    var username = req["query"]["username"];
-    var tweetCount = req["query"]["count"];
-
-    twitterNodeMachine.getUserTweets(username, tweetCount, result => {
-      res.json(result);
-    });
-  } else if (reqType === "popular") {
-    twitterNodeMachine.getPopularTweets(result => {
-      res.json(result);
-    });
-  } else {
-    res.send("Error: This request type is not defined");
-  }
 });
 
 app.listen(port, hostname);

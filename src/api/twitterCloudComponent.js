@@ -7,7 +7,7 @@ module.exports = (function() {
 
   app.get("/", (req, res) => {
     res.send(
-      "<h1>Hello! Welcome to Pumba!</h1> <p> For Twitter API alternative, go to ./api/twitter </p>"
+      "<h1>Hello! Welcome to Pumba!</h1>"
     );
   });
 

@@ -1,7 +1,7 @@
 {
   "name": "machinepack-youtubenodemachines",
   "version": "2.0.0",
-  "description": "A Youtube machinepack",
+  "description": "Gets content from Youtube",
   "scripts": {
     "test": "node ./node_modules/test-machinepack-mocha/bin/testmachinepack-mocha.js"
   },

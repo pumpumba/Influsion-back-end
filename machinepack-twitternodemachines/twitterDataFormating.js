@@ -42,12 +42,12 @@ var self = module.exports = {
             }
             tweet.user_url = "https://twitter.com/" + tweet.user_screen_name;
             tweet.tweet_url = "https://twitter.com/" + tweet.user_screen_name + "/status/" + tweet.tweet_id;
-        
+
             // Add hashtags
             for (var j = 0; j < tweets[i].entities.hashtags.length; j++){
               tweet.tweet_hashtags.push(tweets[i].entities.hashtags[j].text)
             }
-        
+
             // Add media
             if (tweets[i].entities.media != null) {
               if (tweets[i].extended_entities != null) { // Multiple pictures/media
@@ -60,12 +60,12 @@ var self = module.exports = {
                 }
               }
             }
-        
+
             // Get the higher res image
             var fileType = tweet.user_profile_image_url.substring(tweet.user_profile_image_url.length - 4, tweet.user_profile_image_url.length);
-      tweet.user_profile_image_url = tweet.user_profile_image_url.substring(0, tweet.user_profile_image_url.length - 11);
-      tweet.user_profile_image_url = tweet.user_profile_image_url + fileType;
-        
+            tweet.user_profile_image_url = tweet.user_profile_image_url.substring(0, tweet.user_profile_image_url.length - 11);
+            tweet.user_profile_image_url = tweet.user_profile_image_url + fileType;
+
             formatedTweets.push(tweet);
           }
         }

@@ -6,7 +6,7 @@
 
 ### [Docs](http://node-machine.org/machinepack-youtubenodemachines) &nbsp; [Browse other machines](http://node-machine.org/machinepacks) &nbsp;  [FAQ](http://node-machine.org/implementing/FAQ)  &nbsp;  [Newsgroup](https://groups.google.com/forum/?hl=en#!forum/node-machine)
 
-A Youtube machinepack
+Gets content from Youtube
 
 
 ## Installation &nbsp; [![NPM version](https://badge.fury.io/js/machinepack-youtubenodemachines.svg)](http://badge.fury.io/js/machinepack-youtubenodemachines) [![Build Status](https://travis-ci.org/mikermcneil/machinepack-youtubenodemachines.png?branch=master)](https://travis-ci.org/mikermcneil/machinepack-youtubenodemachines)
@@ -17,7 +17,7 @@ $ npm install machinepack-youtubenodemachines
 
 ## Usage
 
-For the latest usage documentation, version information, and test status of this module, see <a href="http://node-machine.org/machinepack-youtubenodemachines" title="A Youtube machinepack (for node.js)">http://node-machine.org/machinepack-youtubenodemachines</a>.  The generated manpages for each machine contain a complete reference of all expected inputs, possible exit states, and example return values.  If you need more help, or find a bug, jump into [Gitter](https://gitter.im/node-machine/general) or leave a message in the project [newsgroup](https://groups.google.com/forum/?hl=en#!forum/node-machine).
+For the latest usage documentation, version information, and test status of this module, see <a href="http://node-machine.org/machinepack-youtubenodemachines" title="Gets content from Youtube (for node.js)">http://node-machine.org/machinepack-youtubenodemachines</a>.  The generated manpages for each machine contain a complete reference of all expected inputs, possible exit states, and example return values.  If you need more help, or find a bug, jump into [Gitter](https://gitter.im/node-machine/general) or leave a message in the project [newsgroup](https://groups.google.com/forum/?hl=en#!forum/node-machine).
 
 ## About  &nbsp; [![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/node-machine/general?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -28,4 +28,3 @@ Learn more at <a href="http://node-machine.org/implementing/FAQ" title="Machine 
 ## License
 
 MIT &copy; 2018 contributors
-
