@@ -1,5 +1,5 @@
 const { google } = require("googleapis");
-//let privatekey = require("./pumbagoogleprivatekey.json");
+
 require("dotenv").load();
 
 // Configure a JWT auth client
@@ -39,9 +39,7 @@ module.exports = {
           console.log("The API returned an error: " + err);
         } else {
           callback(res.data.items);
-          /*for (var i = 0; i < response.data.items.length; i++) {
-             console.log(response.data.items[i].snippet.title);
-           }*/
+          
         }
       }
     );
