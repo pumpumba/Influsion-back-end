@@ -1,6 +1,5 @@
 const express = require("express");
 const twitterNodeMachine = require("./api/twitterNodeMachine");
-instagram = require("./api/instagram");
 youtube = require("./api/youtube");
 const { Pool, Client } = require("pg");
 const bodyParser = require("body-parser");
@@ -66,13 +65,6 @@ app.get("/", (req, res) => {
 //Youtube routing
 app.get("/api/youtube", (req, res) => {
   youtube.getYoutube(result => {
-    res.json(result);
-  });
-});
-
-//Instagram routing
-app.get("/api/instagram", (req, res) => {
-  var result = instagram.getInsta(result => {
     res.json(result);
   });
 });
