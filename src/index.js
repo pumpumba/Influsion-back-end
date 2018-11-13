@@ -213,7 +213,7 @@ app.get("/db/get_user", (req, res) => {
   var usrID = req["query"]["usrid"];
   var dbRequest = "SELECT * FROM USR WHERE usrid = "+usrID+";";
   client.query(dbRequest, (err, dbResult) => {
-    var dbResults = dbResult;
+    var dbResults = dbResult["rows"];
     if (dbResults != undefined) {
       dbResults["retrieveSuccess"] = true;
     } else {
@@ -249,6 +249,69 @@ app.post("/db/add_user_visit", (req, res) =>  {
   dbFunctions.addUserVisit(userID, influencerID, typeOfVisit, client, (response) => {
     res.json(response);
   });
+});
+
+app.post("/db/add_user_like", (req, res) => {
+  var inputObj = req.body;
+  var usrID = inputObj.user_id;
+  var postID = inputObj.post_id;
+  var dbRequest = "INSERT INTO USRLIKEPOST (USRID, POSTID) VALUES ("+usrID+","+postID+");";
+  insertionToDB(client, dbRequest, (response) => {
+    res.json(response);
+  });
+
+});
+
+app.get("/db/get_for_autosearch", (req, res) => {
+  var user_id = req["query"]["user_id"];
+  var dbRequest = "WITH INFLLIST AS ( \
+    SELECT INFLID \
+    FROM USRFLWINFL \
+    WHERE FLWRID = "+user_id+" \
+  ), PLATFORMACCOUNTS AS ( \
+    SELECT PACC.INFLID, json_build_object('platformaccounts', \
+      json_agg( \
+        json_build_object( \
+          'actname', \
+          PACC.actname, \
+          'platform', \
+          PACC.PLATFORM))) \
+          AS PFACCS FROM PLATFORMACCOUNT AS PACC \
+          GROUP BY INFLID \
+  ), IPC AS ( \
+    SELECT INFLUENCER.INFLUENCERNAME, INFLUENCER.REALNAME, PLATFORMACCOUNTS.* FROM INFLUENCER \
+    INNER JOIN PLATFORMACCOUNTS ON \
+    INFLUENCER.INFLUENCERID = PLATFORMACCOUNTS.INFLID \
+  ) \
+   SELECT DISTINCT ON (IPC.INFLID, IPC.INFLUENCERNAME, IPC.REALNAME) IPC.*, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLLIST.INFLID IN(IPC.INFLID)) AS USRFOLLOWINGINFLUENCER FROM IPC;"
+   client.query(dbRequest, (err, dbResult) => {
+     var dbResults = dbResult["rows"];
+     if (dbResults != undefined) {
+       dbResults["retrieveSuccess"] = true;
+     } else {
+       dbResults = err;
+       dbResults["retrieveSuccess"] = false;
+     }
+     res.json(dbResults);
+   });
+});
+
+app.post("/db/delete_user_like", (req, res) => {
+  var inputObj = req.body;
+  var usrID = inputObj.user_id;
+  var postID = inputObj.post_id;
+  var dbRequest = "DELETE FROM USRLIKEPOST WHERE USRID = "+usrID+" AND POSTID = "+postID+";"
+  client.query(dbRequest, (err, dbResult) => {
+    var dbResults = dbResult;
+    if (dbResults != undefined) {
+      dbResults["deleteSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["deleteSuccess"] = false;
+    }
+    res.json(dbResults);
+  });
+
 });
 
 // Modifies a user's information. All information needs to be sent in, or error will be returned. If something is not changed, send in the old information.

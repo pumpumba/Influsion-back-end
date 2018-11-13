@@ -264,6 +264,28 @@ WITH PLATFORMACCOUNTS AS (
 
 
 
+-- Retrieve influencer id, real name and all account names
+WITH INFLLIST AS (
+  SELECT INFLID
+  FROM USRFLWINFL
+  WHERE FLWRID = 2
+), PLATFORMACCOUNTS AS (
+  SELECT PACC.INFLID, json_build_object('platformaccounts',
+    json_agg(
+      json_build_object(
+        'actname',
+        PACC.actname,
+        'platform',
+        PACC.PLATFORM)))
+        AS PFACCS FROM PLATFORMACCOUNT AS PACC
+        GROUP BY INFLID
+), IPC AS (
+  SELECT INFLUENCER.INFLUENCERNAME, INFLUENCER.REALNAME, PLATFORMACCOUNTS.* FROM INFLUENCER
+  INNER JOIN PLATFORMACCOUNTS ON
+  INFLUENCER.INFLUENCERID = PLATFORMACCOUNTS.INFLID
+)
+ SELECT DISTINCT ON (IPC.INFLID, IPC.INFLUENCERNAME, IPC.REALNAME) IPC.*, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLLIST.INFLID IN(IPC.INFLID)) AS USRFOLLOWINGINFLUENCER FROM IPC;
+
 -- Search alternative if it would be too heavy to do the query above.
 -- This one will fetch a picture if there is a profile picture for any of the platformaccounts.
 -- If there is no picture, it will return null and a placeholder shall be held frontend.
