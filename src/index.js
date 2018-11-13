@@ -50,6 +50,10 @@ app.use(function(req, res, next) {
 
 var aggregateCloudComponent = require("./api/aggregateCloudComponent").getRoutes(client);
 app.use("/aggregate", aggregateCloudComponent);
+var twitterCloudComponent = require("./api/twitterCloudComponent");
+ app.use("/twitter", twitterCloudComponent);
+ var youtubeCloudComponent = require("./api/youtubeCloudComponent");
+  app.use("/youtube", youtubeCloudComponent);
 
 //Main page routing
 app.get("/", (req, res) => {
