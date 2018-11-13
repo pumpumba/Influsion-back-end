@@ -47,7 +47,7 @@ client.query("SELECT NOW()", (err, res) => {
   //client.end();
 });
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
     "Access-Control-Allow-Headers",
@@ -115,7 +115,7 @@ app.get("/db/get_followed_infl_posts", (req, res) => {
   //})
   var usrID = req["query"]["userid"]
 
-  var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = "+usrID+") ORDER BY POSTED DESC;"
+  var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = " + usrID + ") ORDER BY POSTED DESC;"
   client.query(dbRequest, (err, dbResult) => {
     console.log(dbResult); //We get a problem if login is
     var dbResults = dbResult;
@@ -131,7 +131,7 @@ app.get("/db/get_followed_infl_posts", (req, res) => {
   });
 });
 // Unfollocw an influencer by specifiying user_id for user, and influencer_id for influencer
-app.post("/db/unfollow_influencer", (req,res) => {
+app.post("/db/unfollow_influencer", (req, res) => {
   var inputObj = req.body;
   var userID = inputObj.user_id;
   var influencerID = inputObj.influencer_id;
@@ -141,15 +141,15 @@ app.post("/db/unfollow_influencer", (req,res) => {
   });
 });
 
-app.post("/db/add_follow_influencer", (req,res) => {
+app.post("/db/add_follow_influencer", (req, res) => {
   var inputObj = req.body;
   var userID = inputObj.user_id;
   var influencerID = inputObj.influencer_id;
   var names = ["real_name", "influencer_id"];
   for (i in inputObj) {
-      if (names.includes(i)) {
-        console.log("Yes!");
-      }
+    if (names.includes(i)) {
+      console.log("Yes!");
+    }
   }
   dbFunctions.addFollowInfluencer(userID, influencerID, client, (response) => {
     res.json(response);
@@ -162,7 +162,7 @@ app.post("/db/get_platf_accs_flwdinfls", (req, res) => {
   var userID = inputObj.user_id; //ss
   var orderBy = inputObj.order_by;
   dbFunctions.getPlatformAccountsFromFollowedInfluencers(userID, orderBy, client, (response) => {
-    for(var i = 0; i < response['rows'].length; i++) {
+    for (var i = 0; i < response['rows'].length; i++) {
       console.log(response['rows'][i]['influencerid']);
     }
     console.log(response['rows'])
@@ -182,15 +182,15 @@ app.post("/db/create_tv_operator", (req, res) => {
   var inputObj = req.body;
   var tv_op_name = inputObj.operatorname;
   var pwd = inputObj.password;
-  bcrypt.hash(pwd, saltRounds, function(err, hash) {
+  bcrypt.hash(pwd, saltRounds, function (err, hash) {
 
 
-  var dbRequest = "INSERT INTO TVOPERATOR (TVOPERATORNAME, HASHEDPWD) VALUES ('"+tv_op_name+"', '"+hash+"');"
+    var dbRequest = "INSERT INTO TVOPERATOR (TVOPERATORNAME, HASHEDPWD) VALUES ('" + tv_op_name + "', '" + hash + "');"
 
-  insertionToDB(client, dbRequest, (response) => {
+    insertionToDB(client, dbRequest, (response) => {
 
-    res.json(response);
-  });
+      res.json(response);
+    });
 
   });
 
@@ -202,7 +202,7 @@ app.post("/db/login_tv_operator", (req, res) => {
   var password = inputObj.password; //TODO: Change to hashed version of password
   var tv_op_name = inputObj.operatorname;
 
-  var dbRequest = "SELECT * FROM TVOPERATOR WHERE TVOPERATORNAME = '"+tv_op_name+"'";
+  var dbRequest = "SELECT * FROM TVOPERATOR WHERE TVOPERATORNAME = '" + tv_op_name + "'";
   //var dbRequest = "SELECT * FROM usr WHERE (usrname = '"+usrname+"' AND HASHEDPWD = '"+hashedPwd+"')"
 
   client.query(dbRequest, (err, dbResult) => {
@@ -211,7 +211,7 @@ app.post("/db/login_tv_operator", (req, res) => {
     if (dbResults != undefined) {
       var hashPassword = dbResult["rows"][0].hashedpwd;
 
-      bcrypt.compare(password, hashPassword, function(err, resultCompare) {
+      bcrypt.compare(password, hashPassword, function (err, resultCompare) {
         if (resultCompare == true) {
           dbResults["loginSuccess"] = true;
         } else {
@@ -219,12 +219,12 @@ app.post("/db/login_tv_operator", (req, res) => {
           dbResults["loginSuccess"] = false;
         }
 
-        res.json({dbResults});
+        res.json({ dbResults });
       });
     } else {
       dbResults = {};
       dbResults["loginSuccess"] = false;
-      res.json({dbResults});
+      res.json({ dbResults });
     }
   });
 });
@@ -234,7 +234,7 @@ app.get("/db/get_user", (req, res) => {
   var usrID = req["query"]["usrid"];
   //console.log("HEHEHEHEHEHEHEH");
   //console.log(req);
-  var dbRequest = "SELECT * FROM USR WHERE usrid = "+usrID+";";
+  var dbRequest = "SELECT * FROM USR WHERE usrid = " + usrID + ";";
   console.log(dbRequest);
   client.query(dbRequest, (err, dbResult) => {
     console.log(err);
@@ -270,7 +270,7 @@ app.get("/db/get_all_users", (req, res) => {
   });
 });
 
-app.post("/db/add_user_visit", (req, res) =>  {
+app.post("/db/add_user_visit", (req, res) => {
   var inputObj = req.body;
   var userID = inputObj.user_id;
   var influencerID = inputObj.influencer_id;
@@ -280,7 +280,7 @@ app.post("/db/add_user_visit", (req, res) =>  {
   });
 });
 
-app.post("/db/modify_user", (req,res) => {
+app.post("/db/modify_user", (req, res) => {
   var inputObj = req.body;
   var password = inputObj.password; //TODO: Change to hashed version of password
   var username = inputObj.username;
@@ -297,7 +297,7 @@ app.use(bodyParser.urlencoded({
 }))
 
 app.use(bodyParser.json());
-app.post("/db/register_user", (req, res)=> {
+app.post("/db/register_user", (req, res) => {
   console.log("ASDASDASD");
   console.log(req.body);
   var inputObj = req.body;
@@ -334,15 +334,15 @@ app.post("/db/change_tv_op_info", (req, res) => {
   var tv_op_name = inputObj.operatorname;
   var pwd = inputObj.password;
 
-  bcrypt.hash(pwd, saltRounds, function(err, hash) {
+  bcrypt.hash(pwd, saltRounds, function (err, hash) {
 
 
-  var dbRequest = "UPDATE TVOPERATOR SET TVOPERATORNAME = '"+tv_op_name+"', HASHEDPWD = '"+hash+"' WHERE TVOPERATORID = "+tv_op_id+";"
+    var dbRequest = "UPDATE TVOPERATOR SET TVOPERATORNAME = '" + tv_op_name + "', HASHEDPWD = '" + hash + "' WHERE TVOPERATORID = " + tv_op_id + ";"
 
-  insertionToDB(client, dbRequest, (response) => {
+    insertionToDB(client, dbRequest, (response) => {
 
-    res.json(response);
-  });
+      res.json(response);
+    });
 
   });
 
@@ -354,7 +354,7 @@ app.post("/db/login", (req, res) => {
   var password = inputObj.password; //TODO: Change to hashed version of password
   var username = inputObj.username;
   dbFunctions.login(password, username, client, (response) => {
-      res.json(response);
+    res.json(response);
   });
 });
 

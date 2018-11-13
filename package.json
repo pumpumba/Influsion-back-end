@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js --legacy-watch",
-    "test": "mocha"
+    "test": "mocha --reporter-options output=filename.xml"
   },
   "repository": {
     "type": "git",

@@ -11,19 +11,21 @@ let jwtClient = new google.auth.JWT(
 );
 
 // Authenticate request
-jwtClient.authorize(function(err, tokens) {
+jwtClient.authorize(function (err, tokens) {
   if (err) {
     console.log(err);
     return;
   } else {
-    console.log("Successfully connected!");
+    if (process.env.NODE_ENV !== "test") {
+      console.log("Successfully connected!");
+    }
   }
 });
 
 let youtube = google.youtube("v3");
 
 module.exports = {
-  getYoutube: function(callback) {
+  getYoutube: function (callback) {
     youtube.search.list(
       {
         auth: jwtClient,
@@ -32,7 +34,7 @@ module.exports = {
         q: "pewdiepie",
         type: "video"
       },
-      function(err, res) {
+      function (err, res) {
         if (err) {
           console.log("The API returned an error: " + err);
         } else {
