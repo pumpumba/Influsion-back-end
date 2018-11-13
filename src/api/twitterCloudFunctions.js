@@ -12,8 +12,11 @@ var self = module.exports = {
     switch (assetType) {
       case "tweet":
         switch (filterType) {
-          case "user":
-            res.json(["Popular", "<enter your influencers username>"]);
+          case "influencer":
+            res.json(["<enter your influencers username>"]);
+            break;
+          case "popular":
+            res.json(['<no input needed>']);
             break;
           default:
             res.json(["Nothing available"]);
@@ -81,35 +84,32 @@ var getContent = function(assetTypes, filterTypes, filterValue, context, limit, 
   switch (assetTypes[currentAssetNum]) {
     case "tweet":
         switch (filterTypes[currentFilterNum]) {
-          case "user":
-            switch (filterValue) {
-              case "Popular":
-              var screenNames = ["elonmusk", "justinbieber", "barackobama", "potus", "billgates", "beyonce"];
-                Twitter.getPopularTweets({
-                  consumerKey: process.env.TWITTER_CONSUMER_KEY,
-                  consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
-                  accessToken: process.env.TWITTER_ACCESS_TOKEN,
-                  accessSecret: process.env.TWITTER_ACCESS_SECRET,
-                  bearerToken: process.env.TWITTER_BEARER_TOKEN,
-                  userScreenNames: screenNames,
-                  count: limit
-                }).exec((err, response) => {
-                  callbackFunction(response, assetTypes, filterTypes, filterValue, context, currentAssetNum, currentFilterNum, resultObj, callback);
-                });
-                break;
-              default:
-                Twitter.getUserTweets({
-                  consumerKey: process.env.TWITTER_CONSUMER_KEY,
-                  consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
-                  accessToken: process.env.TWITTER_ACCESS_TOKEN,
-                  accessSecret: process.env.TWITTER_ACCESS_SECRET,
-                  bearerToken: process.env.TWITTER_BEARER_TOKEN,
-                  userScreenName: filterValue,
-                  count: limit
-                }).exec((err, response) => {
-                  callbackFunction(response, assetTypes, filterTypes, filterValue, context, currentAssetNum, currentFilterNum, resultObj, callback);
-                });
-            }
+          case "influencer":
+            Twitter.getUserTweets({
+              consumerKey: process.env.TWITTER_CONSUMER_KEY,
+              consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
+              accessToken: process.env.TWITTER_ACCESS_TOKEN,
+              accessSecret: process.env.TWITTER_ACCESS_SECRET,
+              bearerToken: process.env.TWITTER_BEARER_TOKEN,
+              userScreenName: filterValue,
+              count: limit
+            }).exec((err, response) => {
+              callbackFunction(response, assetTypes, filterTypes, filterValue, context, currentAssetNum, currentFilterNum, resultObj, callback);
+            });
+            break;
+          case "popular":
+            var screenNames = ["elonmusk", "justinbieber", "barackobama", "potus", "billgates", "beyonce"];
+            Twitter.getPopularTweets({
+              consumerKey: process.env.TWITTER_CONSUMER_KEY,
+              consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
+              accessToken: process.env.TWITTER_ACCESS_TOKEN,
+              accessSecret: process.env.TWITTER_ACCESS_SECRET,
+              bearerToken: process.env.TWITTER_BEARER_TOKEN,
+              userScreenNames: screenNames,
+              count: limit
+            }).exec((err, response) => {
+              callbackFunction(response, assetTypes, filterTypes, filterValue, context, currentAssetNum, currentFilterNum, resultObj, callback);
+            });
             break;
           default:
             callback("The cloud component failed to provide any content");
