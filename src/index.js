@@ -1,6 +1,4 @@
 const express = require("express");
-const twitterNodeMachine = require("./api/twitterNodeMachine");
-youtube = require("./api/youtube");
 const { Pool, Client } = require("pg");
 const bodyParser = require("body-parser");
 const bcrypt = require('bcrypt');
@@ -50,23 +48,18 @@ app.use(function(req, res, next) {
   next();
 });
 
-var twitterCloudComponent = require("./api/twitterCloudComponent");
-app.use("/twitter", twitterCloudComponent);
 var aggregateCloudComponent = require("./api/aggregateCloudComponent").getRoutes(client);
 app.use("/aggregate", aggregateCloudComponent);
+var twitterCloudComponent = require("./api/twitterCloudComponent");
+ app.use("/twitter", twitterCloudComponent);
+ var youtubeCloudComponent = require("./api/youtubeCloudComponent");
+  app.use("/youtube", youtubeCloudComponent);
 
 //Main page routing
 app.get("/", (req, res) => {
   res.send(
-    "<h1>Hello, friends! Welcome to Pumba!</h1> <p> For Instagram API, go to ./api/instagram <br>For Twitter API, go to ./api/twitter <br>For Youtube API, go to ./api/youtube </p>"
+    "<h1>Hello! Welcome to Pumba!</h1> <p>See the project Wiki for more information.</p>"
   );
-});
-
-//Youtube routing
-app.get("/api/youtube", (req, res) => {
-  youtube.getYoutube(result => {
-    res.json(result);
-  });
 });
 
 app.use(bodyParser.urlencoded({
@@ -401,25 +394,6 @@ app.post("/db/search_influencer", (req, res) => {
   });
 
 
-});
-
-//Twitter routing
-app.get("/api/twitter", (req, res) => {
-  var reqType = req["query"]["request_type"];
-  if (reqType === "get_user_tweets") {
-    var username = req["query"]["username"];
-    var tweetCount = req["query"]["count"];
-
-    twitterNodeMachine.getUserTweets(username, tweetCount, result => {
-      res.json(result);
-    });
-  } else if (reqType === "popular") {
-    twitterNodeMachine.getPopularTweets(result => {
-      res.json(result);
-    });
-  } else {
-    res.send("Error: This request type is not defined");
-  }
 });
 
 app.listen(port, hostname);
