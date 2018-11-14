@@ -1,9 +1,8 @@
 var self = module.exports = {
   // the twitter/health call
   health: function(req, res) {
-    res.send(
-      "<h1>Hello! Welcome to Pumba!</h1>"
-    );
+    res.status(200);
+    res.send("HTTP response 200 code OK.");
   },
   //The twitter/filters call
   filters: function(req, res) {
