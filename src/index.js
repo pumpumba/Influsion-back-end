@@ -294,6 +294,24 @@ app.get("/db/get_clicks_promoted_influencers", (req, res) => {
 
 });
 
+app.post("/db/influencer_promotion", (req, res) => {
+  var inputObj = req.body;
+  var promotionType = inputObj.promotion_type;
+  var infl_id = inputObj.influencer_id;
+  var promotion_id = inputObj.promotion_id;
+  var dbRequest = "INSERT INTO INFLUENCERPROMOTED(INFLUENCERID, PROMOTIONID, PROMOTIONTYPE) VALUES ("+infl_id+","+promotion_id+", '"+promotionType+"');";
+  client.query(dbRequest, (err, dbResult) => {
+    var dbResults = dbResult;
+    if (dbResults != undefined) {
+      dbResults["createSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["createSuccess"] = false;
+    }
+    res.json(dbResults);
+  });
+});
+
 app.post("/db/hashtag_promotion", (req, res) => {
   var inputObj = req.body;
   var promotionType = inputObj.promotion_type;
