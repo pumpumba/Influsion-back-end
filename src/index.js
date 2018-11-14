@@ -198,7 +198,7 @@ app.get("/db/get_user", (req, res) => {
   var usrID = req["query"]["usrid"];
   var dbRequest = "SELECT * FROM USR WHERE usrid = "+usrID+";";
   client.query(dbRequest, (err, dbResult) => {
-    var dbResults = dbResult;
+    var dbResults = dbResult["rows"];
     if (dbResults != undefined) {
       dbResults["retrieveSuccess"] = true;
     } else {
@@ -234,6 +234,137 @@ app.post("/db/add_user_visit", (req, res) =>  {
   dbFunctions.addUserVisit(userID, influencerID, typeOfVisit, client, (response) => {
     res.json(response);
   });
+});
+
+app.post("/db/add_user_like", (req, res) => {
+  var inputObj = req.body;
+  var usrID = inputObj.user_id;
+  var postID = inputObj.post_id;
+  var dbRequest = "INSERT INTO USRLIKEPOST (USRID, POSTID) VALUES ("+usrID+","+postID+");";
+  insertionToDB(client, dbRequest, (response) => {
+    res.json(response);
+  });
+
+});
+
+app.get("/db/get_clicks_promoted_influencers", (req, res) => {
+  var inputObj = req.body;
+  var promotion_id = req["query"]["promotion_id"];
+  var tv_op_id = req["query"]["tv_op_id"];
+  var dbRequest = "SELECT I.INFLID, COUNT(*) AS NRCLICKS, (SELECT \
+    (COUNT(*) >= 1) \
+    FROM INFLUENCERPROMOTED \
+    WHERE INFLUENCERID IN(I.INFLID)";
+
+    if (promotion_id != undefined) {
+      dbRequest = dbRequest+" AND PROMOTIONID = "+promotion_id+") AS ISPROMOTEDBYCAMPAIGN";
+    } else {
+      dbRequest = dbRequest+" AND PROMOTIONID IN(SELECT PROMOTIONID FROM PROMOTION WHERE TVOPERATORID = "+tv_op_id+")) AS ISPROMOTEDBYCAMPAIGN";
+    }
+
+
+    dbRequest = dbRequest+" FROM USRVISIT AS I GROUP BY I.INFLID \
+    ORDER BY NRCLICKS DESC;"
+    client.query(dbRequest, (err, dbResult) => {
+
+      if (dbResult != undefined) {
+        var dbResults = dbResult["rows"];
+        dbResults["retrieveSuccess"] = true;
+      } else {
+        var dbResults = err;
+        dbResults["retrieveSuccess"] = false;
+      }
+      res.json(dbResults);
+    });
+
+});
+
+app.post("/db/influencer_promotion", (req, res) => {
+  var inputObj = req.body;
+  var promotionType = inputObj.promotion_type;
+  var infl_id = inputObj.influencer_id;
+  var promotion_id = inputObj.promotion_id;
+  var dbRequest = "INSERT INTO INFLUENCERPROMOTED(INFLUENCERID, PROMOTIONID, PROMOTIONTYPE) VALUES ("+infl_id+","+promotion_id+", '"+promotionType+"');";
+  client.query(dbRequest, (err, dbResult) => {
+    var dbResults = dbResult;
+    if (dbResults != undefined) {
+      dbResults["createSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["createSuccess"] = false;
+    }
+    res.json(dbResults);
+  });
+});
+
+app.post("/db/hashtag_promotion", (req, res) => {
+  var inputObj = req.body;
+  var promotionType = inputObj.promotion_type;
+  var tag = inputObj.tag;
+  var promotion_id = inputObj.promotion_id;
+  var dbRequest = "INSERT INTO TAGPROMOTED(TAGID, PROMOTIONID, PROMOTIONTYPE) VALUES ((SELECT TAGID FROM TAG WHERE TAGNAME = '"+tag+"'),"+promotion_id+", '"+promotionType+"');";
+  client.query(dbRequest, (err, dbResult) => {
+    var dbResults = dbResult;
+    if (dbResults != undefined) {
+      dbResults["createSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["createSuccess"] = false;
+    }
+    res.json(dbResults);
+  });
+});
+
+app.get("/db/get_for_autosearch", (req, res) => {
+  var user_id = req["query"]["user_id"];
+  var dbRequest = "WITH INFLLIST AS ( \
+    SELECT INFLID \
+    FROM USRFLWINFL \
+    WHERE FLWRID = "+user_id+" \
+  ), PLATFORMACCOUNTS AS ( \
+    SELECT PACC.INFLID, json_build_object('platformaccounts', \
+      json_agg( \
+        json_build_object( \
+          'actname', \
+          PACC.actname, \
+          'platform', \
+          PACC.PLATFORM))) \
+          AS PFACCS FROM PLATFORMACCOUNT AS PACC \
+          GROUP BY INFLID \
+  ), IPC AS ( \
+    SELECT INFLUENCER.INFLUENCERNAME, INFLUENCER.REALNAME, PLATFORMACCOUNTS.* FROM INFLUENCER \
+    INNER JOIN PLATFORMACCOUNTS ON \
+    INFLUENCER.INFLUENCERID = PLATFORMACCOUNTS.INFLID \
+  ) \
+   SELECT DISTINCT ON (IPC.INFLID, IPC.INFLUENCERNAME, IPC.REALNAME) IPC.*, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLLIST.INFLID IN(IPC.INFLID)) AS USRFOLLOWINGINFLUENCER FROM IPC;"
+   client.query(dbRequest, (err, dbResult) => {
+     var dbResults = dbResult["rows"];
+     if (dbResults != undefined) {
+       dbResults["retrieveSuccess"] = true;
+     } else {
+       dbResults = err;
+       dbResults["retrieveSuccess"] = false;
+     }
+     res.json(dbResults);
+   });
+});
+
+app.post("/db/delete_user_like", (req, res) => {
+  var inputObj = req.body;
+  var usrID = inputObj.user_id;
+  var postID = inputObj.post_id;
+  var dbRequest = "DELETE FROM USRLIKEPOST WHERE USRID = "+usrID+" AND POSTID = "+postID+";"
+  client.query(dbRequest, (err, dbResult) => {
+    var dbResults = dbResult;
+    if (dbResults != undefined) {
+      dbResults["deleteSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["deleteSuccess"] = false;
+    }
+    res.json(dbResults);
+  });
+
 });
 
 // Modifies a user's information. All information needs to be sent in, or error will be returned. If something is not changed, send in the old information.
