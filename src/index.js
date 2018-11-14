@@ -262,6 +262,56 @@ app.post("/db/add_user_like", (req, res) => {
 
 });
 
+app.get("/db/get_clicks_promoted_influencers", (req, res) => {
+  var inputObj = req.body;
+  var promotion_id = req["query"]["promotion_id"];
+  var tv_op_id = req["query"]["tv_op_id"];
+  var dbRequest = "SELECT I.INFLID, COUNT(*) AS NRCLICKS, (SELECT \
+    (COUNT(*) >= 1) \
+    FROM INFLUENCERPROMOTED \
+    WHERE INFLUENCERID IN(I.INFLID)";
+
+    if (promotion_id != undefined) {
+      dbRequest = dbRequest+" AND PROMOTIONID = "+promotion_id+") AS ISPROMOTEDBYCAMPAIGN";
+    } else {
+      dbRequest = dbRequest+" AND PROMOTIONID IN(SELECT PROMOTIONID FROM PROMOTION WHERE TVOPERATORID = "+tv_op_id+")) AS ISPROMOTEDBYCAMPAIGN";
+    }
+
+
+    dbRequest = dbRequest+" FROM USRVISIT AS I GROUP BY I.INFLID \
+    ORDER BY NRCLICKS DESC;"
+    client.query(dbRequest, (err, dbResult) => {
+
+      if (dbResult != undefined) {
+        var dbResults = dbResult["rows"];
+        dbResults["retrieveSuccess"] = true;
+      } else {
+        var dbResults = err;
+        dbResults["retrieveSuccess"] = false;
+      }
+      res.json(dbResults);
+    });
+
+});
+
+app.post("/db/hashtag_promotion", (req, res) => {
+  var inputObj = req.body;
+  var promotionType = inputObj.promotion_type;
+  var tag = inputObj.tag;
+  var promotion_id = inputObj.promotion_id;
+  var dbRequest = "INSERT INTO TAGPROMOTED(TAGID, PROMOTIONID, PROMOTIONTYPE) VALUES ((SELECT TAGID FROM TAG WHERE TAGNAME = '"+tag+"'),"+promotion_id+", '"+promotionType+"');";
+  client.query(dbRequest, (err, dbResult) => {
+    var dbResults = dbResult;
+    if (dbResults != undefined) {
+      dbResults["createSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["createSuccess"] = false;
+    }
+    res.json(dbResults);
+  });
+});
+
 app.get("/db/get_for_autosearch", (req, res) => {
   var user_id = req["query"]["user_id"];
   var dbRequest = "WITH INFLLIST AS ( \
