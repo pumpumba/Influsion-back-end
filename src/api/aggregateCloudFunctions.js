@@ -1,9 +1,8 @@
 const dbFunctions = require('../dbFunctions');
 var self = module.exports = {
   health: function (req, res) {
-    res.send(
-      "<h1>Hello! Welcome to Pumba!</h1>"
-    );
+      res.status(200);
+      res.send("HTTP response 200 code OK.");
   },
 
   filters: function (req, res) {
