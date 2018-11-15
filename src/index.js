@@ -432,7 +432,8 @@ app.post("/db/delete_user", (req, res) => {
       var hashPassword = dbResult["rows"][0].hashedpwd;
 
       bcrypt.compare(password, hashPassword, function(err, resultCompare) {
-
+        console.log("line 435");
+        console.log(resultCompare);
         if (resultCompare == true) {
           var dbRequest = "BEGIN; \
           DELETE FROM USRFLWINFL WHERE FLWRID = "+usrID+"; \
@@ -442,6 +443,8 @@ app.post("/db/delete_user", (req, res) => {
           COMMIT;";
           client.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
+            console.log("We are here");
+            console.log(dbResults);
             if (dbResults != undefined) {
               dbResults["deleteSuccess"] = true;
             } else {
@@ -452,7 +455,7 @@ app.post("/db/delete_user", (req, res) => {
           });
 
         } else {
-          dbResults = err;
+          dbResults = {};
           dbResults["deleteSuccess"] = false;
         }
 
@@ -460,7 +463,7 @@ app.post("/db/delete_user", (req, res) => {
       });
     } else {
       dbResults = {};
-      dbResults["loginSuccess"] = false;
+      dbResults["deleteSuccess"] = false;
       res.json({dbResults});
     }
   });
