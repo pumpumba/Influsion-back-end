@@ -1,15 +1,9 @@
 module.exports = (function() {
   var express = require("express");
   const bodyParser = require("body-parser");
-  var functions = require('./twitterCloudFunctions');
+  var functions = require('./instagramCloudFunctions');
 
   app = express.Router();
-
-  app.get("/", (req, res) => {
-    res.send(
-      "<h1>Hello! Welcome to Pumba!</h1>"
-    );
-  });
 
   app.get("/health", (req, res) => {
     functions.health(req, res);
