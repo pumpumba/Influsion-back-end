@@ -159,8 +159,10 @@ app.post("/db/create_tv_operator", (req, res) => {
   bcrypt.hash(pwd, saltRounds, function (err, hash) {
     var dbRequest = "INSERT INTO TVOPERATOR (TVOPERATORNAME, HASHEDPWD) VALUES ('" + tv_op_name + "', '" + hash + "');"
 
-    insertionToDB(client, dbRequest, (response) => {
-      res.json(response);
+    client.query(dbRequest, (err, dbResult) => {
+
+      res.json(dbResult);
+
     });
 
   });
@@ -244,8 +246,11 @@ app.post("/db/add_user_like", (req, res) => {
   var usrID = inputObj.user_id;
   var postID = inputObj.post_id;
   var dbRequest = "INSERT INTO USRLIKEPOST (USRID, POSTID) VALUES (" + usrID + "," + postID + ");";
-  insertionToDB(client, dbRequest, (response) => {
-    res.json(response);
+  client.query(dbRequest, (err, dbResult) => {
+
+    res.json(dbResult);
+
+
   });
 
 });
@@ -416,7 +421,6 @@ app.post("/db/delete_user", (req, res) => {
       var hashPassword = dbResult["rows"][0].hashedpwd;
 
       bcrypt.compare(password, hashPassword, function (err, resultCompare) {
-
         if (resultCompare == true) {
           var dbRequest = "BEGIN; \
           DELETE FROM USRFLWINFL WHERE FLWRID = "+ usrID + "; \
@@ -426,6 +430,8 @@ app.post("/db/delete_user", (req, res) => {
           COMMIT;";
           client.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
+            console.log("We are here");
+            console.log(dbResults);
             if (dbResults != undefined) {
               dbResults["deleteSuccess"] = true;
             } else {
@@ -436,7 +442,7 @@ app.post("/db/delete_user", (req, res) => {
           });
 
         } else {
-          dbResults = err;
+          dbResults = {};
           dbResults["deleteSuccess"] = false;
         }
 
@@ -444,7 +450,8 @@ app.post("/db/delete_user", (req, res) => {
       });
     } else {
       dbResults = {};
-      dbResults["loginSuccess"] = false;
+      dbResults["deleteSuccess"] = false;
+
       res.json({ dbResults });
     }
   });
@@ -476,8 +483,11 @@ app.post("/db/change_tv_op_info", (req, res) => {
   var pwd = inputObj.password;
   bcrypt.hash(pwd, saltRounds, function (err, hash) {
     var dbRequest = "UPDATE TVOPERATOR SET TVOPERATORNAME = '" + tv_op_name + "', HASHEDPWD = '" + hash + "' WHERE TVOPERATORID = " + tv_op_id + ";"
-    insertionToDB(client, dbRequest, (response) => {
-      res.json(response);
+    client.query(dbRequest, (err, dbResult) => {
+
+      res.json(dbResult);
+
+
     });
   });
 });

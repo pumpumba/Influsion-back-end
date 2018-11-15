@@ -288,7 +288,9 @@ WITH INFLLIST AS (
         'actname',
         PACC.actname,
         'platform',
-        PACC.PLATFORM)))
+        PACC.PLATFORM,
+        'imgurl',
+        PACC.IMGURL)))
         AS PFACCS FROM PLATFORMACCOUNT AS PACC
         GROUP BY INFLID
 ), IPC AS (

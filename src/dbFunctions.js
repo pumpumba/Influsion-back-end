@@ -10,7 +10,8 @@ var self = module.exports = {
             if (dbResults != undefined && dbResults["rowCount"] >= 1) {
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = {};
+                dbResults = err;
+
                 dbResults["retrieveSuccess"] = false;
             }
             callback(dbResults);
@@ -23,6 +24,7 @@ var self = module.exports = {
             dbRequest = dbRequest + "AND platform = '" + platform + "'";
 
         dbRequest = dbRequest + " ORDER BY POSTED DESC LIMIT " + limit + ";";
+
         databaseClient.query(dbRequest, (err, dbResult) => {
             //We get a problem if login is
             var dbResults = dbResult;
@@ -35,6 +37,7 @@ var self = module.exports = {
             callback(dbResults);
         });
     },
+
     //inserts a post into the database.
     insertPost: function (influencerID, numLikes, platform, userTextContent, unixtime, postID, postUrl, jsonContent, databaseClient, callback) {
         var dbRequest = "INSERT INTO POST(INFLID, NRLIKES, PLATFORM, USRTXTCONTENT, POSTED, POSTURL, PLATFORMCONTENT) \
@@ -73,6 +76,7 @@ var self = module.exports = {
     addFollowInfluencer: function (userID, influencerID, databaseClient, callback) {
         var dbRequest = "INSERT INTO USRFLWINFL (FLWRID, INFLID) VALUES (" + userID + "," + influencerID + ");";
 
+
         databaseClient.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
@@ -84,8 +88,10 @@ var self = module.exports = {
             callback(dbResults);
         });
     },
+
     //Retrieves the platforms accounts of a users followed influencers.
     getPlatformAccountsFromFollowedInfluencers: function (userID, orderBy, databaseClient, callback) {
+
         var dbRequest = "WITH INFLUENCERWITHPLATFORMACCOUNTS AS ( \
             SELECT INFLUENCER.*, PLATFORMACCOUNT.* FROM INFLUENCER \
             INNER JOIN PLATFORMACCOUNT ON \
@@ -113,6 +119,7 @@ var self = module.exports = {
             callback(dbResults);
         });
     },
+
     //Retrieves the influencer accounts which a user follows
     getFollowListAccounts: function (userID, databaseClient, callback) {
         var dbRequest = "WITH B AS ( \
@@ -134,6 +141,7 @@ var self = module.exports = {
             callback(dbResults);
         });
     },
+
     //Adds into the database that a user visited an influencer
     addUserVisit: function (userID, influencerID, typeOfVisit, databaseClient, callback) {
         var dbRequest = "INSERT INTO USRVISIT(USRID, INFLID, TYPEOFVISIT) VALUES (" + userID + "," + influencerID + ",'" + typeOfVisit + "');";
@@ -150,6 +158,7 @@ var self = module.exports = {
             callback(dbResults);
         });
     },
+
     //Modifies a users account information
     modifyUser: function (password, username, age, email, sex, userID, databaseClient, callback) {
         console.log(userID);
@@ -179,6 +188,7 @@ var self = module.exports = {
     //Makes an insertion to the database, sends in the request.
     insertionToDB: function (databaseClient, dbRequest, callback) {
         databaseClient.query(dbRequest, (err, dbResult) => {
+
 
             var dbResults = dbResult;
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
