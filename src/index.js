@@ -42,7 +42,7 @@ client.query("SELECT NOW()", (err, res) => {
   console.log(err, res);
 });
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
     "Access-Control-Allow-Headers",
@@ -84,7 +84,7 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 //Get all the platform account names for a specific platform
-app.post("/db/get_platform_accounts", (req,res) => {
+app.post("/db/get_platform_accounts", (req, res) => {
   var inputObj = req.body;
   var platform = inputObj.platform; //TODO: Change to hashed version of password
   dbFunctions.getPlatformAccounts(platform, client, (response) => {
@@ -105,7 +105,7 @@ app.post("/db/insert_post", (req, res) => {
 // Returns posts from all influencers that a user follows.
 app.get("/db/get_followed_infl_posts", (req, res) => {
   var usrID = req["query"]["userid"];
-  var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = "+usrID+") ORDER BY POSTED DESC;"
+  var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = " + usrID + ") ORDER BY POSTED DESC;"
   client.query(dbRequest, (err, dbResult) => {
     console.log(dbResult); //TODO: We get a problem if login is WHAT? Who wrote this?
     var dbResults = dbResult;
@@ -123,7 +123,7 @@ app.get("/db/get_followed_infl_posts", (req, res) => {
 });
 
 // Unfollow an influencer by specifiying user_id for user, and influencer_id for influencer
-app.post("/db/unfollow_influencer", (req,res) => {
+app.post("/db/unfollow_influencer", (req, res) => {
   var inputObj = req.body;
   var userID = inputObj.user_id;
   var influencerID = inputObj.influencer_id;
@@ -133,7 +133,7 @@ app.post("/db/unfollow_influencer", (req,res) => {
 });
 
 // Makes a user follow an influencer.
-app.post("/db/add_follow_influencer", (req,res) => {
+app.post("/db/add_follow_influencer", (req, res) => {
   var inputObj = req.body;
   var userID = inputObj.user_id;
   var influencerID = inputObj.influencer_id;
@@ -168,14 +168,14 @@ app.post("/db/create_tv_operator", (req, res) => {
   var inputObj = req.body;
   var tv_op_name = inputObj.operatorname;
   var pwd = inputObj.password;
-  bcrypt.hash(pwd, saltRounds, function(err, hash) {
-  var dbRequest = "INSERT INTO TVOPERATOR (TVOPERATORNAME, HASHEDPWD) VALUES ('"+tv_op_name+"', '"+hash+"');"
+  bcrypt.hash(pwd, saltRounds, function (err, hash) {
+    var dbRequest = "INSERT INTO TVOPERATOR (TVOPERATORNAME, HASHEDPWD) VALUES ('" + tv_op_name + "', '" + hash + "');"
 
-  client.query(dbRequest, (err, dbResult) => {
+    client.query(dbRequest, (err, dbResult) => {
 
-    res.json(dbResult);
+      res.json(dbResult);
 
-  });
+    });
 
   });
 
@@ -186,26 +186,26 @@ app.post("/db/login_tv_operator", (req, res) => {
   var inputObj = req.body;
   var password = inputObj.password; //TODO: Change to hashed version of password
   var tv_op_name = inputObj.operatorname;
-  var dbRequest = "SELECT * FROM TVOPERATOR WHERE TVOPERATORNAME = '"+tv_op_name+"'";
+  var dbRequest = "SELECT * FROM TVOPERATOR WHERE TVOPERATORNAME = '" + tv_op_name + "'";
   client.query(dbRequest, (err, dbResult) => {
     var dbResults = dbResult["rows"][0];
 
     if (dbResults != undefined) {
       var hashPassword = dbResult["rows"][0].hashedpwd;
 
-      bcrypt.compare(password, hashPassword, function(err, resultCompare) {
+      bcrypt.compare(password, hashPassword, function (err, resultCompare) {
         if (resultCompare == true) {
           dbResults["loginSuccess"] = true;
         } else {
           dbResults = {};
           dbResults["loginSuccess"] = false;
         }
-        res.json({dbResults});
+        res.json({ dbResults });
       });
     } else {
       dbResults = {};
       dbResults["loginSuccess"] = false;
-      res.json({dbResults});
+      res.json({ dbResults });
     }
   });
 });
@@ -213,7 +213,7 @@ app.post("/db/login_tv_operator", (req, res) => {
 // Returns a user based on user id (sent in as usrid)
 app.get("/db/get_user", (req, res) => {
   var usrID = req["query"]["usrid"];
-  var dbRequest = "SELECT * FROM USR WHERE usrid = "+usrID+";";
+  var dbRequest = "SELECT * FROM USR WHERE usrid = " + usrID + ";";
   client.query(dbRequest, (err, dbResult) => {
     var dbResults = dbResult["rows"];
     if (dbResults != undefined) {
@@ -243,7 +243,7 @@ app.get("/db/get_all_users", (req, res) => {
 
 // Adds a visit from a user (send in user_id) to an influencer (send in influencer_id)
 // Send in also, which type of vist (as type_of_visit). Can be 'profilevisit', 'instagrampost', 'twitterpost' or 'youtubevideo'
-app.post("/db/add_user_visit", (req, res) =>  {
+app.post("/db/add_user_visit", (req, res) => {
   var inputObj = req.body;
   var userID = inputObj.user_id;
   var influencerID = inputObj.influencer_id;
@@ -257,7 +257,7 @@ app.post("/db/add_user_like", (req, res) => {
   var inputObj = req.body;
   var usrID = inputObj.user_id;
   var postID = inputObj.post_id;
-  var dbRequest = "INSERT INTO USRLIKEPOST (USRID, POSTID) VALUES ("+usrID+","+postID+");";
+  var dbRequest = "INSERT INTO USRLIKEPOST (USRID, POSTID) VALUES (" + usrID + "," + postID + ");";
   client.query(dbRequest, (err, dbResult) => {
 
     res.json(dbResult);
@@ -275,26 +275,26 @@ app.get("/db/get_clicks_promoted_influencers", (req, res) => {
     FROM INFLUENCERPROMOTED \
     WHERE INFLUENCERID IN(I.INFLID)";
 
-    if (promotion_id != undefined) {
-      dbRequest = dbRequest+" AND PROMOTIONID = "+promotion_id+") AS ISPROMOTEDBYCAMPAIGN";
-    } else {
-      dbRequest = dbRequest+" AND PROMOTIONID IN(SELECT PROMOTIONID FROM PROMOTION WHERE TVOPERATORID = "+tv_op_id+")) AS ISPROMOTEDBYCAMPAIGN";
-    }
+  if (promotion_id != undefined) {
+    dbRequest = dbRequest + " AND PROMOTIONID = " + promotion_id + ") AS ISPROMOTEDBYCAMPAIGN";
+  } else {
+    dbRequest = dbRequest + " AND PROMOTIONID IN(SELECT PROMOTIONID FROM PROMOTION WHERE TVOPERATORID = " + tv_op_id + ")) AS ISPROMOTEDBYCAMPAIGN";
+  }
 
 
-    dbRequest = dbRequest+" FROM USRVISIT AS I GROUP BY I.INFLID \
+  dbRequest = dbRequest + " FROM USRVISIT AS I GROUP BY I.INFLID \
     ORDER BY NRCLICKS DESC;"
-    client.query(dbRequest, (err, dbResult) => {
+  client.query(dbRequest, (err, dbResult) => {
 
-      if (dbResult != undefined) {
-        var dbResults = dbResult["rows"];
-        dbResults["retrieveSuccess"] = true;
-      } else {
-        var dbResults = err;
-        dbResults["retrieveSuccess"] = false;
-      }
-      res.json(dbResults);
-    });
+    if (dbResult != undefined) {
+      var dbResults = dbResult["rows"];
+      dbResults["retrieveSuccess"] = true;
+    } else {
+      var dbResults = err;
+      dbResults["retrieveSuccess"] = false;
+    }
+    res.json(dbResults);
+  });
 
 });
 
@@ -303,7 +303,7 @@ app.post("/db/influencer_promotion", (req, res) => {
   var promotionType = inputObj.promotion_type;
   var infl_id = inputObj.influencer_id;
   var promotion_id = inputObj.promotion_id;
-  var dbRequest = "INSERT INTO INFLUENCERPROMOTED(INFLUENCERID, PROMOTIONID, PROMOTIONTYPE) VALUES ("+infl_id+","+promotion_id+", '"+promotionType+"');";
+  var dbRequest = "INSERT INTO INFLUENCERPROMOTED(INFLUENCERID, PROMOTIONID, PROMOTIONTYPE) VALUES (" + infl_id + "," + promotion_id + ", '" + promotionType + "');";
   client.query(dbRequest, (err, dbResult) => {
     var dbResults = dbResult;
     if (dbResults != undefined) {
@@ -321,7 +321,7 @@ app.post("/db/hashtag_promotion", (req, res) => {
   var promotionType = inputObj.promotion_type;
   var tag = inputObj.tag;
   var promotion_id = inputObj.promotion_id;
-  var dbRequest = "INSERT INTO TAGPROMOTED(TAGID, PROMOTIONID, PROMOTIONTYPE) VALUES ((SELECT TAGID FROM TAG WHERE TAGNAME = '"+tag+"'),"+promotion_id+", '"+promotionType+"');";
+  var dbRequest = "INSERT INTO TAGPROMOTED(TAGID, PROMOTIONID, PROMOTIONTYPE) VALUES ((SELECT TAGID FROM TAG WHERE TAGNAME = '" + tag + "')," + promotion_id + ", '" + promotionType + "');";
   client.query(dbRequest, (err, dbResult) => {
     var dbResults = dbResult;
     if (dbResults != undefined) {
@@ -339,7 +339,7 @@ app.get("/db/get_for_autosearch", (req, res) => {
   var dbRequest = "WITH INFLLIST AS ( \
     SELECT INFLID \
     FROM USRFLWINFL \
-    WHERE FLWRID = "+user_id+" \
+    WHERE FLWRID = "+ user_id + " \
   ), PLATFORMACCOUNTS AS ( \
     SELECT PACC.INFLID, json_build_object('platformaccounts', \
       json_agg( \
@@ -356,23 +356,23 @@ app.get("/db/get_for_autosearch", (req, res) => {
     INFLUENCER.INFLUENCERID = PLATFORMACCOUNTS.INFLID \
   ) \
    SELECT DISTINCT ON (IPC.INFLID, IPC.INFLUENCERNAME, IPC.REALNAME) IPC.*, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLLIST.INFLID IN(IPC.INFLID)) AS USRFOLLOWINGINFLUENCER FROM IPC;"
-   client.query(dbRequest, (err, dbResult) => {
-     var dbResults = dbResult["rows"];
-     if (dbResults != undefined) {
-       dbResults["retrieveSuccess"] = true;
-     } else {
-       dbResults = err;
-       dbResults["retrieveSuccess"] = false;
-     }
-     res.json(dbResults);
-   });
+  client.query(dbRequest, (err, dbResult) => {
+    var dbResults = dbResult["rows"];
+    if (dbResults != undefined) {
+      dbResults["retrieveSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["retrieveSuccess"] = false;
+    }
+    res.json(dbResults);
+  });
 });
 
 app.post("/db/delete_user_like", (req, res) => {
   var inputObj = req.body;
   var usrID = inputObj.user_id;
   var postID = inputObj.post_id;
-  var dbRequest = "DELETE FROM USRLIKEPOST WHERE USRID = "+usrID+" AND POSTID = "+postID+";"
+  var dbRequest = "DELETE FROM USRLIKEPOST WHERE USRID = " + usrID + " AND POSTID = " + postID + ";"
   client.query(dbRequest, (err, dbResult) => {
     var dbResults = dbResult;
     if (dbResults != undefined) {
@@ -387,7 +387,7 @@ app.post("/db/delete_user_like", (req, res) => {
 });
 
 // Modifies a user's information. All information needs to be sent in, or error will be returned. If something is not changed, send in the old information.
-app.post("/db/modify_user", (req,res) => {
+app.post("/db/modify_user", (req, res) => {
   var inputObj = req.body;
   var password = inputObj.password; //TODO: Change to hashed version of password
   var username = inputObj.username;
@@ -406,7 +406,7 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 //Registers a user. Send in all the information. If something is not specified, send in null
-app.post("/db/register_user", (req, res)=> {
+app.post("/db/register_user", (req, res) => {
   var inputObj = req.body;
   var password = inputObj.password;
   var username = inputObj.username;
@@ -423,7 +423,7 @@ app.post("/db/delete_user", (req, res) => {
   var inputObj = req.body;
   var usrID = inputObj.usrid;
   var password = inputObj.password;
-  var dbRequest = "SELECT * FROM USR WHERE usrid = "+usrID+";";
+  var dbRequest = "SELECT * FROM USR WHERE usrid = " + usrID + ";";
 
   client.query(dbRequest, (err, dbResult) => {
     var dbResults = dbResult["rows"][0];
@@ -431,15 +431,15 @@ app.post("/db/delete_user", (req, res) => {
     if (dbResults != undefined) {
       var hashPassword = dbResult["rows"][0].hashedpwd;
 
-      bcrypt.compare(password, hashPassword, function(err, resultCompare) {
+      bcrypt.compare(password, hashPassword, function (err, resultCompare) {
         console.log("line 435");
         console.log(resultCompare);
         if (resultCompare == true) {
           var dbRequest = "BEGIN; \
-          DELETE FROM USRFLWINFL WHERE FLWRID = "+usrID+"; \
-          DELETE FROM USRLIKEPOST WHERE USRID = "+usrID+"; \
-          DELETE FROM USRVISIT WHERE usrid = "+usrID+"; \
-          DELETE FROM USR WHERE usrid = "+usrID+"; \
+          DELETE FROM USRFLWINFL WHERE FLWRID = "+ usrID + "; \
+          DELETE FROM USRLIKEPOST WHERE USRID = "+ usrID + "; \
+          DELETE FROM USRVISIT WHERE usrid = "+ usrID + "; \
+          DELETE FROM USR WHERE usrid = "+ usrID + "; \
           COMMIT;";
           client.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
@@ -459,12 +459,12 @@ app.post("/db/delete_user", (req, res) => {
           dbResults["deleteSuccess"] = false;
         }
 
-        res.json({dbResults});
+        res.json({ dbResults });
       });
     } else {
       dbResults = {};
       dbResults["deleteSuccess"] = false;
-      res.json({dbResults});
+      res.json({ dbResults });
     }
   });
 });
@@ -493,13 +493,13 @@ app.post("/db/change_tv_op_info", (req, res) => {
   var tv_op_id = inputObj.tv_op_id;
   var tv_op_name = inputObj.operatorname;
   var pwd = inputObj.password;
-  bcrypt.hash(pwd, saltRounds, function(err, hash) {
-  var dbRequest = "UPDATE TVOPERATOR SET TVOPERATORNAME = '"+tv_op_name+"', HASHEDPWD = '"+hash+"' WHERE TVOPERATORID = "+tv_op_id+";"
-  client.query(dbRequest, (err, dbResult) => {
+  bcrypt.hash(pwd, saltRounds, function (err, hash) {
+    var dbRequest = "UPDATE TVOPERATOR SET TVOPERATORNAME = '" + tv_op_name + "', HASHEDPWD = '" + hash + "' WHERE TVOPERATORID = " + tv_op_id + ";"
+    client.query(dbRequest, (err, dbResult) => {
 
-    res.json(dbResult);
+      res.json(dbResult);
 
-  });
+    });
   });
 });
 
@@ -509,7 +509,7 @@ app.post("/db/login", (req, res) => {
   var password = inputObj.password; //TODO: Change to hashed version of password
   var username = inputObj.username;
   dbFunctions.login(password, username, client, (response) => {
-      res.json(response);
+    res.json(response);
   });
 });
 
@@ -541,7 +541,7 @@ app.post("/db/search_influencer", (req, res) => {
   keyword = keyword.toLowerCase();
   var dbRequest = "SELECT DISTINCT ON (I.INFLUENCERID, I.INFLUENCERNAME, I.REALNAME) I.INFLUENCERID, I.INFLUENCERNAME, I.REALNAME, P.IMGURL FROM INFLUENCER AS I \
     INNER JOIN PLATFORMACCOUNT AS P ON I.INFLUENCERID = P.INFLID \
-    WHERE LOWER(I.INFLUENCERNAME) LIKE '%"+keyword+"%' OR LOWER(I.REALNAME) LIKE '%"+keyword+"%' OR LOWER(P.ACTNAME) LIKE '%"+keyword+"%';";
+    WHERE LOWER(I.INFLUENCERNAME) LIKE '%"+ keyword + "%' OR LOWER(I.REALNAME) LIKE '%" + keyword + "%' OR LOWER(P.ACTNAME) LIKE '%" + keyword + "%';";
   client.query(dbRequest, (err, dbResult) => {
 
     res.json(dbResult);
@@ -582,14 +582,14 @@ app.post("/db/update_platform_acc", (req, res) => {
 
   //Put everything into a json object.
   var jsonObj = {
-    "ACTNAME" : inputObj.actname, //check
-    "PLATFORM" : inputObj.platform, //not necessary to implement below
-    "NRFLWRS" : inputObj.nr_flwrs, //check
-    "MEMBERSINCE" : inputObj.member_since, //MUST BE UNIX TIME FORMAT
-    "ACTURL" : inputObj.act_url, //check
-    "IMGURL" : inputObj.img_url, //check
-    "VERIFIED" : inputObj.is_verified, //check
-    "PLATFORMCONTENT" : inputObj.platform_content
+    "ACTNAME": inputObj.actname, //check
+    "PLATFORM": inputObj.platform, //not necessary to implement below
+    "NRFLWRS": inputObj.nr_flwrs, //check
+    "MEMBERSINCE": inputObj.member_since, //MUST BE UNIX TIME FORMAT
+    "ACTURL": inputObj.act_url, //check
+    "IMGURL": inputObj.img_url, //check
+    "VERIFIED": inputObj.is_verified, //check
+    "PLATFORMCONTENT": inputObj.platform_content
   }
   console.log(jsonObj);
   // We loop through the json object. If something is not defined,
@@ -597,23 +597,23 @@ app.post("/db/update_platform_acc", (req, res) => {
   var dbRequest = "UPDATE PLATFORMACCOUNT SET ";
   for (key in jsonObj) {
     if (jsonObj[key] != undefined) {
-      switch(key) {
+      switch (key) {
         case "ACTNAME":
         case "ACTURL":
         case "IMGURL":
-          dbRequest = dbRequest + key + " = '"+jsonObj[key]+"', ";
+          dbRequest = dbRequest + key + " = '" + jsonObj[key] + "', ";
           break;
         case "NRFLWRS":
         case "VERIFIED":
-          dbRequest = dbRequest + key + " = "+jsonObj[key]+", ";
+          dbRequest = dbRequest + key + " = " + jsonObj[key] + ", ";
           break;
         case "MEMBERSINCE":
-          dbRequest = dbRequest + key + " = to_timestamp("+jsonObj[key]+"), ";
+          dbRequest = dbRequest + key + " = to_timestamp(" + jsonObj[key] + "), ";
           break;
         case "PLATFORMCONTENT":
           // Do note that we might have to do regex if we send in json objects here, and replace ' with '' to escape.
           // in that case, do regex on jsonObj[key]
-          dbRequest = dbRequest + key + " = '"+jsonObj[key]+"'::json, ";
+          dbRequest = dbRequest + key + " = '" + jsonObj[key] + "'::json, ";
           break;
       }
     }
@@ -621,8 +621,8 @@ app.post("/db/update_platform_acc", (req, res) => {
 
   }
   // Remove the last , and space, and add the last bit of the request to finish it
-  dbRequest = dbRequest.substr(0, dbRequest.length-2);
-  dbRequest = dbRequest+" WHERE INFLID = "+inputObj.inflid+" AND PLATFORM = '"+inputObj.platform+"';";
+  dbRequest = dbRequest.substr(0, dbRequest.length - 2);
+  dbRequest = dbRequest + " WHERE INFLID = " + inputObj.inflid + " AND PLATFORM = '" + inputObj.platform + "';";
 
   // Here, I just send back the actual db request. Should be different when actually implementing it for real.
   res.send(dbRequest);
@@ -653,7 +653,7 @@ app.get("/db/get_all_info_infl", (req, res) => {
           'platform_content', \
           PACC.platformcontent))) \
           AS PFACCS FROM PLATFORMACCOUNT AS PACC \
-          WHERE INFLID = "+infl_id+" \
+          WHERE INFLID = "+ infl_id + " \
           GROUP BY INFLID \
   ), USERPOSTS AS ( \
     SELECT P.INFLID, json_build_object('platformaccounts', \
@@ -673,12 +673,12 @@ app.get("/db/get_all_info_infl", (req, res) => {
           'platform_content', \
           P.platformcontent))) \
           AS posts FROM POST AS P \
-          WHERE INFLID = "+infl_id;
-    if (req["query"]["post_platform"] != undefined) {
-      dbRequest = dbRequest + " AND platform = '"+req["query"]["post_platform"]+"'";
-    }
+          WHERE INFLID = "+ infl_id;
+  if (req["query"]["post_platform"] != undefined) {
+    dbRequest = dbRequest + " AND platform = '" + req["query"]["post_platform"] + "'";
+  }
 
-          dbRequest = dbRequest +" GROUP BY INFLID \
+  dbRequest = dbRequest + " GROUP BY INFLID \
   ), IPC AS ( \
     SELECT INFLUENCER.*, USERPOSTS.POSTS, PLATFORMACCOUNTS.PFACCS FROM INFLUENCER \
     INNER JOIN PLATFORMACCOUNTS ON \
