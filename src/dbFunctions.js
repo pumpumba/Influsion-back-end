@@ -221,7 +221,7 @@ var self = module.exports = {
             WHERE FLWRID = "+ userID + " \
             ), P AS ( \
             SELECT * FROM POST ";
-        if (platform != undefined) {
+        if (platform != 'all') {
             dbRequest = dbRequest + " WHERE PLATFORM  = '" + platform + "' ";
         }
 

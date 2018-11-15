@@ -1,5 +1,5 @@
 module.exports = {
-  getRoutes: function(client) {
+  getRoutes: function (client) {
     var express = require("express");
     const bodyParser = require("body-parser");
     var functions = require('./aggregateCloudFunctions');

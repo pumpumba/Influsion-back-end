@@ -1,8 +1,8 @@
 const dbFunctions = require('../dbFunctions');
 var self = module.exports = {
   health: function (req, res) {
-      res.status(200);
-      res.send("HTTP response 200 code OK.");
+    res.status(200);
+    res.send("HTTP response 200 code OK.");
   },
 
   filters: function (req, res) {
@@ -69,7 +69,7 @@ var self = module.exports = {
 };
 
 //get content from specific asset type, continuation from getContent
-var getContentFromAsset = function(platform, assetType, assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback) {
+var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback) {
   switch (filterTypes[currentFilterNum]) {
     case "influencer":
       dbFunctions.getContentFromInfluencer(platform, filterValue[0], limit, filterValue[1], databaseClient, (response) => {
@@ -132,7 +132,7 @@ var getContentFromAsset = function(platform, assetType, assetTypes, filterTypes,
       break;
     //Updates the database with new content from our social media API:s
     case "update":
-      if(platform == 'all') {
+      if (platform == 'all') {
         callback('Can not update all platform at once. Update each one by one.');
       }
       else {
@@ -185,30 +185,30 @@ var getContentFromAsset = function(platform, assetType, assetTypes, filterTypes,
   }
 };
 //A switch function for the aggregate/filters call
-var filterSwitch = function(assetType, filterType) {
+var filterSwitch = function (assetType, filterType) {
   switch (filterType) {
     case "search":
-      return(["<enter your influencers username>"]);
+      return (["<enter your influencers username>"]);
       break;
     case "influencer":
-      return(["<enter your influencers id>", "<enter your users ID>"]);
+      return (["<enter your influencers id>", "<enter your users ID>"]);
       break;
     case "user":
-      return(['<enter your user ID here>']);
+      return (['<enter your user ID here>']);
       break;
     case "popular":
-      return(['<no entry needed>']);
+      return (['<no entry needed>']);
       break;
     case "update":
-      if(assetType != 'all') {
-        return(['<no entry needed>']);
+      if (assetType != 'all') {
+        return (['<no entry needed>']);
       }
       else {
-        return(['<update is not available for asset type "all">']);
+        return (['<update is not available for asset type "all">']);
       }
       break;
     default:
-      return(["Nothing available"]);
+      return (["Nothing available"]);
   }
 };
 //The main content function
@@ -248,11 +248,11 @@ var getContentFromInfluencersFromPlatform = function (userID, influencerAccounts
 };
 
 //Stores content into our database.
-var storeContent = function(assetType, posts, postNum, databaseClient, callback) {
+var storeContent = function (assetType, posts, postNum, databaseClient, callback) {
   var regex = /'/gi;
   var jsonContent = JSON.stringify(posts[postNum]).replace(regex, "''");
   var platform = posts[postNum].platform.toLowerCase();
-  switch(assetType) {
+  switch (assetType) {
     case 'tweet':
       var unixtime = new Date(posts[postNum].tweet_created_at).getTime();
       var userTextContent = posts[postNum].tweet_text.replace(regex, "''");
@@ -272,7 +272,7 @@ var storeContent = function(assetType, posts, postNum, databaseClient, callback)
   }
 };
 //Just a continuation of storeContent, the actual insertion.
-var insertContentToDB = function(assetType, posts, postNum, influencerID, likeCount, platform, userTextContent, unixTime, postID, url, jsonContent, databaseClient, callback) {
+var insertContentToDB = function (assetType, posts, postNum, influencerID, likeCount, platform, userTextContent, unixTime, postID, url, jsonContent, databaseClient, callback) {
   dbFunctions.insertPost(influencerID, likeCount, platform, userTextContent, unixTime, postID, url, jsonContent, databaseClient, (response) => {
     if (postNum != posts.length - 1) {
       storeContent(assetType, posts, postNum + 1, databaseClient, callback);
@@ -283,8 +283,8 @@ var insertContentToDB = function(assetType, posts, postNum, influencerID, likeCo
   });
 };
 //Gets content from a specific influencer from a social media API.
-var getContentFromInfluencerFromAPI = function(assetType, influencers, currentInfluencer, resultObj, limit, callback) {
-  switch(assetType) {
+var getContentFromInfluencerFromAPI = function (assetType, influencers, currentInfluencer, resultObj, limit, callback) {
+  switch (assetType) {
     case 'tweet':
       var Twitter = require("machinepack-twitternodemachines");
       Twitter.getUserTweets({
@@ -325,7 +325,7 @@ var getContentFromInfluencerFromAPI = function(assetType, influencers, currentIn
   }
 };
 
-var contentCallback = function(assetType, err, result, influencers, currentInfluencer, resultObj, limit, callback) {
+var contentCallback = function (assetType, err, result, influencers, currentInfluencer, resultObj, limit, callback) {
   if (err) {
     console.log("Error at getContentFromInfluencerFromAPI");
     console.log(err);
