@@ -1,5 +1,4 @@
-data = ["INSERT INTO USR(USRNAME, HASHEDPWD, EMAIL, AGE, SEX)",
-  "VALUES('Filleboy', 'BAJSBAJS', 'c.filip.cornell@gmail.com', 24, 'Male'); ",
+data = ["INSERT INTO USR(USRNAME, HASHEDPWD, EMAIL, AGE, SEX) VALUES('Filleboy', 'BAJSBAJS', 'c.filip.cornell@gmail.com', 24, 'Male'); ",
   "INSERT INTO LOCATION(LOCATIONNAME, LOCATIONTYPE) VALUES('Sweden', 'COUNTRY'); ",
   "INSERT INTO LOCATION(LOCATIONNAME, LOCATIONTYPE) VALUES('United States', 'COUNTRY'); ",
   "INSERT INTO LOCATION(LOCATIONNAME, LOCATIONTYPE, COUNTRYID) VALUES('New York', 'CITY', (select locationid from location where location.locationname = 'United States')); ",
