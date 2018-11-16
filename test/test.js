@@ -8,11 +8,16 @@ let chai = require("chai");
 let chaiHttp = require("chai-http");
 let server = require("../src/index");
 const { Pool, Client } = require("pg");
+const dbData = require("./dbTestData")
 let should = chai.should();
 
 //DATABASE
 // pools will use environment variables
 // for connection information
+dbData.data.forEach(element => {
+  console.log(element);
+});
+
 const pool = new Pool({
   user: process.env.DATABASE_USER,
   host: process.env.DATABASE_HOST,
@@ -107,7 +112,7 @@ describe("/POST update content in empty DB from each platform individually", () 
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.a("array");
-        res.body.length.should.be.eql(2);
+        res.body.length.should.be.eql(0);
         done();
       });
   });
@@ -125,7 +130,7 @@ describe("/POST update content in empty DB from each platform individually", () 
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.a("array");
-        res.body.length.should.be.eql(2);
+        res.body.length.should.be.eql(0);
         done();
       });
   });
