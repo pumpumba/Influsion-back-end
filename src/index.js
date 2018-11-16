@@ -80,6 +80,109 @@ app.post("/db/get_platform_accounts", (req, res) => {
   });
 });
 
+app.post("/getPlatformAccount", (req, res) => {
+  var inputObject = req.body;
+  var screenName = inputObject.name;
+  var Twitter = require("twitter");
+  var client = new Twitter({
+    consumer_key: process.env.TWITTER_CONSUMER_KEY,
+    consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+    access_token: process.env.TWITTER_ACCESS_TOKEN,
+    access_secret: process.env.TWITTER_ACCESS_SECRET,
+    bearer_token: process.env.TWITTER_BEARER_TOKEN
+  });
+  client.get(
+    "/users/show",
+    { screen_name: screenName },
+    function(error, response) {
+      var result = response;
+      result.status = "";
+      res.json(result);
+    }
+  );
+
+});
+
+/*var platformTwitterFilter = function(profile) {
+  
+  var jsonObj = {
+    "ACTNAME": profile.screen_name, //check
+    "PLATFORM": 'twitter', //not necessary to implement below
+    "NRFLWRS": profile.followers_count, //check
+    "MEMBERSINCE": profile.created_at, //MUST BE UNIX TIME FORMAT
+    "ACTURL": actURL, //check
+    "IMGURL": imageURL, //check
+    "VERIFIED": isVerified, //check
+    "PLATFORMCONTENT": platformContent
+  }
+}; */
+
+var updatePlatformAccounts = function(platform, databaseClient) {
+  dbFunctions.getPlatformAccounts(platform, databaseClient, (response1) => {
+    var influencers = response1['rows'];
+    var accounts = [];
+    if (influencers != undefined) {
+      for (var k = 0; k < influencers.length; k++) {
+        accounts.push(influencers[k]);
+      }
+    }
+    var currentInfluencerAccount = 0;
+    if (currentInfluencerAccount < accounts.length) {
+      getPlatformAccountInformation(platform, accounts, currentInfluencerAccount, informations, (reponse2) => {
+        if (response2.length != 0) {
+          storeContent(assetType, response2, 0, databaseClient, (response3) => {
+            resultObj.push("Success");
+            if (currentAssetNum != (assetTypes.length - 1)) {
+              getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+            }
+            else {
+              callback(resultObj);
+            }
+          });
+        }
+        else {
+          if (currentAssetNum != (assetTypes.length - 1)) {
+            getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+          }
+          else {
+            callback(resultObj);
+          }
+        }
+      });
+      var posts = [];
+      getContentFromInfluencerFromAPI(assetType, accounts, currentInfluencerAccount, posts, limit, (response2) => {
+        if (response2.length != 0) {
+          storeContent(assetType, response2, 0, databaseClient, (response3) => {
+            resultObj.push("Success");
+            if (currentAssetNum != (assetTypes.length - 1)) {
+              getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+            }
+            else {
+              callback(resultObj);
+            }
+          });
+        }
+        else {
+          if (currentAssetNum != (assetTypes.length - 1)) {
+            getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+          }
+          else {
+            callback(resultObj);
+          }
+        }
+      });
+    }
+    else {
+      if (currentAssetNum != (assetTypes.length - 1)) {
+        getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+      }
+      else {
+        callback(resultObj);
+      }
+    }
+  });
+}
+
 //Inserts a post with all the information specificed for a post
 app.post("/db/insert_post", (req, res) => {
   var inputObj = req.body;
@@ -419,9 +522,12 @@ app.post("/db/delete_user", (req, res) => {
 
     if (dbResults != undefined) {
       var hashPassword = dbResult["rows"][0].hashedpwd;
+      /*
+      DELETE FROM USRLIKEPOST WHERE USRID = "+ usrID + "; \
+          DELETE FROM USRVISIT WHERE usrid = "+ usrID + "; \ */
 
       bcrypt.compare(password, hashPassword, function (err, resultCompare) {
-        if (resultCompare == true) {
+        if (resultCompare == false) {
           var dbRequest = "BEGIN; \
           DELETE FROM USRFLWINFL WHERE FLWRID = "+ usrID + "; \
           DELETE FROM USRLIKEPOST WHERE USRID = "+ usrID + "; \
@@ -434,19 +540,19 @@ app.post("/db/delete_user", (req, res) => {
             console.log(dbResults);
             if (dbResults != undefined) {
               dbResults["deleteSuccess"] = true;
+              res.json(dbResults);
             } else {
-              dbResults = err;
+              dbResults = {};
               dbResults["deleteSuccess"] = false;
+              res.json(dbResults);
             }
-            res.json(dbResults);
           });
 
         } else {
           dbResults = {};
           dbResults["deleteSuccess"] = false;
+          res.json(dbResults);
         }
-
-        res.json({ dbResults });
       });
     } else {
       dbResults = {};

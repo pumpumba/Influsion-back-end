@@ -1,6 +1,6 @@
 {
   "name": "machinepack-twitternodemachines",
-  "version": "1.27.0",
+  "version": "1.28.0",
   "description": "Gets content from twitter.",
   "scripts": {
     "test": "node ./node_modules/test-machinepack-mocha/bin/testmachinepack-mocha.js"
@@ -26,7 +26,8 @@
     "machineDir": "machines/",
     "machines": [
       "getPopularTweets",
-      "getUserTweets"
+      "getUserTweets",
+      "getAccountInformation"
     ]
   }
 }

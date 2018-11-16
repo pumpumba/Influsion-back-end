@@ -65,7 +65,7 @@ CREATE TABLE POST (
   PLATFORM PF NOT NULL, -- Defining which platform the post comes from
   USRTXTCONTENT TEXT, -- Can be the post description, e.g., the text below an image on instagram etc.
   POSTED TIMESTAMPTZ, -- When the post was posted. Fetchable from platform.
-  POSTPLATFORMID INTEGER, -- The specific id on the platform for the post.
+  POSTPLATFORMID VARCHAR, -- The specific id on the platform for the post.
   POSTURL VARCHAR UNIQUE, -- The url for the post
   PLATFORMCONTENT JSON --TODO: decide whether JSONB or JSON is best. JSONB supports indexing, is faster to process but slower to insert.
 );

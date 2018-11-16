@@ -7,8 +7,6 @@ var self = module.exports = {
     },
     formatJson: function(tweets) {
         var formatedTweets = [];
-        console.log(Array.isArray(tweets));
-        console.log(tweets);
 
         if((Array.isArray(tweets))) {
           for (var i = 0; i < tweets.length; i++) {

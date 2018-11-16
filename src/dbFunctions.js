@@ -40,7 +40,8 @@ var self = module.exports = {
 
     //inserts a post into the database.
     insertPost: function (influencerID, numLikes, platform, userTextContent, unixtime, postID, postUrl, jsonContent, databaseClient, callback) {
-        var dbRequest = "INSERT INTO POST(INFLID, NRLIKES, PLATFORM, USRTXTCONTENT, POSTED, POSTURL, PLATFORMCONTENT) \
+        
+        var dbRequest = "INSERT INTO POST(INFLID, NRLIKES, PLATFORM, USRTXTCONTENT, POSTED, POSTPLATFORMID, POSTURL, PLATFORMCONTENT) \
             VALUES ("+ influencerID + ",\
             "+ numLikes + ", '" + platform + "',\
             '"+ userTextContent + "', to_timestamp(" + unixtime + "),\
@@ -56,6 +57,55 @@ var self = module.exports = {
             }
             callback(dbResults);
         });
+    },
+
+    updatePlatformAccount: function(actname, platform, followersAmount, memberSince, actURL, imageURL, isVerified, platformContent) {
+        //Put everything into a json object.
+        var jsonObj = {
+            "ACTNAME": actname, //check
+            "PLATFORM": platform, //not necessary to implement below
+            "NRFLWRS": followersAmount, //check
+            "MEMBERSINCE": memberSince, //MUST BE UNIX TIME FORMAT
+            "ACTURL": actURL, //check
+            "IMGURL": imageURL, //check
+            "VERIFIED": isVerified, //check
+            "PLATFORMCONTENT": platformContent
+        }
+        console.log(jsonObj);
+        // We loop through the json object. If something is not defined,
+        // then we simply do not add this to the request.
+        var dbRequest = "UPDATE PLATFORMACCOUNT SET ";
+        for (key in jsonObj) {
+            if (jsonObj[key] != undefined) {
+            switch (key) {
+                case "ACTNAME":
+                case "ACTURL":
+                case "IMGURL":
+                dbRequest = dbRequest + key + " = '" + jsonObj[key] + "', ";
+                break;
+                case "NRFLWRS":
+                case "VERIFIED":
+                dbRequest = dbRequest + key + " = " + jsonObj[key] + ", ";
+                break;
+                case "MEMBERSINCE":
+                dbRequest = dbRequest + key + " = to_timestamp(" + jsonObj[key] + "), ";
+                break;
+                case "PLATFORMCONTENT":
+                // Do note that we might have to do regex if we send in json objects here, and replace ' with '' to escape.
+                // in that case, do regex on jsonObj[key]
+                dbRequest = dbRequest + key + " = '" + jsonObj[key] + "'::json, ";
+                break;
+            }
+            }
+
+
+        }
+        // Remove the last , and space, and add the last bit of the request to finish it
+        dbRequest = dbRequest.substr(0, dbRequest.length - 2);
+        dbRequest = dbRequest + " WHERE INFLID = " + inputObj.inflid + " AND PLATFORM = '" + inputObj.platform + "';";
+
+        // Here, I just send back the actual db request. Should be different when actually implementing it for real.
+        res.send(dbRequest);
     },
     //makes a user unfollows an influencer
     unfollowInfluencer: function (userID, influencerID, databaseClient, callback) {
@@ -107,7 +157,6 @@ var self = module.exports = {
             dbRequest = dbRequest + "ORDER BY " + orderBy;
         }
         dbRequest = dbRequest + ";";
-        console.log(dbRequest);
         databaseClient.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
             if (dbResults != undefined) {
@@ -161,7 +210,6 @@ var self = module.exports = {
 
     //Modifies a users account information
     modifyUser: function (password, username, age, email, sex, userID, databaseClient, callback) {
-        console.log(userID);
         bcrypt.hash(password, saltRounds, function (err, hash) {
             var dbRequest = "UPDATE USR SET USRNAME = '" + username + "', HASHEDPWD = '" + hash + "', age = " + age + ", email = '" + email + "', sex = '" + sex + "' WHERE usrid = " + userID + ";";
             databaseClient.query(dbRequest, (err, dbResult) => {
@@ -230,8 +278,6 @@ var self = module.exports = {
           SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
             FROM P ORDER BY POSTED DESC";
         databaseClient.query(dbRequest, (err, dbResult) => {
-            console.log(err);
-            console.log(dbResult);
             var dbResults = dbResult;
             if (dbResults != undefined) {
                 dbResults["retrieveSuccess"] = true;
@@ -264,7 +310,6 @@ var self = module.exports = {
            SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
             FROM P ORDER BY POSTED DESC";
         dbRequest = dbRequest + ";";
-        console.log(dbRequest);
         databaseClient.query(dbRequest, (err, dbResult) => {
 
             var dbResults = dbResult;
