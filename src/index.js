@@ -82,7 +82,11 @@ app.post("/db/get_platform_accounts", (req, res) => {
 
 app.post("/getPlatformAccount", (req, res) => {
   var inputObject = req.body;
-  var screenName = inputObject.name;
+  var platform = inputObject.platform;
+  updatePlatformAccounts(platform, client, (response) => {
+    res.json(response);
+  });
+  /*
   var Twitter = require("twitter");
   var client = new Twitter({
     consumer_key: process.env.TWITTER_CONSUMER_KEY,
@@ -97,9 +101,10 @@ app.post("/getPlatformAccount", (req, res) => {
     function(error, response) {
       var result = response;
       result.status = "";
-      res.json(result);
+      res.json(twitterAccountFormat(result));
     }
-  );
+  ); */
+
 
 });
 
@@ -117,7 +122,96 @@ app.post("/getPlatformAccount", (req, res) => {
   }
 }; */
 
-var updatePlatformAccounts = function(platform, databaseClient) {
+var updateAccount = function (accountInformations, accountNum, databaseClient, callback) {
+
+  dbFunctions.updatePlatformAccount(accountInformations[accountNum].influencerId, accountInformations[accountNum].accountName, 
+      accountInformations[accountNum].platform, accountInformations[accountNum].followersCount, accountInformations[accountNum].createdAtUnixTime, 
+      accountInformations[accountNum].accountUrl, accountInformations[accountNum].imageUrl, accountInformations[accountNum].verified, accountInformations[accountNum].jsonContent, databaseClient, (response) => {
+    if (accountNum != accountInformations.length - 1) {
+      updateAccount(accountInformations, accountNum + 1, databaseClient, callback);
+    }
+    else {
+      callback(response);
+    }
+  });
+};
+
+var twitterAccountFormat = function(accountInformation) {
+  var imageUrl = accountInformation.profile_image_url;
+  var n = imageUrl.lastIndexOf(".");
+  var fileType = imageUrl.substring(n, imageUrl.length);
+  imageUrl = imageUrl.substring(0, n - 7);
+  imageUrl = imageUrl + fileType;
+  var essentialInformation = {
+    "platform" : 'twitter',
+    "accountName" : accountInformation.screen_name,
+    "followersCount" : accountInformation.followers_count,
+    "createdAtUnixTime" : new Date(accountInformation.created_at).getTime(),
+    "accountUrl" : 'https://twitter.com/' + accountInformation.screen_name,
+    "imageUrl": imageUrl,
+    "verified": accountInformation.verified,
+    "platformContent": accountInformation
+  };
+  return essentialInformation;
+};
+
+var getPlatformAccountInformation = function(platform, accounts, currentInfluencerAccount, informations, callback) {
+  switch (platform) {
+    case 'twitter':
+      var Twitter = require("machinepack-twitternodemachines");
+      Twitter.getAccountInformation({
+        consumerKey: process.env.TWITTER_CONSUMER_KEY,
+        consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
+        accessToken: process.env.TWITTER_ACCESS_TOKEN,
+        accessSecret: process.env.TWITTER_ACCESS_SECRET,
+        bearerToken: process.env.TWITTER_BEARER_TOKEN,
+        userScreenName: accounts[currentInfluencerAccount].platformname
+      }).exec((err, result) => {
+        contentCallback(platform, err, twitterAccountFormat(result), accounts, currentInfluencerAccount, informations, callback);
+      });
+      break;
+    case 'instagram':
+      var Instagram = require("machinepack-instagramnodemachines2");
+      Instagram.getAccountInformation({
+        accessToken: process.env.INSTAGRAM_ACCESS_TOKEN,
+        accessId: process.env.INSTAGRAM_ID,
+        screenName: accounts[currentInfluencerAccount].platformname
+      }).exec((err, result) => {
+        contentCallback(platform, err, result, accounts, currentInfluencerAccount, informations, callback);
+      });
+      break;
+    case 'youtube':
+      var YoutubeNodeMachine = require("machinepack-youtubenodemachines");
+      require("dotenv").load();
+      YoutubeNodeMachine.getAccountInformation({
+        googleEmail: process.env.GOOGLE_CLIENT_EMAIL,
+        googlePrivateKey: process.env.GOOGLE_PRIVATE_KEY,
+        channelName: accounts[currentInfluencerAccount].platformname
+      }).exec((err, result) => {
+        contentCallback(platform, err, result, accounts, currentInfluencerAccount, informations, callback);
+      });
+      break;
+  }
+};
+
+var contentCallback = function (platform, err, result, accounts, currentInfluencerAccount, resultObj, callback) {
+  if (err) {
+    console.log("Error at getPlatformAccountInformation");
+    console.log(err);
+  } else {
+    if (result != undefined) {
+      result.influencerId = accounts[currentInfluencerAccount].influencerid
+      resultObj.push(result);
+    }
+    if (currentInfluencerAccount != (accounts.length - 1)) {
+      getPlatformAccountInformation(platform, accounts, currentInfluencerAccount + 1, resultObj, callback);
+    }
+    else {
+      callback(resultObj);
+    }
+  }
+};
+var updatePlatformAccounts = function(platform, databaseClient, callback) {
   dbFunctions.getPlatformAccounts(platform, databaseClient, (response1) => {
     var influencers = response1['rows'];
     var accounts = [];
@@ -128,58 +222,40 @@ var updatePlatformAccounts = function(platform, databaseClient) {
     }
     var currentInfluencerAccount = 0;
     if (currentInfluencerAccount < accounts.length) {
-      getPlatformAccountInformation(platform, accounts, currentInfluencerAccount, informations, (reponse2) => {
+      var informations = [];
+      getPlatformAccountInformation(platform, accounts, currentInfluencerAccount, informations, (response2) => {
+        
         if (response2.length != 0) {
-          storeContent(assetType, response2, 0, databaseClient, (response3) => {
-            resultObj.push("Success");
-            if (currentAssetNum != (assetTypes.length - 1)) {
+          updateAccount(response2, 0, databaseClient, (response3) => {
+            //resultObj.push("Success");
+            /*if (currentAssetNum != (assetTypes.length - 1)) {
               getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
             }
-            else {
-              callback(resultObj);
-            }
+            else { */
+              callback(response3);
+            //}
           });
+        } else {
+          callback(accounts);
         }
-        else {
+        /*else {
           if (currentAssetNum != (assetTypes.length - 1)) {
             getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
           }
           else {
             callback(resultObj);
           }
-        }
-      });
-      var posts = [];
-      getContentFromInfluencerFromAPI(assetType, accounts, currentInfluencerAccount, posts, limit, (response2) => {
-        if (response2.length != 0) {
-          storeContent(assetType, response2, 0, databaseClient, (response3) => {
-            resultObj.push("Success");
-            if (currentAssetNum != (assetTypes.length - 1)) {
-              getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-            }
-            else {
-              callback(resultObj);
-            }
-          });
-        }
-        else {
-          if (currentAssetNum != (assetTypes.length - 1)) {
-            getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
-          }
-          else {
-            callback(resultObj);
-          }
-        }
+        } */
       });
     }
-    else {
+    /*else {
       if (currentAssetNum != (assetTypes.length - 1)) {
         getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
       }
       else {
         callback(resultObj);
       }
-    }
+    }*/
   });
 }
 

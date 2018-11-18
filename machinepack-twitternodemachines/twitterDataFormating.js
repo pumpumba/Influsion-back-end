@@ -12,60 +12,58 @@ var self = module.exports = {
           for (var i = 0; i < tweets.length; i++) {
             var tweet = {
               "platform": "twitter",
-              "user_id": tweets[i].user.id,
-              "user_url": "",
-              "user_name": tweets[i].user.name,
-              "user_screen_name": tweets[i].user.screen_name,
-              "user_followers_count": tweets[i].user.followers_count,
-              "user_verified": tweets[i].user.verified,
-              "user_profile_image_url": tweets[i].user.profile_image_url,
-              "tweet_id": tweets[i].id_str,
-              "tweet_text": tweets[i].text,
-              "tweet_url": "",
-              "tweet_favorite_count": tweets[i].favorite_count,
-              "tweet_retweet_count": tweets[i].retweet_count,
-              "tweet_created_at": tweets[i].created_at,
-              "tweet_hashtags": [],
-              "tweet_media": []
+              "userId": tweets[i].user.id,
+              "userUrl": "",
+              "userName": tweets[i].user.name,
+              "userScreenName": tweets[i].user.screen_name,
+              "userFollowersCount": tweets[i].user.followers_count,
+              "userVerified": tweets[i].user.verified,
+              "userProfileImageUrl": tweets[i].user.profile_image_url,
+              "tweetId": tweets[i].id_str,
+              "tweetText": tweets[i].text,
+              "tweetUrl": "",
+              "tweetFavoriteCount": tweets[i].favorite_count,
+              "tweetRetweetCount": tweets[i].retweet_count,
+              "tweetCreatedAt": tweets[i].created_at,
+              "tweetHashtags": [],
+              "tweetMedia": []
             };
-            var textLength = tweet.tweet_text.length;
-            var url_length = 'http://t.co'.length;
-            if(textLength > url_length) {
-              for(var k = 0; k<(textLength - url_length - 1);k++) {
-                if(tweet.tweet_text.substring(k, url_length + k) == 'http://t.co' || tweet.tweet_text.substring(k, url_length + k + 1) == 'https://t.co') {
-                  tweet.tweet_text = tweet.tweet_text.substring(0, k);
+            var textLength = tweet.tweetText.length;
+            var urlLength = 'http://t.co'.length;
+            if(textLength > urlLength) {
+              for(var k = 0; k<(textLength - urlLength - 1);k++) {
+                if(tweet.tweetText.substring(k, urlLength + k) == 'http://t.co' || tweet.tweetText.substring(k, urlLength + k + 1) == 'https://t.co') {
+                  tweet.tweetText = tweet.tweetText.substring(0, k);
                   break;
                 }
               }
             }
-            tweet.user_url = "https://twitter.com/" + tweet.user_screen_name;
-            tweet.tweet_url = "https://twitter.com/" + tweet.user_screen_name + "/status/" + tweet.tweet_id;
+            tweet.userUrl = "https://twitter.com/" + tweet.userScreenName;
+            tweet.tweetUrl = "https://twitter.com/" + tweet.userScreenName + "/status/" + tweet.tweetId;
 
             // Add hashtags
             for (var j = 0; j < tweets[i].entities.hashtags.length; j++){
-              tweet.tweet_hashtags.push(tweets[i].entities.hashtags[j].text)
+              tweet.tweetHashtags.push(tweets[i].entities.hashtags[j].text)
             }
 
             // Add media
             if (tweets[i].entities.media != null) {
               if (tweets[i].extended_entities != null) { // Multiple pictures/media
                 for (var j = 0; j < tweets[i].extended_entities.media.length; j++){
-                  tweet.tweet_media.push(tweets[i].extended_entities.media[j].media_url);
+                  tweet.tweetMedia.push(tweets[i].extended_entities.media[j].media_url);
                 }
               } else { // One picture/media
                 for (var j = 0; j < tweets[i].entities.media.length; j++){
-                  tweet.tweet_media.push(tweets[i].entities.media[j].media_url);
+                  tweet.tweetMedia.push(tweets[i].entities.media[j].media_url);
                 }
               }
             }
 
             // Get the higher res image
-            var fileType = tweet.user_profile_image_url.substring(tweet.user_profile_image_url.length - 4, tweet.user_profile_image_url.length);
-            tweet.user_profile_image_url = tweet.user_profile_image_url.substring(0, tweet.user_profile_image_url.length - 11);
-            //var n = tweet.user_profile_image_url.lastIndexOf(".");
-            //var fileType = tweet.user_profile_image_url.substring(n, tweet.user_profile_image_url.length);
-            //tweet.user_profile_image_url = tweet.user_profile_image_url.substring(0, n - 7);
-            tweet.user_profile_image_url = tweet.user_profile_image_url + fileType;
+            var n = tweet.userProfileImageUrl.lastIndexOf(".");
+            var fileType = tweet.userProfileImageUrl.substring(n, tweet.userProfileImageUrl.length);
+            tweet.userProfileImageUrl = tweet.userProfileImageUrl.substring(0, n - 7);
+            tweet.userProfileImageUrl = tweet.userProfileImageUrl + fileType;
 
             formatedTweets.push(tweet);
           }

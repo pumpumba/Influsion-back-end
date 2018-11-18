@@ -144,6 +144,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
               accounts.push(influencers[k]);
             }
           }
+          console.log(accounts);
           var currentInfluencerAccount = 0;
           if (currentInfluencerAccount < accounts.length) {
             var posts = [];
@@ -254,20 +255,20 @@ var storeContent = function (assetType, posts, postNum, databaseClient, callback
   var platform = posts[postNum].platform.toLowerCase();
   switch (assetType) {
     case 'tweet':
-      var unixtime = new Date(posts[postNum].tweet_created_at).getTime();
-      var userTextContent = posts[postNum].tweet_text.replace(regex, "''");
-      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerID, posts[postNum].tweet_favorite_count, platform, userTextContent, unixtime, posts[postNum].tweet_id, posts[postNum].tweet_url, jsonContent, databaseClient, callback);
+      var unixtime = new Date(posts[postNum].tweetCreatedAt).getTime();
+      var userTextContent = posts[postNum].tweetText.replace(regex, "''");
+      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerId, posts[postNum].tweetFavoriteCount, platform, userTextContent, unixtime, posts[postNum].tweetId, posts[postNum].tweetUrl, jsonContent, databaseClient, callback);
       break;
     case 'instagram post':
       var userTextContent = posts[postNum].postText.replace(regex, "''");
       var datePosted = Date.parse(posts[postNum].postCreatedAt);
-      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerID, posts[postNum].postLikeCount, platform, userTextContent, datePosted, posts[postNum].postId, posts[postNum].postUrl, jsonContent, databaseClient, callback);
+      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerId, posts[postNum].postLikeCount, platform, userTextContent, datePosted, posts[postNum].postId, posts[postNum].postUrl, jsonContent, databaseClient, callback);
       break;
     case 'youtube video':
       var splitedDate = posts[postNum].video_created_at.split(" ");
       var unixtime = new Date(splitedDate).getTime();
       var userTextContent = posts[postNum].video_title.replace(regex, "''");
-      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerID, posts[postNum].video_like_count, platform, userTextContent, unixtime, posts[postNum].video_id, posts[postNum].video_embeded_url, jsonContent, databaseClient, callback);
+      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerId, posts[postNum].video_like_count, platform, userTextContent, unixtime, posts[postNum].video_id, posts[postNum].video_embeded_url, jsonContent, databaseClient, callback);
       break;
   }
 };
@@ -332,7 +333,7 @@ var contentCallback = function (assetType, err, result, influencers, currentInfl
   } else {
     if (result != undefined) {
       for (var k = 0; k < result.length; k++) {
-        result[k].influencerID = influencers[currentInfluencer].influencerid
+        result[k].influencerId = influencers[currentInfluencer].influencerid;
         resultObj.push(result[k]);
       }
     }
