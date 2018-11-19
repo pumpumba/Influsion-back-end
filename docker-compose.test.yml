@@ -23,11 +23,11 @@ services:
     volumes:
       - "./db/createTables.sql:/docker-entrypoint-initdb.d/createTables.sql"
     environment:
-      POSTGRES_PASSWORD: "erikandfiliprules987"
-      POSTGRES_DB: "pumbadb"
-      POSTGRES_USER: "pumbapumba"
-      DATABASE_HOST: ${DATABASE_HOST}
-      DATABASE_NAME: ${DATABASE_NAME}
-      DATABASE_USER: ${DATABASE_USER}
-      DATABASE_PORT: ${DATABASE_PORT}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      - POSTGRES_PASSWORD="erikandfiliprules987"
+      - POSTGRES_DB="pumbadb"
+      - POSTGRES_USER="pumbapumba"
+      - "DATABASE_HOST=${DATABASE_HOST}"
+      - "DATABASE_NAME=${DATABASE_NAME}"
+      - "DATABASE_USER=${DATABASE_USER}"
+      - "DATABASE_PORT=${DATABASE_PORT}"
+      - "DATABASE_PASSWORD=${DATABASE_PASSWORD}"
