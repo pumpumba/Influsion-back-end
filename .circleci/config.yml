@@ -15,6 +15,7 @@ jobs:
     branches:
       only:
         - master
+        - test_setup
 
     steps:
       - checkout
@@ -35,26 +36,34 @@ jobs:
           docker_layer_caching: true
 
       - run:
-          name: Docker build server
+          name: Run Mocha tests
           command: |
-            docker build -f Dockerfile -t mezzersmite/$BACK_END_IMAGE_NAME:$TAG .
+            docker-compose -f docker-compose.test.yml up --build
+      
+      - store_test_results:
+          path: test-results.xml
 
-      - run:
-          name: Push server to docker hub
-          command: |
-            docker login -u $DOCKER_LOGIN -p $DOCKER_PWD
-            docker push mezzersmite/$BACK_END_IMAGE_NAME:$TAG
-
-      - run:
-          name: Docker build database
-          command: |
-            docker build -f Dockerfile.db -t mezzersmite/$BACK_END_DB_IMAGE_NAME:$TAG .
-
-      - run:
-          name: Push database to docker hub
-          command: |
-            docker login -u $DOCKER_LOGIN -p $DOCKER_PWD
-            docker push mezzersmite/$BACK_END_DB_IMAGE_NAME:$TAG
+      #- run:
+      #    name: Docker build server
+      #    command: |
+      #      docker build -f Dockerfile -t mezzersmite/$BACK_END_IMAGE_NAME:$TAG .
+#
+      #- run:
+      #    name: Push server to docker hub
+      #    command: |
+      #      docker login -u $DOCKER_LOGIN -p $DOCKER_PWD
+      #      docker push mezzersmite/$BACK_END_IMAGE_NAME:$TAG
+#
+      #- run:
+      #    name: Docker build database
+      #    command: |
+      #      docker build -f Dockerfile.db -t mezzersmite/$BACK_END_DB_IMAGE_NAME:$TAG .
+#
+      #- run:
+      #    name: Push database to docker hub
+      #    command: |
+      #      docker login -u $DOCKER_LOGIN -p $DOCKER_PWD
+      #      docker push mezzersmite/$BACK_END_DB_IMAGE_NAME:$TAG
       # run tests!
       #- run: roliga tests kanske
 
