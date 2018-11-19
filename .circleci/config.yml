@@ -5,9 +5,9 @@
 version: 2
 jobs:
   build:
-    machine: true
-    #docker:
-      #- image: circleci/node:latest
+    docker:
+      - image: circleci/node:latest
+      - image: circleci/postgres:latest
       #   auth:
       #    username: $DOCKER_LOGIN
       #   password: $DOCKER_PWD
