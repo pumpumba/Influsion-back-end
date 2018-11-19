@@ -7,7 +7,7 @@ var self = module.exports = {
         databaseClient.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
 
-            if (dbResults != undefined && dbResults["rowCount"] >= 1) {
+            if (dbResults != undefined && dbResults != null) {
                 dbResults["retrieveSuccess"] = true;
             } else {
                 dbResults = err;
@@ -28,10 +28,10 @@ var self = module.exports = {
         databaseClient.query(dbRequest, (err, dbResult) => {
             //We get a problem if login is
             var dbResults = dbResult;
-            if (dbResults != undefined && dbResults["rowCount"] >= 1) {
+            if (dbResults != undefined && dbResults != null) {
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = {};
+                dbResults = err;
                 dbResults["retrieveSuccess"] = false;
             }
             callback(dbResults);
@@ -172,13 +172,13 @@ var self = module.exports = {
 
                     dbResults["updateSuccess"] = true;
                 } else if (dbResults == undefined) {
-                    dbResults = {};
+                    dbResults = err;
                     dbResults["updateSuccess"] = false;
 
                 } else if (dbResults["rowCount"] == 2) {
                     console.log("2 or more updated. GRAVE ERROR in database.");
                 } else {
-                    dbResults = {};
+                    dbResults = err;
                     dbResults["updateSuccess"] = false;
                 }
                 callback(dbResults);
@@ -294,7 +294,7 @@ var self = module.exports = {
                     if (resultCompare == true) {
                         dbResults["loginSuccess"] = true;
                     } else {
-                        dbResults = {};
+                        dbResults = err;
                         dbResults["loginSuccess"] = false;
                     }
                     callback({ dbResults });

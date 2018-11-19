@@ -98,7 +98,7 @@ app.get("/db/get_followed_infl_posts", (req, res) => {
     console.log(dbResult); //TODO: We get a problem if login is WHAT? Who wrote this?
     var dbResults = dbResult;
 
-    if (dbResults != undefined && dbResults["rowCount"] >= 1) {
+    if (dbResults != undefined && dbResults != null) {
       dbResults["retrieveSuccess"] = true;
     } else {
       dbResults = err;
@@ -185,13 +185,13 @@ app.post("/db/login_tv_operator", (req, res) => {
         if (resultCompare == true) {
           dbResults["loginSuccess"] = true;
         } else {
-          dbResults = {};
+          dbResults = err;
           dbResults["loginSuccess"] = false;
         }
         res.json({ dbResults });
       });
     } else {
-      dbResults = {};
+      dbResults = err;
       dbResults["loginSuccess"] = false;
       res.json({ dbResults });
     }
@@ -442,14 +442,14 @@ app.post("/db/delete_user", (req, res) => {
           });
 
         } else {
-          dbResults = {};
+          dbResults = err;
           dbResults["deleteSuccess"] = false;
         }
 
         res.json({ dbResults });
       });
     } else {
-      dbResults = {};
+      dbResults = err;
       dbResults["deleteSuccess"] = false;
 
       res.json({ dbResults });
