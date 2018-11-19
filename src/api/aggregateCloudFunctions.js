@@ -82,7 +82,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
 
         if (currentAssetNum != (assetTypes.length - 1)) {
           //Go into next iteration of getContent
-          getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+          getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
         }
         else {
           //All iterations done, send back the result
@@ -100,7 +100,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
         }
         if (currentAssetNum != (assetTypes.length - 1)) {
           //Go into next iteration of getContent
-          getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+          getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
         }
         else {
           //All iterations done, send back the result
@@ -118,7 +118,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
         }
         if (currentAssetNum != (assetTypes.length - 1)) {
           //Go into next iteration of getContent
-          getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+          getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
         }
         else {
           //All iterations done, send back the result
@@ -144,7 +144,6 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
               accounts.push(influencers[k]);
             }
           }
-          console.log(accounts);
           var currentInfluencerAccount = 0;
           if (currentInfluencerAccount < accounts.length) {
             var posts = [];
@@ -153,7 +152,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
                 storeContent(assetType, response2, 0, databaseClient, (response3) => {
                   resultObj.push("Success");
                   if (currentAssetNum != (assetTypes.length - 1)) {
-                    getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+                    getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
                   }
                   else {
                     callback(resultObj);
@@ -162,7 +161,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
               }
               else {
                 if (currentAssetNum != (assetTypes.length - 1)) {
-                  getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+                  getContent(assetTypes, filterTypes, filterValue, context, limit, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
                 }
                 else {
                   callback(resultObj);
@@ -172,7 +171,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
           }
           else {
             if (currentAssetNum != (assetTypes.length - 1)) {
-              getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+              getContent(assetTypes, filterTypes, filterValue, context, limit, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
             }
             else {
               callback(resultObj);
@@ -180,6 +179,9 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
           }
         });
       }
+      break;
+    case "update platform accounts" :
+      updatePlatformAccounts(platform, assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, databaseClient, resultObj, callback);
       break;
     default:
       callback("The cloud component failed to provide any content");
@@ -270,6 +272,141 @@ var storeContent = function (assetType, posts, postNum, databaseClient, callback
       var userTextContent = posts[postNum].video_title.replace(regex, "''");
       insertContentToDB(assetType, posts, postNum, posts[postNum].influencerId, posts[postNum].video_like_count, platform, userTextContent, unixtime, posts[postNum].video_id, posts[postNum].video_embeded_url, jsonContent, databaseClient, callback);
       break;
+  }
+};
+
+var updateAccount = function (accountInformations, accountNum, databaseClient, callback) {
+
+  dbFunctions.updatePlatformAccount(accountInformations[accountNum].influencerId, accountInformations[accountNum].accountName, 
+      accountInformations[accountNum].platform, accountInformations[accountNum].followersCount, accountInformations[accountNum].createdAtUnixTime, 
+      accountInformations[accountNum].accountUrl, accountInformations[accountNum].imageUrl, accountInformations[accountNum].verified, accountInformations[accountNum].jsonContent, databaseClient, (response) => {
+    if (accountNum != accountInformations.length - 1) {
+      updateAccount(accountInformations, accountNum + 1, databaseClient, callback);
+    }
+    else {
+      callback(response);
+    }
+  });
+};
+
+var twitterAccountFormat = function(accountInformation) {
+  var imageUrl = accountInformation.profile_image_url;
+  var n = imageUrl.lastIndexOf(".");
+  var fileType = imageUrl.substring(n, imageUrl.length);
+  imageUrl = imageUrl.substring(0, n - 7);
+  imageUrl = imageUrl + fileType;
+  var essentialInformation = {
+    "platform" : 'twitter',
+    "accountName" : accountInformation.screen_name,
+    "followersCount" : accountInformation.followers_count,
+    "createdAtUnixTime" : new Date(accountInformation.created_at).getTime(),
+    "accountUrl" : 'https://twitter.com/' + accountInformation.screen_name,
+    "imageUrl": imageUrl,
+    "verified": accountInformation.verified,
+    "platformContent": accountInformation
+  };
+  return essentialInformation;
+};
+var updatePlatformAccounts = function(platform, assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, databaseClient, resultObj, callback) {
+  dbFunctions.getPlatformAccounts(platform, databaseClient, (response1) => {
+    var influencers = response1['rows'];
+    var accounts = [];
+    if (influencers != undefined) {
+      for (var k = 0; k < influencers.length; k++) {
+        accounts.push(influencers[k]);
+      }
+    }
+    var currentInfluencerAccount = 0;
+    if (currentInfluencerAccount < accounts.length) {
+      var informations = [];
+      getPlatformAccountInformation(platform, accounts, currentInfluencerAccount, informations, (response2) => {
+        
+        if (response2.length != 0) {
+          updateAccount(response2, 0, databaseClient, (response3) => {
+            resultObj.push("Success");
+            if (currentAssetNum != (assetTypes.length - 1)) {
+              getContent(assetTypes, filterTypes, filterValue, context, limit, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+            }
+            else { 
+              callback(response3);
+            }
+          });
+        }
+        else {
+          if (currentAssetNum != (assetTypes.length - 1)) {
+            getContent(assetTypes, filterTypes, filterValue, context, limit, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+          }
+          else {
+            callback(resultObj);
+          }
+        } 
+      });
+    }
+    else {
+      if (currentAssetNum != (assetTypes.length - 1)) {
+        getContent(assetTypes, filterTypes, filterValue, context, limit, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+      }
+      else {
+        callback(resultObj);
+      }
+    }
+  });
+};
+
+var getPlatformAccountInformation = function(platform, accounts, currentInfluencerAccount, informations, callback) {
+  switch (platform) {
+    case 'twitter':
+      var Twitter = require("machinepack-twitternodemachines");
+      Twitter.getAccountInformation({
+        consumerKey: process.env.TWITTER_CONSUMER_KEY,
+        consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
+        accessToken: process.env.TWITTER_ACCESS_TOKEN,
+        accessSecret: process.env.TWITTER_ACCESS_SECRET,
+        bearerToken: process.env.TWITTER_BEARER_TOKEN,
+        userScreenName: accounts[currentInfluencerAccount].platformname
+      }).exec((err, result) => {
+        contentCallbackPlatformAccounts(platform, err, twitterAccountFormat(result), accounts, currentInfluencerAccount, informations, callback);
+      });
+      break;
+    case 'instagram':
+      var Instagram = require("machinepack-instagramnodemachines2");
+      Instagram.getAccountInformation({
+        accessToken: process.env.INSTAGRAM_ACCESS_TOKEN,
+        accessId: process.env.INSTAGRAM_ID,
+        screenName: accounts[currentInfluencerAccount].platformname
+      }).exec((err, result) => {
+        contentCallbackPlatformAccounts(platform, err, result, accounts, currentInfluencerAccount, informations, callback);
+      });
+      break;
+    case 'youtube':
+      var YoutubeNodeMachine = require("machinepack-youtubenodemachines");
+      require("dotenv").load();
+      YoutubeNodeMachine.getAccountInformation({
+        googleEmail: process.env.GOOGLE_CLIENT_EMAIL,
+        googlePrivateKey: process.env.GOOGLE_PRIVATE_KEY,
+        channelName: accounts[currentInfluencerAccount].platformname
+      }).exec((err, result) => {
+        contentCallbackPlatformAccounts(platform, err, result, accounts, currentInfluencerAccount, informations, callback);
+      });
+      break;
+  }
+};
+
+var contentCallbackPlatformAccounts = function (platform, err, result, accounts, currentInfluencerAccount, resultObj, callback) {
+  if (err) {
+    console.log("Error at getPlatformAccountInformation");
+    console.log(err);
+  } else {
+    if (result != undefined) {
+      result.influencerId = accounts[currentInfluencerAccount].influencerid
+      resultObj.push(result);
+    }
+    if (currentInfluencerAccount != (accounts.length - 1)) {
+      getPlatformAccountInformation(platform, accounts, currentInfluencerAccount + 1, resultObj, callback);
+    }
+    else {
+      callback(resultObj);
+    }
   }
 };
 //Just a continuation of storeContent, the actual insertion.
