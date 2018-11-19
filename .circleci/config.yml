@@ -41,11 +41,21 @@ jobs:
           name: load environment variables
           command: |
             {
-              echo 'DATABASE_HOST="$DATABASE_HOST"'
-              echo 'DATABASE_NAME="$DATABASE_NAME"'
-              echo 'DATABASE_USER="$DATABASE_USER"'
-              echo 'DATABASE_PORT="$DATABASE_PORT"'
-              echo 'DATABASE_PASSWORD="$DATABASE_PASSWORD"'
+              echo 'DATABASE_HOST='\"$DATABASE_HOST\"
+              echo 'DATABASE_NAME='\"$DATABASE_NAME\"
+              echo 'DATABASE_USER='\"$DATABASE_USER\"
+              echo 'DATABASE_PORT='$DATABASE_PORT
+              echo 'DATABASE_PASSWORD='\"$DATABASE_PASSWORD\"
+              echo 'TWITTER_CONSUMER_KEY='\"$TWITTER_CONSUMER_KEY\"
+              echo 'TWITTER_CONSUMER_SECRET='\"$TWITTER_CONSUMER_SECRET\"
+              echo 'TWITTER_ACCESS_TOKEN='\"$TWITTER_ACCESS_TOKEN\"
+              echo 'TWITTER_ACCESS_SECRET='\"$TWITTER_ACCESS_SECRET\"
+              echo 'TWITTER_BEARER_TOKEN='\"$TWITTER_BEARER_TOKEN\"
+              echo 'INSTAGRAM_TOKEN='\"$INSTAGRAM_TOKEN\"
+              echo 'GOOGLE_CLIENT_ID='\"$GOOGLE_CLIENT_ID\"
+              echo 'GOOGLE_CLIENT_SECRET='\"$GOOGLE_CLIENT_SECRET\"
+              echo 'GOOGLE_PRIVATE_KEY='\"$GOOGLE_PRIVATE_KEY\"
+              echo 'GOOGLE_CLIENT_EMAIL='\"$GOOGLE_CLIENT_EMAIL\"
             } > .env
 
       - run:

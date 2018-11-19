@@ -11,8 +11,6 @@ services:
       - ".:/usr/src/app/test/report"
     depends_on:
       - "db"
-    environment:
-      - DATABASE_URL=postgres://pumbapumba:erikandfiliprules987@db:5432/pumbadb
     command: bash -c 'while !</dev/tcp/db/5432; do sleep 10; done; echo Waiting for database; npm test'
   db:
     container_name: "postgres"
