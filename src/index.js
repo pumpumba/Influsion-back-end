@@ -162,15 +162,10 @@ app.post("/db/create_tv_operator", (req, res) => {
   bcrypt.hash(pwd, saltRounds, function (err, hash) {
     var dbRequest = "INSERT INTO TVOPERATOR (TVOPERATORNAME, HASHEDPWD) VALUES ('" + tv_op_name + "', '" + hash + "');"
 
-<<<<<<< HEAD
-    insertionToDB(client, dbRequest, (response) => {
-      res.json(response);
-=======
     client.query(dbRequest, (err, dbResult) => {
 
       res.json(dbResult);
 
->>>>>>> development
     });
 
   });
@@ -429,10 +424,6 @@ app.post("/db/delete_user", (req, res) => {
       var hashPassword = dbResult["rows"][0].hashedpwd;
 
       bcrypt.compare(password, hashPassword, function (err, resultCompare) {
-<<<<<<< HEAD
-
-=======
->>>>>>> development
         if (resultCompare == true) {
           var dbRequest = "BEGIN; \
           DELETE FROM USRFLWINFL WHERE FLWRID = "+ usrID + "; \
@@ -462,12 +453,8 @@ app.post("/db/delete_user", (req, res) => {
       });
     } else {
       dbResults = {};
-<<<<<<< HEAD
-      dbResults["loginSuccess"] = false;
-=======
       dbResults["deleteSuccess"] = false;
 
->>>>>>> development
       res.json({ dbResults });
     }
   });
@@ -499,16 +486,11 @@ app.post("/db/change_tv_op_info", (req, res) => {
   var pwd = inputObj.password;
   bcrypt.hash(pwd, saltRounds, function (err, hash) {
     var dbRequest = "UPDATE TVOPERATOR SET TVOPERATORNAME = '" + tv_op_name + "', HASHEDPWD = '" + hash + "' WHERE TVOPERATORID = " + tv_op_id + ";"
-<<<<<<< HEAD
-    insertionToDB(client, dbRequest, (response) => {
-      res.json(response);
-=======
     client.query(dbRequest, (err, dbResult) => {
 
       res.json(dbResult);
 
 
->>>>>>> development
     });
   });
 });

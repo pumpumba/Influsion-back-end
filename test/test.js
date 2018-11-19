@@ -1,12 +1,12 @@
 process.env.NODE_ENV = "test";
 
-//let mongoose = require("mongoose");
-//const twitterNodeMachine = require("../src/api/twitterNodeMachine");
-
 //Require the dev-dependencies
 let chai = require("chai");
 let chaiHttp = require("chai-http");
 let server = require("../src/index");
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
 const { Pool, Client } = require("pg");
 const dbData = require("./dbTestData")
 let should = chai.should();
@@ -71,7 +71,6 @@ describe("/GET influencers from DB", () => {
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.a("array");
-        res.body.length.should.be.eql(0);
         done();
       });
   });
@@ -198,143 +197,136 @@ describe("/POST get popular content from empty dataase from each platform indivi
 //Insert data into DB
 function insertDBData() {
   dbData.data.forEach(element => {
-    console.log(element);
     client.query(element, (err, res) => {
       if (err) {
-        //console.log(err.stack)
-      } else {
-        //console.log(res)
+        console.log(err)
       }
     })
   });
+  testWithFilledDB();
 };
 
-describe("/GET influencers from DB", () => {
-  it("it should GET all influencers", done => {
-    chai
-      .request(server)
-      .get("/db/get_influencer")
-      .end((err, res) => {
-        res.should.have.status(200);
-        res.body.should.be.a("array");
-        res.body.length.should.be.eql(0);
-        done();
-      });
-  });
-});
-
-describe("/POST update content in filled DB from each platform individually", () => {
-  it("it should update youtube content in an filled DB", done => {
-    chai
-      .request(server)
-      .post("/aggregate/content")
-      .type("application/x-www-form-urlencoded")
-      .send({
-        'assetType[0]': 'youtube video',
-        'filterType[0]': 'update',
-        filterValue: '1',
-        limit: '2'
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        res.body.should.be.a("array");
-        res.body.length.should.be.eql(0);
-        done();
-      });
-  });
-  it("it should update instagram content in an filled DB", done => {
-    chai
-      .request(server)
-      .post("/aggregate/content")
-      .type("application/x-www-form-urlencoded")
-      .send({
-        'assetType[0]': 'instagram post',
-        'filterType[0]': 'update',
-        filterValue: '1',
-        limit: '2'
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        res.body.should.be.a("array");
-        res.body.length.should.be.eql(0);
-        done();
-      });
-  });
-  it("it should update twitter content in an filled DB", done => {
-    chai
-      .request(server)
-      .post("/aggregate/content")
-      .type("application/x-www-form-urlencoded")
-      .send({
-        'assetType[0]': 'tweet',
-        'filterType[0]': 'update',
-        filterValue: '1',
-        limit: '2'
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        res.body.should.be.a("array");
-        res.body.length.should.be.eql(0);
-        done();
-      });
-  });
-});
-
-describe("/POST get popular content from filled dataase from each platform individually", () => {
-  it("it should get youtube content from an filled DB", done => {
-    chai
-      .request(server)
-      .post("/aggregate/content")
-      .type("application/x-www-form-urlencoded")
-      .send({
-        'assetType[0]': 'youtube video',
-        'filterType[0]': 'popular',
-        filterValue: '1',
-        limit: '2'
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        res.body.should.be.a("array");
-        res.body.length.should.be.eql(0);
-        done();
-      });
+function testWithFilledDB() {
+  describe("/GET influencers from DB", () => {
+    it("it should GET all influencers", done => {
+      chai
+        .request(server)
+        .get("/db/get_influencer")
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a("array");
+          done();
+        });
+    });
   });
 
-  it("it should get instagram content from an filled DB", done => {
-    chai
-      .request(server)
-      .post("/aggregate/content")
-      .type("application/x-www-form-urlencoded")
-      .send({
-        'assetType[0]': 'instagram post',
-        'filterType[0]': 'popular',
-        filterValue: '1',
-        limit: '2'
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        res.body.should.be.a("array");
-        res.body.length.should.be.eql(0);
-        done();
-      });
+  describe("/POST update content in filled DB from each platform individually", () => {
+    it("it should update twitter content in an filled DB", done => {
+      chai
+        .request(server)
+        .post("/aggregate/content")
+        .type("application/x-www-form-urlencoded")
+        .send({
+          'assetType[0]': 'tweet',
+          'filterType[0]': 'update',
+          filterValue: '1',
+          limit: '2'
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a("array");
+          done();
+        });
+    });
+    it("it should update instagram content in an filled DB", done => {
+      chai
+        .request(server)
+        .post("/aggregate/content")
+        .type("application/x-www-form-urlencoded")
+        .send({
+          'assetType[0]': 'instagram post',
+          'filterType[0]': 'update',
+          filterValue: '1',
+          limit: '2'
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a("array");
+          done();
+        });
+    });
+    it("it should update youtube content in an filled DB", done => {
+      chai
+        .request(server)
+        .post("/aggregate/content")
+        .type("application/x-www-form-urlencoded")
+        .send({
+          'assetType[0]': 'youtube video',
+          'filterType[0]': 'update',
+          filterValue: '1',
+          limit: '2'
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a("array");
+          done();
+        });
+    });
   });
 
-  it("it should get twitter content from an filled DB", done => {
-    chai
-      .request(server)
-      .post("/aggregate/content")
-      .type("application/x-www-form-urlencoded")
-      .send({
-        'assetType[0]': 'tweet',
-        'filterType[0]': 'popular',
-        filterValue: '1',
-        limit: '2'
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        res.body.should.be.a("array");
-        res.body.length.should.be.eql(0);
-        done();
-      });
+  describe("/POST get popular content from filled dataase from each platform individually", () => {
+    it("it should get youtube content from an filled DB", done => {
+      chai
+        .request(server)
+        .post("/aggregate/content")
+        .type("application/x-www-form-urlencoded")
+        .send({
+          'assetType[0]': 'youtube video',
+          'filterType[0]': 'popular',
+          filterValue: '1',
+          limit: '2'
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a("array");
+          done();
+        });
+    });
+
+    it("it should get instagram content from an filled DB", done => {
+      chai
+        .request(server)
+        .post("/aggregate/content")
+        .type("application/x-www-form-urlencoded")
+        .send({
+          'assetType[0]': 'instagram post',
+          'filterType[0]': 'popular',
+          filterValue: '1',
+          limit: '2'
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a("array");
+          done();
+        });
+    });
+
+    it("it should get twitter content from an filled DB", done => {
+      chai
+        .request(server)
+        .post("/aggregate/content")
+        .type("application/x-www-form-urlencoded")
+        .send({
+          'assetType[0]': 'tweet',
+          'filterType[0]': 'popular',
+          filterValue: '1',
+          limit: '2'
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a("array");
+          done();
+        });
+    });
   });
-});
+};
