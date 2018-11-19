@@ -6,12 +6,7 @@ version: 2
 jobs:
   build:
     machine: true
-    environment:    
-      DATABASE_HOST: $DATABASE_HOST
-      DATABASE_NAME: $DATABASE_NAME
-      DATABASE_USER: $DATABASE_USER
-      DATABASE_PORT: $DATABASE_PORT
-      DATABASE_PASSWORD: $DATABASE_PASSWORD
+    environment:
     #docker:
      # - image: circleci/node:latest
       #- image: circleci/postgres:latest
@@ -42,6 +37,16 @@ jobs:
 
       #- setup_remote_docker:
        #   docker_layer_caching: true
+      - run:
+          name: load environment variables
+          command: |
+            {
+              echo 'DATABASE_HOST="$DATABASE_HOST"'
+              echo 'DATABASE_NAME="$DATABASE_NAME"'
+              echo 'DATABASE_USER="$DATABASE_USER"'
+              echo 'DATABASE_PORT="$DATABASE_PORT"'
+              echo 'DATABASE_PASSWORD="$DATABASE_PASSWORD"'
+            } > .env
 
       - run:
           name: Run Mocha tests
