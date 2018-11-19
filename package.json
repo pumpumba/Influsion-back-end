@@ -23,7 +23,6 @@
     "sails": "^1.0.2",
     "twitter": "^1.7.1",
     "yo": "^2.0.5",
-    "dotenv": "^6.0.0",
     "wrappy": "^1.0.2",
     "pg": "^7.4.3",
     "body-parser": "^1.18.3",
@@ -36,7 +35,8 @@
     "chai": "^4.2.0",
     "chai-http": "^4.2.0",
     "mocha": "^5.2.0",
-    "nodemon": "^1.18.4"
+    "nodemon": "^1.18.4",
+    "dotenv": "^6.0.0"
   },
   "bugs": {
     "url": "https://github.com/pumpumba/project_TBD/issues"

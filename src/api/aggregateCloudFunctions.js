@@ -1,9 +1,8 @@
 const dbFunctions = require('../dbFunctions');
 var self = module.exports = {
   health: function (req, res) {
-    res.send(
-      "<h1>Hello! Welcome to Pumba!</h1> <p> For Twitter API alternative, go to ./api/twitter </p>"
-    );
+    res.status(200);
+    res.send("HTTP response 200 code OK.");
   },
 
   filters: function (req, res) {
@@ -262,7 +261,7 @@ var storeContent = function (assetType, posts, postNum, databaseClient, callback
     case 'instagram post':
       var userTextContent = posts[postNum].postText.replace(regex, "''");
       var datePosted = Date.parse(posts[postNum].postCreatedAt);
-      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerId, posts[postNum].postLikeCount, platform, userTextContent, datePosted, posts[postNum].postId, posts[postNum].postUrl, jsonContent, databaseClient, callback);
+      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerID, posts[postNum].postLikeCount, platform, userTextContent, datePosted, posts[postNum].postId, posts[postNum].postUrl, jsonContent, databaseClient, callback);
       break;
     case 'youtube video':
       var splitedDate = posts[postNum].video_created_at.split(" ");

@@ -10,7 +10,8 @@ var self = module.exports = {
             if (dbResults != undefined && dbResults["rowCount"] >= 1) {
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = {};
+                dbResults = err;
+
                 dbResults["retrieveSuccess"] = false;
             }
             callback(dbResults);
@@ -23,6 +24,7 @@ var self = module.exports = {
             dbRequest = dbRequest + "AND platform = '" + platform + "'";
 
         dbRequest = dbRequest + " ORDER BY POSTED DESC LIMIT " + limit + ";";
+
         databaseClient.query(dbRequest, (err, dbResult) => {
             //We get a problem if login is
             var dbResults = dbResult;
@@ -35,6 +37,7 @@ var self = module.exports = {
             callback(dbResults);
         });
     },
+
     //inserts a post into the database.
     insertPost: function (influencerID, numLikes, platform, userTextContent, unixtime, postID, postUrl, jsonContent, databaseClient, callback) {
         var dbRequest = "INSERT INTO POST(INFLID, NRLIKES, PLATFORM, USRTXTCONTENT, POSTED, POSTURL, PLATFORMCONTENT) \
@@ -86,6 +89,7 @@ var self = module.exports = {
             callback(dbResults);
         });
     },
+
     //Retrieves the platforms accounts of a users followed influencers.
     getPlatformAccountsFromFollowedInfluencers: function (userID, orderBy, databaseClient, callback) {
         var dbRequest = "WITH INFLUENCERWITHPLATFORMACCOUNTS AS ( \
@@ -106,10 +110,6 @@ var self = module.exports = {
         if (process.env.NODE_ENV !== "test") {
             console.log(dbRequest);
         }
-        dbRequest = dbRequest + ";";
-        if (process.env.NODE_ENV !== "test") {
-            console.log(dbRequest);
-        }
         databaseClient.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
             if (dbResults != undefined) {
@@ -121,6 +121,7 @@ var self = module.exports = {
             callback(dbResults);
         });
     },
+
     //Retrieves the influencer accounts which a user follows
     getFollowListAccounts: function (userID, databaseClient, callback) {
         var dbRequest = "WITH B AS ( \
@@ -142,6 +143,7 @@ var self = module.exports = {
             callback(dbResults);
         });
     },
+
     //Adds into the database that a user visited an influencer
     addUserVisit: function (userID, influencerID, typeOfVisit, databaseClient, callback) {
         var dbRequest = "INSERT INTO USRVISIT(USRID, INFLID, TYPEOFVISIT) VALUES (" + userID + "," + influencerID + ",'" + typeOfVisit + "');";
@@ -162,6 +164,7 @@ var self = module.exports = {
             callback(dbResults);
         });
     },
+
     //Modifies a users account information
     modifyUser: function (password, username, age, email, sex, userID, databaseClient, callback) {
         if (process.env.NODE_ENV !== "test") {
@@ -195,8 +198,12 @@ var self = module.exports = {
     //Makes an insertion to the database, sends in the request.
     insertionToDB: function (databaseClient, dbRequest, callback) {
         databaseClient.query(dbRequest, (err, dbResult) => {
+
+
             var dbResults = dbResult;
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
+
+
                 dbResults["createSuccess"] = true;
             } else {
                 dbResults = err;
@@ -224,7 +231,7 @@ var self = module.exports = {
             WHERE FLWRID = "+ userID + " \
             ), P AS ( \
             SELECT * FROM POST ";
-        if (platform != undefined) {
+        if (platform != 'all') {
             dbRequest = dbRequest + " WHERE PLATFORM  = '" + platform + "' ";
         }
 
@@ -264,19 +271,22 @@ var self = module.exports = {
             dbRequest = dbRequest + " LIMIT " + limit;
         }
         dbRequest = dbRequest + "), INFLLIST AS ( \
-        SELECT INFLID \
-        FROM USRFLWINFL \
-        WHERE FLWRID = "+ userID + " \
-          ) \
-SELECT *, (SELECT(COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
-FROM P ORDER BY POSTED DESC";
+            SELECT INFLID \
+            FROM USRFLWINFL \
+            WHERE FLWRID = "+ userID + " \
+          )\
+           SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
+            FROM P ORDER BY POSTED DESC";
         dbRequest = dbRequest + ";";
         if (process.env.NODE_ENV !== "test") {
             console.log(dbRequest);
         }
         databaseClient.query(dbRequest, (err, dbResult) => {
+
             var dbResults = dbResult;
             if (dbResults != undefined) {
+
+
                 dbResults["retrieveSuccess"] = true;
             } else {
                 dbResults = err;
