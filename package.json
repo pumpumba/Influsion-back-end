@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js --legacy-watch",
-    "test": "mocha --timeout 5000 --reporter-options output=filename.xml"
+    "test": "mocha --timeout 5000 --reporter xunit --reporter-options output=./test/report/test-report.xml"
   },
   "repository": {
     "type": "git",

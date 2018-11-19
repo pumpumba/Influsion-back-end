@@ -3,3 +3,4 @@ pumbagoogleprivatekey.json
 node_modules
 .DS_Store
 .vscode
+test-report.xml

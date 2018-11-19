@@ -8,6 +8,7 @@ services:
       - "80:8080"
     volumes:
       - "./src:/usr/src/app/src"
+      - ".:/usr/src/app/test/report"
     depends_on:
       - "db"
     environment:
