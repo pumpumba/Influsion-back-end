@@ -323,6 +323,13 @@ app.post("/db/hashtag_promotion", (req, res) => {
   });
 });
 
+app.get("/db/get_counts", (req, res) => {
+  var dbRequest = "SELECT (SELECT COUNT(DISTINCT USR) FROM USR) as NRUSERS, (SELECT COUNT(DISTINCT INFLUENCERID) FROM INFLUENCER) AS NRINFLUENCERS;";
+  client.query(dbRequest, (err, dbResult) => {
+    res.json(dbResult);
+  });
+})
+
 app.get("/db/get_for_autosearch", (req, res) => {
   var user_id = req["query"]["user_id"];
   var dbRequest = "WITH INFLLIST AS ( \
@@ -336,7 +343,9 @@ app.get("/db/get_for_autosearch", (req, res) => {
           'actname', \
           PACC.actname, \
           'platform', \
-          PACC.PLATFORM))) \
+          PACC.PLATFORM, \
+          'img_url', \
+          PACC.IMGURL))) \
           AS PFACCS FROM PLATFORMACCOUNT AS PACC \
           GROUP BY INFLID \
   ), IPC AS ( \
@@ -542,6 +551,13 @@ app.post("/db/search_influencer", (req, res) => {
 
 app.listen(port, hostname);
 console.log(`Running on http://${hostname}.${port}`);
+
+app.get("/db/get_user_ages", (req, res) => {
+  var dbRequest = "SELECT AGE FROM USR;";
+  client.query(dbRequest, (err, dbResult) => {
+    res.json(dbResult);
+  });
+});
 
 // Updates a platformaccount with the info sent in.
 /* OBSERVE: THIS FUNCTION ONLY RETURNS THE CORRECT REQUEST. I HAVE TRIED THE REQUESTS IN TERMINAL,
