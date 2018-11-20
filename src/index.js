@@ -328,7 +328,23 @@ app.get("/db/get_counts", (req, res) => {
   client.query(dbRequest, (err, dbResult) => {
     res.json(dbResult);
   });
-})
+});
+
+app.get("/db/get_most_followed_influencers", (req, res) => {
+  var limit = req["query"]["limit"];
+  var dbRequest = "SELECT (SELECT COUNT(*) FROM USRFLWINFL WHERE USRFLWINFL.INFLID = I.INFLUENCERID) AS NRFOLLOWING, I.INFLUENCERNAME FROM INFLUENCER AS I ORDER BY NRFOLLOWING DESC LIMIT "+limit+";";
+
+  client.query(dbRequest, (err, dbResult) => {
+    var dbResults = dbResult["rows"];
+    if (dbResults != undefined) {
+      dbResults["retrieveSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["retrieveSuccess"] = false;
+    }
+    res.json(dbResults);
+  });
+});
 
 app.get("/db/get_for_autosearch", (req, res) => {
   var user_id = req["query"]["user_id"];
