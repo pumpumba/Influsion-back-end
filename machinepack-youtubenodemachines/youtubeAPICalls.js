@@ -131,6 +131,7 @@ function getVideoStatistics(auth, youtube, items, count, callback) {
 // Format the JSON object containing the channel data
 function formatChannelJson(channel) {
   return formatedChannel = {
+    "platform": "Youtube",
     "channel_id": channel.id,
     "channel_title": channel.snippet.title,
     "channel_description": channel.snippet.description,
