@@ -1,6 +1,6 @@
 {
   "name": "machinepack-youtubenodemachines",
-  "version": "2.0.0",
+  "version": "2.4.0",
   "description": "Gets content from Youtube",
   "scripts": {
     "test": "node ./node_modules/test-machinepack-mocha/bin/testmachinepack-mocha.js"
@@ -23,7 +23,8 @@
     "machineDir": "machines/",
     "machines": [
       "getChannelYoutube",
-      "getChannelYoutubeVideos"
+      "getChannelYoutubeVideos",
+      "getAccountInformation"
     ]
   },
   "repository": {

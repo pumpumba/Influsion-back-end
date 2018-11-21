@@ -2,15 +2,30 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 var self = module.exports = {
     //Retrieves all accounts from the database from a specific social media platform.
+    getCompletePlatformAccounts: function (platform, databaseClient, callback) {
+        var dbRequest = "SELECT * FROM PLATFORMACCOUNT WHERE PLATFORM = '" + platform + "'";
+        databaseClient.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+
+            if (dbResults != undefined && dbResults != null) {
+                dbResults["retrieveSuccess"] = true;
+            } else {
+                dbResults = {};
+
+                dbResults["retrieveSuccess"] = false;
+            }
+            callback(dbResults);
+        });
+    },
     getPlatformAccounts: function (platform, databaseClient, callback) {
         var dbRequest = "SELECT INFLID AS INFLUENCERID, ACTNAME AS PLATFORMNAME FROM PLATFORMACCOUNT WHERE PLATFORM = '" + platform + "'";
         databaseClient.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
 
-            if (dbResults != undefined && dbResults["rowCount"] >= 1) {
+            if (dbResults != undefined && dbResults != null) {
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
 
                 dbResults["retrieveSuccess"] = false;
             }
@@ -28,7 +43,7 @@ var self = module.exports = {
         databaseClient.query(dbRequest, (err, dbResult) => {
             //We get a problem if login is
             var dbResults = dbResult;
-            if (dbResults != undefined && dbResults["rowCount"] >= 1) {
+            if (dbResults != undefined && dbResults != null) {
                 dbResults["retrieveSuccess"] = true;
             } else {
                 dbResults = {};
@@ -39,20 +54,77 @@ var self = module.exports = {
     },
 
     //inserts a post into the database.
-    insertPost: function (influencerID, numLikes, platform, userTextContent, unixtime, postID, postUrl, jsonContent, databaseClient, callback) {
-        var dbRequest = "INSERT INTO POST(INFLID, NRLIKES, PLATFORM, USRTXTCONTENT, POSTED, POSTURL, PLATFORMCONTENT) \
+    insertPost: function (influencerID, numLikes, platform, userTextContent, unixtime, postID, postUrl, profilePicture, jsonContent, databaseClient, callback) {
+        var dbRequest = "INSERT INTO POST(INFLID, NRLIKES, PLATFORM, USRTXTCONTENT, POSTED, POSTURL, PROFILEPIC, PLATFORMCONTENT) \
             VALUES ("+ influencerID + ",\
             "+ numLikes + ", '" + platform + "',\
             '"+ userTextContent + "', to_timestamp(" + unixtime + "),\
-            '"+ postUrl + "', '" + jsonContent + "'::json);";
+            '"+ postUrl + "', '" + profilePicture + "', '" + jsonContent + "'::json);";
 
         databaseClient.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["createSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["createSuccess"] = false;
+            }
+            callback(dbResults);
+        });
+    },
+
+    updatePlatformAccount: function(influencerId, accountName, platform, followersCount, memberSince, actURL, imageURL, isVerified, platformContent, databaseClient, callback) {
+        //Put everything into a json object.
+        var jsonObject = {
+            "ACTNAME": accountName, //check
+            "PLATFORM": platform, //not necessary to implement below
+            "NRFLWRS": followersCount, //check
+            "MEMBERSINCE": memberSince, //MUST BE UNIX TIME FORMAT
+            "ACTURL": actURL, //check
+            "IMGURL": imageURL, //check
+            "VERIFIED": isVerified, //check
+            "PLATFORMCONTENT": platformContent
+        }
+        // We loop through the json object. If something is not defined,
+        // then we simply do not add this to the request.
+        var dbRequest = "UPDATE PLATFORMACCOUNT SET ";
+        for (key in jsonObject) {
+            if (jsonObject[key] != undefined) {
+                switch (key) {
+                    case "ACTNAME":
+                    case "ACTURL":
+                    case "IMGURL":
+                    dbRequest = dbRequest + key + " = '" + jsonObject[key] + "', ";
+                    break;
+                    case "NRFLWRS":
+                    case "VERIFIED":
+                    dbRequest = dbRequest + key + " = " + jsonObject[key] + ", ";
+                    break;
+                    case "MEMBERSINCE":
+                    dbRequest = dbRequest + key + " = to_timestamp(" + jsonObject[key] + "), ";
+                    break;
+                    case "PLATFORMCONTENT":
+                    // Do note that we might have to do regex if we send in json objects here, and replace ' with '' to escape.
+                    // in that case, do regex on jsonObj[key]
+                    dbRequest = dbRequest + key + " = '" + jsonObject[key] + "'::json, ";
+                    break;
+                }
+            }
+        }
+        // Remove the last , and space, and add the last bit of the request to finish it
+        dbRequest = dbRequest.substr(0, dbRequest.length - 2);
+        dbRequest = dbRequest + " WHERE INFLID = " + influencerId + " AND PLATFORM = '" + platform + "';";
+
+        // Here, I just send back the actual db request. Should be different when actually implementing it for real.
+        databaseClient.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+            if (dbResults != undefined && dbResults["rowCount"] == 1) {
+                dbResults["updateSuccess"] = true;
+            } else {
+                console.log("Failed: ");
+                console.log(dbResult);
+                dbResults = {};
+                dbResults["updateSuccess"] = false;
             }
             callback(dbResults);
         });
@@ -66,7 +138,7 @@ var self = module.exports = {
             if (dbResults != undefined) {
                 dbResults["deleteSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["deleteSuccess"] = false;
             }
             callback(dbResults);
@@ -82,7 +154,7 @@ var self = module.exports = {
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["createSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["createSuccess"] = false;
             }
             callback(dbResults);
@@ -107,13 +179,12 @@ var self = module.exports = {
             dbRequest = dbRequest + "ORDER BY " + orderBy;
         }
         dbRequest = dbRequest + ";";
-        console.log(dbRequest);
         databaseClient.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
             if (dbResults != undefined) {
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["retrieveSuccess"] = false;
             }
             callback(dbResults);
@@ -135,7 +206,7 @@ var self = module.exports = {
             if (dbResults != undefined) {
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["retrieveSuccess"] = false;
             }
             callback(dbResults);
@@ -152,7 +223,7 @@ var self = module.exports = {
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["createSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["createSuccess"] = false;
             }
             callback(dbResults);
@@ -161,7 +232,6 @@ var self = module.exports = {
 
     //Modifies a users account information
     modifyUser: function (password, username, age, email, sex, userID, databaseClient, callback) {
-        console.log(userID);
         bcrypt.hash(password, saltRounds, function (err, hash) {
             var dbRequest = "UPDATE USR SET USRNAME = '" + username + "', HASHEDPWD = '" + hash + "', age = " + age + ", email = '" + email + "', sex = '" + sex + "' WHERE usrid = " + userID + ";";
             databaseClient.query(dbRequest, (err, dbResult) => {
@@ -196,7 +266,7 @@ var self = module.exports = {
 
                 dbResults["createSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["createSuccess"] = false;
             }
             callback(dbResults);
@@ -230,13 +300,11 @@ var self = module.exports = {
           SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
             FROM P ORDER BY POSTED DESC";
         databaseClient.query(dbRequest, (err, dbResult) => {
-            console.log(err);
-            console.log(dbResult);
             var dbResults = dbResult;
             if (dbResults != undefined) {
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["retrieveSuccess"] = false;
             }
             callback(dbResults);
@@ -264,7 +332,6 @@ var self = module.exports = {
            SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
             FROM P ORDER BY POSTED DESC";
         dbRequest = dbRequest + ";";
-        console.log(dbRequest);
         databaseClient.query(dbRequest, (err, dbResult) => {
 
             var dbResults = dbResult;
@@ -273,7 +340,7 @@ var self = module.exports = {
 
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["retrieveSuccess"] = false;
             }
             callback(dbResults);
