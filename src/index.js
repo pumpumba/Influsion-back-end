@@ -75,7 +75,7 @@ app.use(bodyParser.json());
 app.post("/db/get_platform_accounts", (req, res) => {
   var inputObj = req.body;
   var platform = inputObj.platform; //TODO: Change to hashed version of password
-  dbFunctions.getCompletePlatformAccounts(platform, client, (response) => {
+  dbFunctions.getPlatformAccounts(platform, client, (response) => {
     res.json(response);
   });
 });
