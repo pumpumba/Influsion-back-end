@@ -379,7 +379,7 @@ var contentCallbackPlatformAccounts = function (platform, err, result, accounts,
     console.log("Error at getPlatformAccountInformation");
     console.log(err);
   }
-  console.log(result);
+  //console.log(result);
   if (result.accountName != undefined) {
     result.influencerId = accounts[currentInfluencerAccount].inflid;
     resultObj.push(result);
