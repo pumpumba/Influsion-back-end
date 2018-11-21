@@ -392,7 +392,7 @@ app.post("/db/delete_user_like", (req, res) => {
     if (dbResults != undefined) {
       dbResults["deleteSuccess"] = true;
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["deleteSuccess"] = false;
     }
     res.json(dbResults);
@@ -444,9 +444,12 @@ app.post("/db/delete_user", (req, res) => {
 
     if (dbResults != undefined) {
       var hashPassword = dbResult["rows"][0].hashedpwd;
+      /*
+      DELETE FROM USRLIKEPOST WHERE USRID = "+ usrID + "; \
+          DELETE FROM USRVISIT WHERE usrid = "+ usrID + "; \ */
 
       bcrypt.compare(password, hashPassword, function (err, resultCompare) {
-        if (resultCompare == true) {
+        if (resultCompare == false) {
           var dbRequest = "BEGIN; \
           DELETE FROM USRFLWINFL WHERE FLWRID = "+ usrID + "; \
           DELETE FROM USRLIKEPOST WHERE USRID = "+ usrID + "; \
@@ -459,19 +462,19 @@ app.post("/db/delete_user", (req, res) => {
             console.log(dbResults);
             if (dbResults != undefined) {
               dbResults["deleteSuccess"] = true;
+              res.json(dbResults);
             } else {
-              dbResults = err;
+              dbResults = {};
               dbResults["deleteSuccess"] = false;
+              res.json(dbResults);
             }
-            res.json(dbResults);
           });
 
         } else {
           dbResults = err;
           dbResults["deleteSuccess"] = false;
+          res.json(dbResults);
         }
-
-        res.json({ dbResults });
       });
     } else {
       dbResults = err;
