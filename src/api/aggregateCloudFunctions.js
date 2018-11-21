@@ -136,7 +136,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
         callback('Can not update all platform at once. Update each one by one.');
       }
       else {
-        dbFunctions.getPlatformAccounts(platform, databaseClient, (response1) => {
+        dbFunctions.getCompletePlatformAccounts(platform, databaseClient, (response1) => {
           var influencers = response1['rows'];
           var accounts = [];
           if (influencers != undefined) {
@@ -259,18 +259,18 @@ var storeContent = function (assetType, posts, postNum, databaseClient, callback
     case 'tweet':
       var unixtime = new Date(posts[postNum].tweetCreatedAt).getTime();
       var userTextContent = posts[postNum].tweetText.replace(regex, "''");
-      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerId, posts[postNum].tweetFavoriteCount, platform, userTextContent, unixtime, posts[postNum].tweetId, posts[postNum].tweetUrl, jsonContent, databaseClient, callback);
+      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerId, posts[postNum].tweetFavoriteCount, platform, userTextContent, unixtime, posts[postNum].tweetId, posts[postNum].tweetUrl, posts[postNum].profilePictureFromAccount, jsonContent, databaseClient, callback);
       break;
     case 'instagram post':
       var userTextContent = posts[postNum].postText.replace(regex, "''");
       var datePosted = Date.parse(posts[postNum].postCreatedAt);
-      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerId, posts[postNum].postLikeCount, platform, userTextContent, datePosted, posts[postNum].postId, posts[postNum].postUrl, jsonContent, databaseClient, callback);
+      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerId, posts[postNum].postLikeCount, platform, userTextContent, datePosted, posts[postNum].postId, posts[postNum].postUrl, posts[postNum].profilePictureFromAccount, jsonContent, databaseClient, callback);
       break;
     case 'youtube video':
       var splitedDate = posts[postNum].video_created_at.split(" ");
       var unixtime = new Date(splitedDate).getTime();
       var userTextContent = posts[postNum].video_title.replace(regex, "''");
-      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerId, posts[postNum].video_like_count, platform, userTextContent, unixtime, posts[postNum].video_id, posts[postNum].video_embeded_url, jsonContent, databaseClient, callback);
+      insertContentToDB(assetType, posts, postNum, posts[postNum].influencerId, posts[postNum].video_like_count, platform, userTextContent, unixtime, posts[postNum].video_id, posts[postNum].video_embeded_url, posts[postNum].profilePictureFromAccount, jsonContent, databaseClient, callback);
       break;
   }
 };
@@ -391,8 +391,8 @@ var contentCallbackPlatformAccounts = function (platform, err, result, accounts,
   }
 };
 //Just a continuation of storeContent, the actual insertion.
-var insertContentToDB = function (assetType, posts, postNum, influencerID, likeCount, platform, userTextContent, unixTime, postID, url, jsonContent, databaseClient, callback) {
-  dbFunctions.insertPost(influencerID, likeCount, platform, userTextContent, unixTime, postID, url, jsonContent, databaseClient, (response) => {
+var insertContentToDB = function (assetType, posts, postNum, influencerID, likeCount, platform, userTextContent, unixTime, postID, url, profilePicture, jsonContent, databaseClient, callback) {
+  dbFunctions.insertPost(influencerID, likeCount, platform, userTextContent, unixTime, postID, url, profilePicture, jsonContent, databaseClient, (response) => {
     if (postNum != posts.length - 1) {
       storeContent(assetType, posts, postNum + 1, databaseClient, callback);
     }
@@ -412,7 +412,7 @@ var getContentFromInfluencerFromAPI = function (assetType, influencers, currentI
         accessToken: process.env.TWITTER_ACCESS_TOKEN,
         accessSecret: process.env.TWITTER_ACCESS_SECRET,
         bearerToken: process.env.TWITTER_BEARER_TOKEN,
-        userScreenName: influencers[currentInfluencer].platformname,
+        userScreenName: influencers[currentInfluencer].actname,
         count: limit
       }).exec((err, result) => {
         contentCallback('tweet', err, result, influencers, currentInfluencer, resultObj, limit, callback);
@@ -423,7 +423,7 @@ var getContentFromInfluencerFromAPI = function (assetType, influencers, currentI
       Instagram.getInstaPosts({
         accessToken: process.env.INSTAGRAM_ACCESS_TOKEN,
         accessId: process.env.INSTAGRAM_ID,
-        screenName: influencers[currentInfluencer].platformname,
+        screenName: influencers[currentInfluencer].actname,
         postCount: limit
       }).exec((err, result) => {
         contentCallback('instagram post', err, result, influencers, currentInfluencer, resultObj, limit, callback);
@@ -435,7 +435,7 @@ var getContentFromInfluencerFromAPI = function (assetType, influencers, currentI
       YoutubeNodeMachine.getChannelYoutubeVideos({
         googleEmail: process.env.GOOGLE_CLIENT_EMAIL,
         googlePrivateKey: process.env.GOOGLE_PRIVATE_KEY,
-        channelName: influencers[currentInfluencer].platformname,
+        channelName: influencers[currentInfluencer].actname,
         count: limit
       }).exec((err, result) => {
         contentCallback('youtube video', err, result, influencers, currentInfluencer, resultObj, limit, callback);
@@ -451,7 +451,8 @@ var contentCallback = function (assetType, err, result, influencers, currentInfl
   } else {
     if (result != undefined) {
       for (var k = 0; k < result.length; k++) {
-        result[k].influencerId = influencers[currentInfluencer].influencerid;
+        result[k].influencerId = influencers[currentInfluencer].inflid;
+        result[k].profilePictureFromAccount = influencers[currentInfluencer].imgurl;
         resultObj.push(result[k]);
       }
     }
