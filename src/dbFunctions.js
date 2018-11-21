@@ -10,7 +10,7 @@ var self = module.exports = {
             if (dbResults != undefined && dbResults != null) {
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
 
                 dbResults["retrieveSuccess"] = false;
             }
@@ -25,7 +25,7 @@ var self = module.exports = {
             if (dbResults != undefined && dbResults != null) {
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
 
                 dbResults["retrieveSuccess"] = false;
             }
@@ -46,7 +46,7 @@ var self = module.exports = {
             if (dbResults != undefined && dbResults != null) {
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["retrieveSuccess"] = false;
             }
             callback(dbResults);
@@ -66,7 +66,7 @@ var self = module.exports = {
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["createSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["createSuccess"] = false;
             }
             callback(dbResults);
@@ -85,7 +85,6 @@ var self = module.exports = {
             "VERIFIED": isVerified, //check
             "PLATFORMCONTENT": platformContent
         }
-        console.log(jsonObject);
         // We loop through the json object. If something is not defined,
         // then we simply do not add this to the request.
         var dbRequest = "UPDATE PLATFORMACCOUNT SET ";
@@ -118,11 +117,11 @@ var self = module.exports = {
 
         // Here, I just send back the actual db request. Should be different when actually implementing it for real.
         databaseClient.query(dbRequest, (err, dbResult) => {
-            console.log(dbResult);
             var dbResults = dbResult;
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["updateSuccess"] = true;
             } else {
+                console.log(dbResult);
                 dbResults = {};
                 dbResults["updateSuccess"] = false;
             }
@@ -138,7 +137,7 @@ var self = module.exports = {
             if (dbResults != undefined) {
                 dbResults["deleteSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["deleteSuccess"] = false;
             }
             callback(dbResults);
@@ -154,7 +153,7 @@ var self = module.exports = {
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["createSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["createSuccess"] = false;
             }
             callback(dbResults);
@@ -184,7 +183,7 @@ var self = module.exports = {
             if (dbResults != undefined) {
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["retrieveSuccess"] = false;
             }
             callback(dbResults);
@@ -206,7 +205,7 @@ var self = module.exports = {
             if (dbResults != undefined) {
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["retrieveSuccess"] = false;
             }
             callback(dbResults);
@@ -223,7 +222,7 @@ var self = module.exports = {
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["createSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["createSuccess"] = false;
             }
             callback(dbResults);
@@ -242,13 +241,13 @@ var self = module.exports = {
 
                     dbResults["updateSuccess"] = true;
                 } else if (dbResults == undefined) {
-                    dbResults = err;
+                    dbResults = {};
                     dbResults["updateSuccess"] = false;
 
                 } else if (dbResults["rowCount"] == 2) {
                     console.log("2 or more updated. GRAVE ERROR in database.");
                 } else {
-                    dbResults = err;
+                    dbResults = {};
                     dbResults["updateSuccess"] = false;
                 }
                 callback(dbResults);
@@ -266,7 +265,7 @@ var self = module.exports = {
 
                 dbResults["createSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["createSuccess"] = false;
             }
             callback(dbResults);
@@ -304,7 +303,7 @@ var self = module.exports = {
             if (dbResults != undefined) {
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["retrieveSuccess"] = false;
             }
             callback(dbResults);
@@ -340,7 +339,7 @@ var self = module.exports = {
 
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["retrieveSuccess"] = false;
             }
             callback(dbResults);
@@ -361,7 +360,7 @@ var self = module.exports = {
                     if (resultCompare == true) {
                         dbResults["loginSuccess"] = true;
                     } else {
-                        dbResults = err;
+                        dbResults = {};
                         dbResults["loginSuccess"] = false;
                     }
                     callback({ dbResults });

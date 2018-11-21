@@ -75,7 +75,7 @@ app.use(bodyParser.json());
 app.post("/db/get_platform_accounts", (req, res) => {
   var inputObj = req.body;
   var platform = inputObj.platform; //TODO: Change to hashed version of password
-  dbFunctions.getPlatformAccounts(platform, client, (response) => {
+  dbFunctions.getCompletePlatformAccounts(platform, client, (response) => {
     res.json(response);
   });
 });
@@ -101,7 +101,7 @@ app.get("/db/get_followed_infl_posts", (req, res) => {
     if (dbResults != undefined && dbResults != null) {
       dbResults["retrieveSuccess"] = true;
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["retrieveSuccess"] = false;
     }
 
@@ -185,13 +185,13 @@ app.post("/db/login_tv_operator", (req, res) => {
         if (resultCompare == true) {
           dbResults["loginSuccess"] = true;
         } else {
-          dbResults = err;
+          dbResults = {};
           dbResults["loginSuccess"] = false;
         }
         res.json({ dbResults });
       });
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["loginSuccess"] = false;
       res.json({ dbResults });
     }
@@ -207,7 +207,7 @@ app.get("/db/get_user", (req, res) => {
     if (dbResults != undefined) {
       dbResults["retrieveSuccess"] = true;
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["retrieveSuccess"] = false;
     }
     res.json(dbResults);
@@ -222,7 +222,7 @@ app.get("/db/get_all_users", (req, res) => {
     if (dbResults != undefined) {
       dbResults["retrieveSuccess"] = true;
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["retrieveSuccess"] = false;
     }
     res.json(dbResults);
@@ -279,7 +279,7 @@ app.get("/db/get_clicks_promoted_influencers", (req, res) => {
       var dbResults = dbResult["rows"];
       dbResults["retrieveSuccess"] = true;
     } else {
-      var dbResults = err;
+      var dbResults = {};
       dbResults["retrieveSuccess"] = false;
     }
     res.json(dbResults);
@@ -298,7 +298,7 @@ app.post("/db/influencer_promotion", (req, res) => {
     if (dbResults != undefined) {
       dbResults["createSuccess"] = true;
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["createSuccess"] = false;
     }
     res.json(dbResults);
@@ -316,7 +316,7 @@ app.post("/db/hashtag_promotion", (req, res) => {
     if (dbResults != undefined) {
       dbResults["createSuccess"] = true;
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["createSuccess"] = false;
     }
     res.json(dbResults);
@@ -339,7 +339,7 @@ app.get("/db/get_most_followed_influencers", (req, res) => {
     if (dbResults != undefined) {
       dbResults["retrieveSuccess"] = true;
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["retrieveSuccess"] = false;
     }
     res.json(dbResults);
@@ -375,7 +375,7 @@ app.get("/db/get_for_autosearch", (req, res) => {
     if (dbResults != undefined) {
       dbResults["retrieveSuccess"] = true;
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["retrieveSuccess"] = false;
     }
     res.json(dbResults);
@@ -471,13 +471,13 @@ app.post("/db/delete_user", (req, res) => {
           });
 
         } else {
-          dbResults = err;
+          dbResults = {};
           dbResults["deleteSuccess"] = false;
           res.json(dbResults);
         }
       });
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["deleteSuccess"] = false;
 
       res.json({ dbResults });
@@ -698,7 +698,7 @@ app.get("/db/get_all_info_infl", (req, res) => {
     if (dbResults != undefined) {
       dbResults["retrieveSuccess"] = true;
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["retrieveSuccess"] = false;
     }
     res.json(dbResults);
