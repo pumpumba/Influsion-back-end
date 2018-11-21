@@ -380,8 +380,13 @@ var contentCallbackPlatformAccounts = function (platform, err, result, accounts,
     console.log(err);
   }
   if (result != undefined) {
-    result.influencerId = accounts[currentInfluencerAccount].inflid;
-    resultObj.push(result);
+    if(result.accountName != undefined) {
+      result.influencerId = accounts[currentInfluencerAccount].inflid;
+      resultObj.push(result);
+    }
+    else {
+      console.log("Could not find influencer with that account name");
+    }
   }
   if (currentInfluencerAccount != (accounts.length - 1)) {
     getPlatformAccountInformation(platform, accounts, currentInfluencerAccount + 1, resultObj, callback);

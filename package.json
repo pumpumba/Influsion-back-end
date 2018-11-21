@@ -28,7 +28,7 @@
     "body-parser": "^1.18.3",
     "machinepack-twitternodemachines": "1.40.0",
     "machinepack-instagramnodemachines2": "1.3.0",
-    "machinepack-youtubenodemachines": "2.0.0",
+    "machinepack-youtubenodemachines": "2.1.0",
     "bcrypt": "^3.0.1"
   },
   "devDependencies": {
