@@ -2,9 +2,23 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 var self = module.exports = {
     //Retrieves all accounts from the database from a specific social media platform.
-    //INFLID AS INFLUENCERID, ACTNAME AS PLATFORMNAME
-    getPlatformAccounts: function (platform, databaseClient, callback) {
+    getCompletePlatformAccounts: function (platform, databaseClient, callback) {
         var dbRequest = "SELECT * FROM PLATFORMACCOUNT WHERE PLATFORM = '" + platform + "'";
+        databaseClient.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+
+            if (dbResults != undefined && dbResults != null) {
+                dbResults["retrieveSuccess"] = true;
+            } else {
+                dbResults = err;
+
+                dbResults["retrieveSuccess"] = false;
+            }
+            callback(dbResults);
+        });
+    },
+    getPlatformAccounts: function (platform, databaseClient, callback) {
+        var dbRequest = "SELECT INFLID AS INFLUENCERID, ACTNAME AS PLATFORMNAME FROM PLATFORMACCOUNT WHERE PLATFORM = '" + platform + "'";
         databaseClient.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
 

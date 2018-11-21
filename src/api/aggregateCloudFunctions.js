@@ -289,7 +289,7 @@ var updateAccount = function (accountInformations, accountNum, databaseClient, c
   });
 };
 var updatePlatformAccounts = function(platform, assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, databaseClient, resultObj, callback) {
-  dbFunctions.getPlatformAccounts(platform, databaseClient, (response1) => {
+  dbFunctions.getCompletePlatformAccounts(platform, databaseClient, (response1) => {
     var influencers = response1['rows'];
     var accounts = [];
     if (influencers != undefined) {
@@ -309,7 +309,7 @@ var updatePlatformAccounts = function(platform, assetTypes, filterTypes, filterV
               getContent(assetTypes, filterTypes, filterValue, context, limit, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
             }
             else { 
-              callback(response3);
+              callback(resultObj);
             }
           });
         }
@@ -381,8 +381,6 @@ var contentCallbackPlatformAccounts = function (platform, err, result, accounts,
   }
   if (result != undefined) {
     result.influencerId = accounts[currentInfluencerAccount].inflid;
-    console.log("INFLUENCEEER");
-    console.log(result.influencerId);
     resultObj.push(result);
   }
   if (currentInfluencerAccount != (accounts.length - 1)) {
@@ -414,7 +412,7 @@ var getContentFromInfluencerFromAPI = function (assetType, influencers, currentI
         accessToken: process.env.TWITTER_ACCESS_TOKEN,
         accessSecret: process.env.TWITTER_ACCESS_SECRET,
         bearerToken: process.env.TWITTER_BEARER_TOKEN,
-        userScreenName: influencers[currentInfluencer].actname,
+        userScreenName: influencers[currentInfluencer].platformname,
         count: limit
       }).exec((err, result) => {
         contentCallback('tweet', err, result, influencers, currentInfluencer, resultObj, limit, callback);
@@ -425,7 +423,7 @@ var getContentFromInfluencerFromAPI = function (assetType, influencers, currentI
       Instagram.getInstaPosts({
         accessToken: process.env.INSTAGRAM_ACCESS_TOKEN,
         accessId: process.env.INSTAGRAM_ID,
-        screenName: influencers[currentInfluencer].actname,
+        screenName: influencers[currentInfluencer].platformname,
         postCount: limit
       }).exec((err, result) => {
         contentCallback('instagram post', err, result, influencers, currentInfluencer, resultObj, limit, callback);
@@ -437,7 +435,7 @@ var getContentFromInfluencerFromAPI = function (assetType, influencers, currentI
       YoutubeNodeMachine.getChannelYoutubeVideos({
         googleEmail: process.env.GOOGLE_CLIENT_EMAIL,
         googlePrivateKey: process.env.GOOGLE_PRIVATE_KEY,
-        channelName: influencers[currentInfluencer].actname,
+        channelName: influencers[currentInfluencer].platformname,
         count: limit
       }).exec((err, result) => {
         contentCallback('youtube video', err, result, influencers, currentInfluencer, resultObj, limit, callback);
@@ -453,9 +451,7 @@ var contentCallback = function (assetType, err, result, influencers, currentInfl
   } else {
     if (result != undefined) {
       for (var k = 0; k < result.length; k++) {
-        result[k].influencerId = influencers[currentInfluencer].inflid;
-        console.log("INFLUENCEEER");
-        console.log(result[k].influencerId);
+        result[k].influencerId = influencers[currentInfluencer].influencerid;
         resultObj.push(result[k]);
       }
     }
