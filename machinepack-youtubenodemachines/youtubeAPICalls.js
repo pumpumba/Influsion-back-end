@@ -167,7 +167,7 @@ function formatChannelJson(channel) {
     "channel_thumbnail_url": channel.snippet.thumbnails.high.url,
     "channel_url": "https://www.youtube.com/channel/" + channel.id,
     "channel_views": channel.statistics.viewCount,
-    "channel_subscribers": channel.statistics.subscribersCount,
+    "channel_subscribers": channel.statistics.subscriberCount,
     "channel_no_of_videos": channel.statistics.videoCount
   };
 }
@@ -177,10 +177,11 @@ function formatChannelInformationJson(channel) {
   return formatedChannel = {
     "platform": "youtube",
     "accountName": channel.snippet.title,
-    "followersCount": channel.statistics.subscribersCount,
-    "createdAtUnixTime": (new Date(channel.snippet.publishedAt)).toISOString(),
+    "followersCount": parseInt(channel.statistics.subscriberCount, 10),
+    "createdAtUnixTime": (new Date(channel.snippet.publishedAt)).getTime(),
     "accountUrl": "https://www.youtube.com/channel/" + channel.id,
     "imageUrl": channel.snippet.thumbnails.high.url,
+    "verified": false,
     "platformContent": null
   };
 }

@@ -276,9 +276,9 @@ var storeContent = function (assetType, posts, postNum, databaseClient, callback
 };
 
 var updateAccount = function (accountInformations, accountNum, databaseClient, callback) {
-
-  dbFunctions.updatePlatformAccount(accountInformations[accountNum].influencerId, accountInformations[accountNum].accountName, 
-      accountInformations[accountNum].platform, accountInformations[accountNum].followersCount, accountInformations[accountNum].createdAtUnixTime, 
+  console.log(accountInformations[accountNum]);
+  dbFunctions.updatePlatformAccount(accountInformations[accountNum].influencerId, accountInformations[accountNum].accountName,
+      accountInformations[accountNum].platform, accountInformations[accountNum].followersCount, accountInformations[accountNum].createdAtUnixTime,
       accountInformations[accountNum].accountUrl, accountInformations[accountNum].imageUrl, accountInformations[accountNum].verified, accountInformations[accountNum].jsonContent, databaseClient, (response) => {
     if (accountNum != accountInformations.length - 1) {
       updateAccount(accountInformations, accountNum + 1, databaseClient, callback);
@@ -301,14 +301,14 @@ var updatePlatformAccounts = function(platform, assetTypes, filterTypes, filterV
     if (currentInfluencerAccount < accounts.length) {
       var informations = [];
       getPlatformAccountInformation(platform, accounts, currentInfluencerAccount, informations, (response2) => {
-        
+
         if (response2.length != 0) {
           updateAccount(response2, 0, databaseClient, (response3) => {
             resultObj.push("Success");
             if (currentAssetNum != (assetTypes.length - 1)) {
               getContent(assetTypes, filterTypes, filterValue, context, limit, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
             }
-            else { 
+            else {
               callback(resultObj);
             }
           });
@@ -320,7 +320,7 @@ var updatePlatformAccounts = function(platform, assetTypes, filterTypes, filterV
           else {
             callback(resultObj);
           }
-        } 
+        }
       });
     }
     else {
@@ -379,7 +379,8 @@ var contentCallbackPlatformAccounts = function (platform, err, result, accounts,
     console.log("Error at getPlatformAccountInformation");
     console.log(err);
   }
-  if (result != undefined) {
+  console.log(result);
+  if (result.accountName != undefined) {
     result.influencerId = accounts[currentInfluencerAccount].inflid;
     resultObj.push(result);
   }
