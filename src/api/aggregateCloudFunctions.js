@@ -21,6 +21,19 @@ var self = module.exports = {
       case "instagram post":
         res.json(filterSwitch(assetType, filterType));
         break;
+      case "custom post": ////////////////////////////////////////////////////////////////////////////////////
+        switch (filterType) {
+          case "create":
+            res.json("<enter title, description, image etc...>");
+            break;
+          case "remove":
+            res.json("<enter custom post ID>");
+            break;
+          case "get":
+            res.json("<enter limit>");
+            break;
+        }
+        break;
       default:
         res.json(["Nothing available"]);
     }
@@ -68,7 +81,77 @@ var self = module.exports = {
   }
 };
 
-//get content from specific asset type, continuation from getContent
+// A switch function for the aggregate/filters call
+var filterSwitch = function(assetType, filterType) {
+  switch (filterType) {
+    case "search":
+      return(["<enter your influencers username>"]);
+      break;
+    case "influencer":
+      return(["<enter your influencers id>", "<enter your users ID>"]);
+      break;
+    case "user":
+      return(['<enter your user ID here>']);
+      break;
+    case "popular":
+      return(['<no entry needed>']);
+      break;
+    case "update":
+      if(assetType != 'all') {
+        return(['<no entry needed>']);
+      }
+      else {
+        return(['<update is not available for asset type "all">']);
+      }
+      break;
+    default:
+      return(["Nothing available"]);
+  }
+};
+
+// The main content function
+var getContent = function (assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback) {
+  switch (assetTypes[currentAssetNum]) {
+    case "tweet":
+      getContentFromAsset('twitter', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
+      break;
+    case "instagram post":
+      getContentFromAsset('instagram', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
+      break;
+    case "youtube video":
+      getContentFromAsset('youtube', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
+      break;
+    case "all":
+      getContentFromAsset('all', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
+      break;
+    case "custom post":
+      customContentFromAsset(assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
+      break;
+    default:
+      callback("The cloud component failed to provide any content");
+  }
+};
+
+function customContentFromAsset(assetType, assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback) {
+  switch (filterTypes[currentFilterNum]) {
+    case "create":
+      callback("Create custom post");
+
+      break;
+    case "remove":
+      callback("Remove custom post");
+
+      break;
+    case "get":
+      callback("Get custom posts");
+
+      break;
+    default:
+      callback("Custom post failed");
+  }
+}
+
+// Get content from specific asset type, continuation from getContent
 var getContentFromAsset = function(platform, assetType, assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback) {
   switch (filterTypes[currentFilterNum]) {
     case "influencer":
@@ -184,53 +267,8 @@ var getContentFromAsset = function(platform, assetType, assetTypes, filterTypes,
       callback("The cloud component failed to provide any content");
   }
 };
-//A switch function for the aggregate/filters call
-var filterSwitch = function(assetType, filterType) {
-  switch (filterType) {
-    case "search":
-      return(["<enter your influencers username>"]);
-      break;
-    case "influencer":
-      return(["<enter your influencers id>", "<enter your users ID>"]);
-      break;
-    case "user":
-      return(['<enter your user ID here>']);
-      break;
-    case "popular":
-      return(['<no entry needed>']);
-      break;
-    case "update":
-      if(assetType != 'all') {
-        return(['<no entry needed>']);
-      }
-      else {
-        return(['<update is not available for asset type "all">']);
-      }
-      break;
-    default:
-      return(["Nothing available"]);
-  }
-};
-//The main content function
-var getContent = function (assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback) {
-  switch (assetTypes[currentAssetNum]) {
-    case "tweet":
-      getContentFromAsset('twitter', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
-      break;
-    case "instagram post":
-      getContentFromAsset('instagram', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
-      break;
-    case "youtube video":
-      getContentFromAsset('youtube', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
-      break;
-    case "all":
-      getContentFromAsset('all', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
-      break;
-    default:
-      callback("The cloud component failed to provide any content");
-  }
-};
-//Gets content from the specified influencers from a specific social media platform from our database.
+
+// Gets content from the specified influencers from a specific social media platform from our database.
 var getContentFromInfluencersFromPlatform = function (userID, influencerAccounts, currentInfluencer, resultObj, databaseClient, platform, callback) {
   dbFunctions.getContentFromInfluencer(platform, influencerAccounts[currentInfluencer]['influencerid'], 5, userID, databaseClient, (response) => {
     if (response != undefined) {
@@ -247,7 +285,7 @@ var getContentFromInfluencersFromPlatform = function (userID, influencerAccounts
   });
 };
 
-//Stores content into our database.
+// Stores content into our database.
 var storeContent = function(assetType, posts, postNum, databaseClient, callback) {
   var regex = /'/gi;
   var jsonContent = JSON.stringify(posts[postNum]).replace(regex, "''");
@@ -271,7 +309,7 @@ var storeContent = function(assetType, posts, postNum, databaseClient, callback)
       break;
   }
 };
-//Just a continuation of storeContent, the actual insertion.
+// Just a continuation of storeContent, the actual insertion.
 var insertContentToDB = function(assetType, posts, postNum, influencerID, likeCount, platform, userTextContent, unixTime, postID, url, jsonContent, databaseClient, callback) {
   dbFunctions.insertPost(influencerID, likeCount, platform, userTextContent, unixTime, postID, url, jsonContent, databaseClient, (response) => {
     if (postNum != posts.length - 1) {
@@ -282,7 +320,7 @@ var insertContentToDB = function(assetType, posts, postNum, influencerID, likeCo
     }
   });
 };
-//Gets content from a specific influencer from a social media API.
+// Gets content from a specific influencer from a social media API.
 var getContentFromInfluencerFromAPI = function(assetType, influencers, currentInfluencer, resultObj, limit, callback) {
   switch(assetType) {
     case 'tweet':
