@@ -10,7 +10,7 @@ var self = module.exports = {
             if (dbResults != undefined && dbResults != null) {
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
 
                 dbResults["retrieveSuccess"] = false;
             }
@@ -25,7 +25,7 @@ var self = module.exports = {
             if (dbResults != undefined && dbResults != null) {
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
 
                 dbResults["retrieveSuccess"] = false;
             }
@@ -46,7 +46,7 @@ var self = module.exports = {
             if (dbResults != undefined && dbResults != null) {
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["retrieveSuccess"] = false;
             }
             callback(dbResults);
@@ -66,7 +66,7 @@ var self = module.exports = {
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["createSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["createSuccess"] = false;
             }
             callback(dbResults);
@@ -138,7 +138,7 @@ var self = module.exports = {
             if (dbResults != undefined) {
                 dbResults["deleteSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["deleteSuccess"] = false;
             }
             callback(dbResults);
@@ -154,7 +154,7 @@ var self = module.exports = {
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["createSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["createSuccess"] = false;
             }
             callback(dbResults);
@@ -184,7 +184,7 @@ var self = module.exports = {
             if (dbResults != undefined) {
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["retrieveSuccess"] = false;
             }
             callback(dbResults);
@@ -206,7 +206,7 @@ var self = module.exports = {
             if (dbResults != undefined) {
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["retrieveSuccess"] = false;
             }
             callback(dbResults);
@@ -223,7 +223,7 @@ var self = module.exports = {
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["createSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["createSuccess"] = false;
             }
             callback(dbResults);
@@ -242,13 +242,13 @@ var self = module.exports = {
 
                     dbResults["updateSuccess"] = true;
                 } else if (dbResults == undefined) {
-                    dbResults = err;
+                    dbResults = {};
                     dbResults["updateSuccess"] = false;
 
                 } else if (dbResults["rowCount"] == 2) {
                     console.log("2 or more updated. GRAVE ERROR in database.");
                 } else {
-                    dbResults = err;
+                    dbResults = {};
                     dbResults["updateSuccess"] = false;
                 }
                 callback(dbResults);
@@ -266,7 +266,7 @@ var self = module.exports = {
 
                 dbResults["createSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["createSuccess"] = false;
             }
             callback(dbResults);
@@ -304,7 +304,7 @@ var self = module.exports = {
             if (dbResults != undefined) {
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["retrieveSuccess"] = false;
             }
             callback(dbResults);
@@ -340,7 +340,7 @@ var self = module.exports = {
 
                 dbResults["retrieveSuccess"] = true;
             } else {
-                dbResults = err;
+                dbResults = {};
                 dbResults["retrieveSuccess"] = false;
             }
             callback(dbResults);
@@ -361,7 +361,7 @@ var self = module.exports = {
                     if (resultCompare == true) {
                         dbResults["loginSuccess"] = true;
                     } else {
-                        dbResults = err;
+                        dbResults = {};
                         dbResults["loginSuccess"] = false;
                     }
                     callback({ dbResults });
