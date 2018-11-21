@@ -80,14 +80,6 @@ app.post("/db/get_platform_accounts", (req, res) => {
   });
 });
 
-app.post("/getPlatformAccount", (req, res) => {
-  var inputObject = req.body;
-  var platform = inputObject.platform;
-  updatePlatformAccounts(platform, client, (response) => {
-    res.json(response);
-  });
-});
-
 //Inserts a post with all the information specificed for a post
 app.post("/db/insert_post", (req, res) => {
   var inputObj = req.body;
@@ -375,7 +367,7 @@ app.post("/db/delete_user_like", (req, res) => {
     if (dbResults != undefined) {
       dbResults["deleteSuccess"] = true;
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["deleteSuccess"] = false;
     }
     res.json(dbResults);

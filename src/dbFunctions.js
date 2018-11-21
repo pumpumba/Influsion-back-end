@@ -2,8 +2,9 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 var self = module.exports = {
     //Retrieves all accounts from the database from a specific social media platform.
+    //INFLID AS INFLUENCERID, ACTNAME AS PLATFORMNAME
     getPlatformAccounts: function (platform, databaseClient, callback) {
-        var dbRequest = "SELECT INFLID AS INFLUENCERID, ACTNAME AS PLATFORMNAME FROM PLATFORMACCOUNT WHERE PLATFORM = '" + platform + "'";
+        var dbRequest = "SELECT * FROM PLATFORMACCOUNT WHERE PLATFORM = '" + platform + "'";
         databaseClient.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
 
@@ -104,6 +105,7 @@ var self = module.exports = {
 
         // Here, I just send back the actual db request. Should be different when actually implementing it for real.
         databaseClient.query(dbRequest, (err, dbResult) => {
+            console.log(dbResult);
             var dbResults = dbResult;
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["updateSuccess"] = true;

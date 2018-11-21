@@ -131,7 +131,7 @@ module.exports = {
         function(error, response) {
         var result = response;
         result.status = "";
-        return exits.success(result);
+        return exits.success(formatFunctions.twitterAccountFormat(result));
         }
     );
   }
