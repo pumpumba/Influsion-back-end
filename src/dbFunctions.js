@@ -121,6 +121,7 @@ var self = module.exports = {
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["updateSuccess"] = true;
             } else {
+                console.log("Failed: ");
                 console.log(dbResult);
                 dbResults = {};
                 dbResults["updateSuccess"] = false;

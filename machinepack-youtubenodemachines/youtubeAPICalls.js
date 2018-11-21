@@ -8,6 +8,9 @@ module.exports = {
   getChannelUsername: function(auth, youtube, username, callback) { // Get a Youtube channel via channel name
       getChannelUsername(auth, youtube, username, callback);
   },
+  getChannelInformationUsername: function(auth, youtube, username, callback) { // Get a Youtube channel via channel name
+      getChannelInformationUsername(auth, youtube, username, callback);
+  },
   getVideos: function(auth, youtube, channel_id, count, callback) { // Get Youtube videos via channel ID
       getVideos(auth, youtube, channel_id, count, callback);
   },
@@ -74,6 +77,31 @@ function getChannelUsername(auth, youtube, username, callback) {
   );
 }
 
+// Get a Youtube channel information via channel name
+function getChannelInformationUsername(auth, youtube, username, callback) {
+  youtube.channels.list( // Call the Youtube API
+    {
+      auth: auth,
+      part: "snippet, statistics",
+      order: "date",
+      forUsername: username,
+      maxResults: 1 // Integer 0-50, default 5
+    },
+    function(err, res) {
+      if (err) {
+        console.log("The API returned an error: " + err);
+      } else {
+        if (res.data.items[0] !== undefined) { // Check if a result was found
+          var formatedChannel = formatChannelInformationJson(res.data.items[0]) // Format the recieved JSON object
+          callback(formatedChannel);
+        } else {
+          callback([]);
+        }
+      }
+    }
+  );
+}
+
 // Get Youtube videos via channel ID
 function getVideos(auth, youtube, channel_id, count, callback) {
   youtube.search.list( // Call the Youtube API
@@ -131,6 +159,7 @@ function getVideoStatistics(auth, youtube, items, count, callback) {
 // Format the JSON object containing the channel data
 function formatChannelJson(channel) {
   return formatedChannel = {
+    "platform": "Youtube",
     "channel_id": channel.id,
     "channel_title": channel.snippet.title,
     "channel_description": channel.snippet.description,
@@ -138,8 +167,22 @@ function formatChannelJson(channel) {
     "channel_thumbnail_url": channel.snippet.thumbnails.high.url,
     "channel_url": "https://www.youtube.com/channel/" + channel.id,
     "channel_views": channel.statistics.viewCount,
-    "channel_subscribers": channel.statistics.subscribersCount,
+    "channel_subscribers": channel.statistics.subscriberCount,
     "channel_no_of_videos": channel.statistics.videoCount
+  };
+}
+
+// Format the JSON object containing the channel data
+function formatChannelInformationJson(channel) {
+  return formatedChannel = {
+    "platform": "youtube",
+    "accountName": channel.snippet.title,
+    "followersCount": parseInt(channel.statistics.subscriberCount, 10),
+    "createdAtUnixTime": (new Date(channel.snippet.publishedAt)).getTime(),
+    "accountUrl": "https://www.youtube.com/channel/" + channel.id,
+    "imageUrl": channel.snippet.thumbnails.high.url,
+    "verified": false,
+    "platformContent": null
   };
 }
 
