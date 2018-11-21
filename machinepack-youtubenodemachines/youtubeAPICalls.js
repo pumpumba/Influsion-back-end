@@ -8,6 +8,9 @@ module.exports = {
   getChannelUsername: function(auth, youtube, username, callback) { // Get a Youtube channel via channel name
       getChannelUsername(auth, youtube, username, callback);
   },
+  getChannelInformationUsername: function(auth, youtube, username, callback) { // Get a Youtube channel via channel name
+      getChannelInformationUsername(auth, youtube, username, callback);
+  },
   getVideos: function(auth, youtube, channel_id, count, callback) { // Get Youtube videos via channel ID
       getVideos(auth, youtube, channel_id, count, callback);
   },
@@ -65,6 +68,31 @@ function getChannelUsername(auth, youtube, username, callback) {
       } else {
         if (res.data.items[0] !== undefined) { // Check if a result was found
           var formatedChannel = formatChannelJson(res.data.items[0]) // Format the recieved JSON object
+          callback(formatedChannel);
+        } else {
+          callback([]);
+        }
+      }
+    }
+  );
+}
+
+// Get a Youtube channel information via channel name
+function getChannelInformationUsername(auth, youtube, username, callback) {
+  youtube.channels.list( // Call the Youtube API
+    {
+      auth: auth,
+      part: "snippet, statistics",
+      order: "date",
+      forUsername: username,
+      maxResults: 1 // Integer 0-50, default 5
+    },
+    function(err, res) {
+      if (err) {
+        console.log("The API returned an error: " + err);
+      } else {
+        if (res.data.items[0] !== undefined) { // Check if a result was found
+          var formatedChannel = formatChannelInformationJson(res.data.items[0]) // Format the recieved JSON object
           callback(formatedChannel);
         } else {
           callback([]);
@@ -141,6 +169,19 @@ function formatChannelJson(channel) {
     "channel_views": channel.statistics.viewCount,
     "channel_subscribers": channel.statistics.subscribersCount,
     "channel_no_of_videos": channel.statistics.videoCount
+  };
+}
+
+// Format the JSON object containing the channel data
+function formatChannelInformationJson(channel) {
+  return formatedChannel = {
+    "platform": "youtube",
+    "accountName": channel.snippet.title,
+    "followersCount": channel.statistics.subscribersCount,
+    "createdAtUnixTime": (new Date(channel.snippet.publishedAt)).toISOString(),
+    "accountUrl": "https://www.youtube.com/channel/" + channel.id,
+    "imageUrl": channel.snippet.thumbnails.high.url,
+    "platformContent": null
   };
 }
 
