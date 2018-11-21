@@ -67,6 +67,7 @@ CREATE TABLE POST (
   POSTED TIMESTAMPTZ, -- When the post was posted. Fetchable from platform.
   POSTPLATFORMID VARCHAR, -- The specific id on the platform for the post.
   POSTURL VARCHAR UNIQUE, -- The url for the post
+  PROFILEPIC VARCHAR, -- The profile picture from the platform account.
   PLATFORMCONTENT JSON --TODO: decide whether JSONB or JSON is best. JSONB supports indexing, is faster to process but slower to insert.
 );
 

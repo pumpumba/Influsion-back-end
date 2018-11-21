@@ -54,13 +54,12 @@ var self = module.exports = {
     },
 
     //inserts a post into the database.
-    insertPost: function (influencerID, numLikes, platform, userTextContent, unixtime, postID, postUrl, jsonContent, databaseClient, callback) {
-        
-        var dbRequest = "INSERT INTO POST(INFLID, NRLIKES, PLATFORM, USRTXTCONTENT, POSTED, POSTURL, PLATFORMCONTENT) \
+    insertPost: function (influencerID, numLikes, platform, userTextContent, unixtime, postID, postUrl, profilePicture, jsonContent, databaseClient, callback) {
+        var dbRequest = "INSERT INTO POST(INFLID, NRLIKES, PLATFORM, USRTXTCONTENT, POSTED, POSTURL, PROFILEPIC, PLATFORMCONTENT) \
             VALUES ("+ influencerID + ",\
             "+ numLikes + ", '" + platform + "',\
             '"+ userTextContent + "', to_timestamp(" + unixtime + "),\
-            '"+ postUrl + "', '" + jsonContent + "'::json);";
+            '"+ postUrl + "', '" + profilePicture + "', '" + jsonContent + "'::json);";
 
         databaseClient.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
