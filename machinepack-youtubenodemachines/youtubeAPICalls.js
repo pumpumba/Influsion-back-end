@@ -176,7 +176,7 @@ function formatChannelJson(channel) {
 function formatChannelInformationJson(channel) {
   return formatedChannel = {
     "platform": "youtube",
-    "accountName": channel.snippet.title,
+    "accountName": channel.snippet.customUrl,
     "followersCount": parseInt(channel.statistics.subscriberCount, 10),
     "createdAtUnixTime": (new Date(channel.snippet.publishedAt)).getTime(),
     "accountUrl": "https://www.youtube.com/channel/" + channel.id,
