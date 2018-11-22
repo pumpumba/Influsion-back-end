@@ -65,11 +65,28 @@ var self = module.exports = {
             var dbResults = dbResult;
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["createSuccess"] = true;
+                callback(dbResults);
             } else {
-                dbResults = {};
-                dbResults["createSuccess"] = false;
+                dbRequest = "UPDATE POST SET INFLID = "+ influencerID +", NRLIKES = "+ numLikes +",\
+                PLATFORM = '"+ platform +"', USRTXTCONTENT = '"+ userTextContent +"',\
+                POSTED = to_timestamp(" + unixtime + "), POSTURL = '"+ postUrl +"',\
+                PROFILEPIC = '"+ profilePicture +"', PLATFORMCONTENT = '" + jsonContent + "'::json";
+                dbRequest = dbRequest + " WHERE POSTURL = '" + postUrl + "';";
+                console.log(dbRequest);
+                databaseClient.query(dbRequest, (err, dbResult) => {
+                    var dbResults = dbResult;
+                    console.log(dbResults);
+                    if (dbResults != undefined && dbResults["rowCount"] == 1) {
+                        console.log("UPDATES POST");
+                        dbResults["createSuccess"] = true;
+                    } else {
+                        console.log("FAILURE AT INSERTING OR UPDATING POST");
+                        dbResults = {};
+                        dbResults["createSuccess"] = false;
+                    }
+                    callback(dbResults);
+                });
             }
-            callback(dbResults);
         });
     },
 
@@ -114,6 +131,11 @@ var self = module.exports = {
         // Remove the last , and space, and add the last bit of the request to finish it
         dbRequest = dbRequest.substr(0, dbRequest.length - 2);
         dbRequest = dbRequest + " WHERE INFLID = " + influencerId + " AND PLATFORM = '" + platform + "';";
+        /*UPDATE PLATFORMACCOUNT SET ACTNAME = 'jakepaulchannel', NRFLWRS = 17555583,
+         MEMBERSINCE = to_timestamp(1379619076000), 
+         ACTURL = 'https://www.youtube.com/channel/UCcgVECVN4OKV6DH1jLkqmcA', 
+         IMGURL = 'https://yt3.ggpht.com/a-/AN66SAwSC_sOp-Fs7FF6SJDtnaouQlpEL4iHGHg1ag=s800-mo-c-c0xffffffff-rj-k-no', 
+         VERIFIED = false WHERE INFLID = 46 AND PLATFORM = 'youtube'; */
 
         // Here, I just send back the actual db request. Should be different when actually implementing it for real.
         databaseClient.query(dbRequest, (err, dbResult) => {
