@@ -23,7 +23,8 @@
     "machineDir": "machines/",
     "machines": [
       "getInstaPosts",
-      "getPopularInstaPosts"
+      "getPopularInstaPosts",
+      "getAccountInformation"
     ]
   },
   "repository": {

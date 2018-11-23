@@ -9,6 +9,28 @@ var self = module.exports = {
         });
         return popularPosts;
     },
+
+    instagramAccountFormat: function(accountInformation) {
+      if(accountInformation != undefined) {
+        var imageUrl = accountInformation.business_discovery.profile_picture_url;
+        var regex = /'/gi;
+        var jsonContent = JSON.stringify(accountInformation).replace(regex, "''");
+        var essentialInformation = {
+          "platform" : 'instagram',
+          "accountName" : accountInformation.business_discovery.username,
+          "followersCount" : accountInformation.business_discovery.followers_count,
+          // "createdAtUnixTime" : new Date(accountInformation.created_at).getTime(),
+          "createdAtUnixTime": null,
+          "accountUrl" : 'https://www.instagram.com/' + accountInformation.business_discovery.username,
+          "imageUrl": imageUrl,
+          // "verified": accountInformation.verified,
+          "verified": true,
+          "platformContent": null
+        };
+      }
+      return essentialInformation;
+    },
+
     //This function takes the recieved content as an Json object and formats it the way we want it.
     formatJson: function(instagramResponse) {
       var formatedInstaPosts = [];
@@ -105,5 +127,32 @@ var self = module.exports = {
           }
         });
       }
+    },
+
+    getInstagramAccountInformation: function(userName, instagramClient, callback) {
+      const https = require("https");
+      //The url we make the call with.
+      var url = "https://graph.facebook.com/" + instagramClient[1] + "?fields=business_discovery.username("
+                + userName + "){username, followers_count, profile_picture_url}&access_token="
+                + instagramClient[0];
+
+      var instagramResponse;
+
+      https
+        .get(url, function(res) {
+          var body = "";
+
+          res.on("data", function(chunk) {
+            body += chunk;
+          });
+
+          res.on("end", function() {
+            instagramResponse = self.instagramAccountFormat(JSON.parse(body));
+            callback(instagramResponse);
+          });
+        })
+        .on("error", function(e) {
+          console.log("Got an error: ", e);
+        });
     }
   };
