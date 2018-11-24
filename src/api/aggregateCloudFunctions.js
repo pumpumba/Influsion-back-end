@@ -92,11 +92,17 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
       break;
     case "user":
       dbFunctions.getFollowedInfluencersPosts(filterValue, limit, platform, databaseClient, (response) => {
-        result = response['rows'];
-        if (result != undefined) {
-          for (var k = 0; k < result.length; k++) {
-            resultObj.push(result[k]);
-          }
+        var resultFollowedInfluencerPosts = response['rows'];
+        if (resultFollowedInfluencerPosts != undefined) {
+          dbFunctions.getAdvertisements(limit, offset, databaseClient, (response2) => {
+            var resultAdvertisements = response2['rows'];
+            dbFunctions.getPromotedPosts(platform, limit, offset, databaseClient, (response3) => {
+              var resultPromotedPosts = response3['rows'];
+              getPopularFeedWithCorrectOrder(resultAdvertisements, resultPromotedPosts, resultFollowedInfluencerPosts, limit, offset, databaseClient, (response4) => {
+                resultObj = response4;
+              });
+            });
+          });
         }
         if (currentAssetNum != (assetTypes.length - 1)) {
           //Go into next iteration of getContent
@@ -110,11 +116,17 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
       break;
     case "popular":
       dbFunctions.getLatestPosts(filterValue, platform, limit, databaseClient, (response) => {
-        result = response['rows'];
-        if (result != undefined) {
-          for (var k = 0; k < result.length; k++) {
-            resultObj.push(result[k]);
-          }
+        var resultPopularPosts = response['rows'];
+        if (resultPopularPosts != undefined) {
+          dbFunctions.getAdvertisements(limit, offset, databaseClient, (response2) => {
+            var resultAdvertisements = response2['rows'];
+            dbFunctions.getPromotedPosts(platform, limit, offset, databaseClient, (response3) => {
+              var resultPromotedPosts = response3['rows'];
+              getPopularFeedWithCorrectOrder(resultAdvertisements, resultPromotedPosts, resultPopularPosts, limit, offset, databaseClient, (response4) => {
+                resultObj = response4;
+              });
+            });
+          });
         }
         if (currentAssetNum != (assetTypes.length - 1)) {
           //Go into next iteration of getContent
@@ -132,6 +144,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
       break;
     //Updates the database with new content from our social media API:s
     case "update":
+      console.log('UPDATING!!!');
       if (platform == 'all') {
         callback('Can not update all platform at once. Update each one by one.');
       }
@@ -147,7 +160,9 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
           var currentInfluencerAccount = 0;
           if (currentInfluencerAccount < accounts.length) {
             var posts = [];
+            console.log('get stuff from API!');
             getContentFromInfluencerFromAPI(assetType, accounts, currentInfluencerAccount, posts, limit, (response2) => {
+              console.log(response2);
               if (response2.length != 0) {
                 storeContent(assetType, response2, 0, databaseClient, (response3) => {
                   resultObj.push("Success");
@@ -406,11 +421,65 @@ var insertContentToDB = function (assetType, posts, postNum, influencerID, likeC
     }
   });
 };
+
+var getPopularFeedWithCorrectOrder = function(advertisements, promotedPosts, popularPosts, limit, offset, databaseClient, callback) {
+  var resultObj = [];
+  var count = 0;
+  var popularPostCount = 0;
+  var ads = advertisements;
+  var promPosts = promotedPosts;
+  var randLengthTillAd;
+  var randPromotedPost;
+  var randAdOrPost;
+  while(count < limit) {
+    randLengthTillAd = 4 + Math.floor(Math.random() * 6);
+    if((count + randLengthTillAd) < limit) {
+      randAdOrPost = Math.floor(Math.random()*2);
+      for(var i = 0;i<randLengthTillAd;i++) {
+        resultObj.push(popularPosts[i]);
+        promotedPostCount += 1;
+        count += 1;
+      }
+      if(randAdOrPost == 0) {
+        resultObj, ads = insertAdvertisementIntoResult(ads, resultObj, advertisements);
+      }
+      else {
+        if(promPosts.length == 0) {
+          resultObj, ads = insertAdvertisementIntoResult(ads, resultObj, advertisements);
+        }
+        else {
+          randPromotedPost = Math.floor(Math.random()*promPosts.length);
+          resultObj.push(promPosts[randPromotedPost]);
+          delete promPosts[randPromotedPost];
+        }
+      }
+      count += 1;
+    }
+    else {
+      for(var i = popularPostCount;i<(limit - count);i++) {
+        resultObj.push(popularPosts[i]);
+        count += 1;
+      }
+    }
+  }
+  callback(resultObj);
+};
+
+var insertAdvertisementIntoResult = function(ads, resultObj, advertisements) {
+  var randAdvertisement = Math.floor(Math.random()*ads.length);
+  resultObj.push(ads[randAdvertisement]);
+  delete ads[randAdvertisement];
+  if(ads.length == 0) {
+    ads = advertisements;
+  }
+  return resultObj, ads;
+};
 //Gets content from a specific influencer from a social media API.
 var getContentFromInfluencerFromAPI = function (assetType, influencers, currentInfluencer, resultObj, limit, callback) {
   switch (assetType) {
     case 'tweet':
       var Twitter = require("machinepack-twitternodemachines");
+      console.log('calling twitter');
       Twitter.getUserTweets({
         consumerKey: process.env.TWITTER_CONSUMER_KEY,
         consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
@@ -420,6 +489,7 @@ var getContentFromInfluencerFromAPI = function (assetType, influencers, currentI
         userScreenName: influencers[currentInfluencer].actname,
         count: limit
       }).exec((err, result) => {
+        console.log(result);
         contentCallback('tweet', err, result, influencers, currentInfluencer, resultObj, limit, callback);
       });
       break;
@@ -456,6 +526,7 @@ var contentCallback = function (assetType, err, result, influencers, currentInfl
   } else {
     if (result != undefined) {
       for (var k = 0; k < result.length; k++) {
+        console.log(result[k]);
         result[k].influencerId = influencers[currentInfluencer].inflid;
         result[k].profilePictureFromAccount = influencers[currentInfluencer].imgurl;
         resultObj.push(result[k]);

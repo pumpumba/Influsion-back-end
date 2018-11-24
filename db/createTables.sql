@@ -68,6 +68,7 @@ CREATE TABLE POST (
   POSTPLATFORMID VARCHAR, -- The specific id on the platform for the post.
   POSTURL VARCHAR UNIQUE, -- The url for the post
   PROFILEPIC VARCHAR, -- The profile picture from the platform account.
+  PROMOTED BOOLEAN NOT NULL DEFAULT FALSE, -- If the post is promoted or not.
   PLATFORMCONTENT JSON --TODO: decide whether JSONB or JSON is best. JSONB supports indexing, is faster to process but slower to insert.
 );
 
@@ -132,6 +133,7 @@ CREATE TABLE PROMOTION (
   PROMOTIONID SERIAL PRIMARY KEY,
   PROMOTIONNAME VARCHAR NOT NULL,
   TVOPERATORID INTEGER REFERENCES TVOPERATOR(TVOPERATORID) NOT NULL,
+  PICTURE VARCHAR NOT NULL,
   STARTDATE TIMESTAMPTZ,
   ENDDATE TIMESTAMPTZ
 );

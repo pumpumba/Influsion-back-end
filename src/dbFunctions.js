@@ -312,12 +312,12 @@ var self = module.exports = {
             FROM USRFLWINFL \
             WHERE FLWRID = "+ userID + " \
             ), P AS ( \
-            SELECT * FROM POST ";
+            SELECT * FROM POST WHERE PROMOTED = FALSE";
         if (platform != 'all') {
-            dbRequest = dbRequest + " WHERE PLATFORM  = '" + platform + "' ";
+            dbRequest = dbRequest + " AND PLATFORM  = '" + platform + "' ";
         }
 
-        dbRequest = dbRequest + "ORDER BY POSTED DESC LIMIT " + limit + " \
+        dbRequest = dbRequest + " ORDER BY POSTED DESC LIMIT " + limit + " \
           ) \
           SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
             FROM P ORDER BY POSTED DESC";
@@ -368,6 +368,61 @@ var self = module.exports = {
             callback(dbResults);
         });
     },
+
+    getPromotedPosts: function(platform, limit, offset, databaseClient, callback) {
+        var dbRequest = "WITH INFLLIST AS ( \
+            SELECT INFLID \
+            FROM USRFLWINFL \
+            WHERE FLWRID = "+ userID + " \
+            ), P AS ( \
+            SELECT * FROM POST WHERE PROMOTED = TRUE";
+        if (platform != 'all') {
+            dbRequest = dbRequest + " AND PLATFORM  = '" + platform + "' ";
+        }
+        var off;
+        if(offset != undefined) {
+            off = offset;
+        }
+        else {
+            off = 0;
+        }
+        dbRequest = dbRequest + " ORDER BY POSTED DESC LIMIT " + limit + " OFFSET " + off + " \
+          ) \
+          SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
+            FROM P ORDER BY POSTED DESC";
+        databaseClient.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+            if (dbResults != undefined) {
+                dbResults["retrieveSuccess"] = true;
+            } else {
+                dbResults = {};
+                dbResults["retrieveSuccess"] = false;
+            }
+            callback(dbResults);
+        });
+    },
+
+    getAdvertisements: function(limit, offset, databaseClient, callback) {
+        var off;
+        if(offset != undefined) {
+            off = offset;
+        }
+        else {
+            off = 0;
+        }
+        var dbRequest = "SELECT * FROM POST ORDER BY POSTED DESC LIMIT " + limit + " OFFSET " + off;
+        databaseClient.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+            if (dbResults != undefined) {
+                dbResults["retrieveSuccess"] = true;
+            } else {
+                dbResults = {};
+                dbResults["retrieveSuccess"] = false;
+            }
+            callback(dbResults);
+        });
+    },
+
     //Logins a user by doing a check in the database if login credentials are correct.
     login: function (password, username, databaseClient, callback) {
         var dbRequest = "SELECT * FROM usr WHERE usrname = '" + username + "'";
