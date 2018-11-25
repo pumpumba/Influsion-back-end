@@ -61,7 +61,7 @@ var self = module.exports = {
     var currentAsset = 0;
     var currentFilter = 0;
     //Enters the recursive getContent loop, works like a for loop, but once it gets into a callback it start the next iteration.
-    getContent(assetTypes, filterTypes, filterValue, context, limit, currentAsset, currentFilter, resultObject, databaseClient, (response) => {
+    getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAsset, currentFilter, resultObject, databaseClient, (response) => {
       resultObject = response;
       res.json(resultObject);
     });
@@ -69,7 +69,7 @@ var self = module.exports = {
 };
 
 //get content from specific asset type, continuation from getContent
-var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback) {
+var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback) {
   switch (filterTypes[currentFilterNum]) {
     case "influencer":
       dbFunctions.getContentFromInfluencer(platform, filterValue[0], limit, filterValue[1], databaseClient, (response) => {
@@ -82,7 +82,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
 
         if (currentAssetNum != (assetTypes.length - 1)) {
           //Go into next iteration of getContent
-          getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
+          getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
         }
         else {
           //All iterations done, send back the result
@@ -96,7 +96,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
         if (resultFollowedInfluencerPosts != undefined) {
           dbFunctions.getAdvertisements(limit, offset, databaseClient, (response2) => {
             var resultAdvertisements = response2['rows'];
-            dbFunctions.getPromotedPosts(platform, limit, offset, databaseClient, (response3) => {
+            dbFunctions.getFollowedPromotedPosts(platform, filterValue, limit, offset, databaseClient, (response3) => {
               var resultPromotedPosts = response3['rows'];
               getPopularFeedWithCorrectOrder(resultAdvertisements, resultPromotedPosts, resultFollowedInfluencerPosts, limit, offset, databaseClient, (response4) => {
                 resultObj = response4;
@@ -106,7 +106,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
         }
         if (currentAssetNum != (assetTypes.length - 1)) {
           //Go into next iteration of getContent
-          getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
+          getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
         }
         else {
           //All iterations done, send back the result
@@ -120,21 +120,22 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
         if (resultPopularPosts != undefined) {
           dbFunctions.getAdvertisements(limit, offset, databaseClient, (response2) => {
             var resultAdvertisements = response2['rows'];
-            dbFunctions.getPromotedPosts(platform, limit, offset, databaseClient, (response3) => {
+            dbFunctions.getPromotedPosts(platform, filterValue, limit, offset, databaseClient, (response3) => {
               var resultPromotedPosts = response3['rows'];
               getPopularFeedWithCorrectOrder(resultAdvertisements, resultPromotedPosts, resultPopularPosts, limit, offset, databaseClient, (response4) => {
                 resultObj = response4;
+                if (currentAssetNum != (assetTypes.length - 1)) {
+                  //Go into next iteration of getContent
+                  getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
+                }
+                else {
+                  //All iterations done, send back the result
+                  callback(resultObj);
+                }
+
               });
             });
           });
-        }
-        if (currentAssetNum != (assetTypes.length - 1)) {
-          //Go into next iteration of getContent
-          getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
-        }
-        else {
-          //All iterations done, send back the result
-          callback(resultObj);
         }
       });
       break;
@@ -167,7 +168,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
                 storeContent(assetType, response2, 0, databaseClient, (response3) => {
                   resultObj.push("Success");
                   if (currentAssetNum != (assetTypes.length - 1)) {
-                    getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
+                    getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
                   }
                   else {
                     callback(resultObj);
@@ -176,7 +177,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
               }
               else {
                 if (currentAssetNum != (assetTypes.length - 1)) {
-                  getContent(assetTypes, filterTypes, filterValue, context, limit, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+                  getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
                 }
                 else {
                   callback(resultObj);
@@ -186,7 +187,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
           }
           else {
             if (currentAssetNum != (assetTypes.length - 1)) {
-              getContent(assetTypes, filterTypes, filterValue, context, limit, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
+              getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
             }
             else {
               callback(resultObj);
@@ -196,7 +197,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
       }
       break;
     case "update platform accounts" :
-      updatePlatformAccounts(platform, assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, databaseClient, resultObj, callback);
+      updatePlatformAccounts(platform, assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum, currentFilterNum, databaseClient, resultObj, callback);
       break;
     default:
       callback("The cloud component failed to provide any content");
@@ -230,19 +231,19 @@ var filterSwitch = function (assetType, filterType) {
   }
 };
 //The main content function
-var getContent = function (assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback) {
+var getContent = function (assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback) {
   switch (assetTypes[currentAssetNum]) {
     case "tweet":
-      getContentFromAsset('twitter', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
+      getContentFromAsset('twitter', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
       break;
     case "instagram post":
-      getContentFromAsset('instagram', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
+      getContentFromAsset('instagram', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
       break;
     case "youtube video":
-      getContentFromAsset('youtube', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
+      getContentFromAsset('youtube', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
       break;
     case "all":
-      getContentFromAsset('all', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
+      getContentFromAsset('all', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
       break;
     default:
       callback("The cloud component failed to provide any content");
@@ -303,7 +304,7 @@ var updateAccount = function (accountInformations, accountNum, databaseClient, c
     }
   });
 };
-var updatePlatformAccounts = function(platform, assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, databaseClient, resultObj, callback) {
+var updatePlatformAccounts = function(platform, assetTypes, filterTypes, filterValue, context, limit,  offset, currentAssetNum, currentFilterNum, databaseClient, resultObj, callback) {
   dbFunctions.getCompletePlatformAccounts(platform, databaseClient, (response1) => {
     var influencers = response1['rows'];
     var accounts = [];
@@ -321,7 +322,7 @@ var updatePlatformAccounts = function(platform, assetTypes, filterTypes, filterV
           updateAccount(response2, 0, databaseClient, (response3) => {
             resultObj.push("Success");
             if (currentAssetNum != (assetTypes.length - 1)) {
-              getContent(assetTypes, filterTypes, filterValue, context, limit, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+              getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
             }
             else {
               callback(resultObj);
@@ -330,7 +331,7 @@ var updatePlatformAccounts = function(platform, assetTypes, filterTypes, filterV
         }
         else {
           if (currentAssetNum != (assetTypes.length - 1)) {
-            getContent(assetTypes, filterTypes, filterValue, context, limit, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+            getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
           }
           else {
             callback(resultObj);
@@ -340,7 +341,7 @@ var updatePlatformAccounts = function(platform, assetTypes, filterTypes, filterV
     }
     else {
       if (currentAssetNum != (assetTypes.length - 1)) {
-        getContent(assetTypes, filterTypes, filterValue, context, limit, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+        getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
       }
       else {
         callback(resultObj);
@@ -431,51 +432,80 @@ var getPopularFeedWithCorrectOrder = function(advertisements, promotedPosts, pop
   var randLengthTillAd;
   var randPromotedPost;
   var randAdOrPost;
+  var resultArray;
+  console.log("ADS: ");
+  console.log(advertisements);
+  console.log("PROMOTED POSTS: ");
+  console.log(promotedPosts);
+  console.log(limit);
   while(count < limit) {
     randLengthTillAd = 4 + Math.floor(Math.random() * 6);
+    var currentStart = popularPostCount;
     if((count + randLengthTillAd) < limit) {
       randAdOrPost = Math.floor(Math.random()*2);
-      for(var i = 0;i<randLengthTillAd;i++) {
+      console.log(randAdOrPost);
+      for(var i = currentStart;i<(randLengthTillAd+currentStart);i++) {
         resultObj.push(popularPosts[i]);
-        promotedPostCount += 1;
+        popularPostCount += 1;
         count += 1;
+        console.log(count);
       }
       if(randAdOrPost == 0) {
-        resultObj, ads = insertAdvertisementIntoResult(ads, resultObj, advertisements);
+        console.log("hello00000000000");
+        resultArray = insertAdvertisementIntoResult(ads, resultObj, advertisements);
+        resultObj = resultArray[0];
+        ads = resultArray[1];
+        console.log("hello1111");
+        console.log("helloXXXXXXXX");
       }
       else {
         if(promPosts.length == 0) {
-          resultObj, ads = insertAdvertisementIntoResult(ads, resultObj, advertisements);
+          console.log("hello1111");
+          resultArray = insertAdvertisementIntoResult(ads, resultObj, advertisements);
+          console.log("hello1111");
+          resultObj = resultArray[0];
+          ads = resultArray[1];
+          console.log("hello1111");
+          console.log("hello1111");
+          console.log("hello22222");
         }
         else {
+          console.log("hello33333");
           randPromotedPost = Math.floor(Math.random()*promPosts.length);
           resultObj.push(promPosts[randPromotedPost]);
           delete promPosts[randPromotedPost];
+          console.log("hello44444");
         }
       }
+      console.log("bach here again");
       count += 1;
     }
     else {
-      for(var i = popularPostCount;i<(limit - count);i++) {
+      for(var i = currentStart;i<(currentStart + limit - count);i++) {
         resultObj.push(popularPosts[i]);
+        popularPostCount += 1;
         count += 1;
       }
     }
+    console.log(count);
+    console.log(count + randLengthTillAd)
   }
   callback(resultObj);
 };
 
 var insertAdvertisementIntoResult = function(ads, resultObj, advertisements) {
+  var newResultObj = resultObj;
   var randAdvertisement = Math.floor(Math.random()*ads.length);
-  resultObj.push(ads[randAdvertisement]);
-  delete ads[randAdvertisement];
-  if(ads.length == 0) {
-    ads = advertisements;
+  var newAds = ads;
+  newResultObj.push(ads[randAdvertisement]);
+  delete newAds[randAdvertisement];
+  if(newAds.length == 0) {
+    newAds = advertisements;
   }
-  return resultObj, ads;
+  return [newResultObj, newAds];
 };
 //Gets content from a specific influencer from a social media API.
-var getContentFromInfluencerFromAPI = function (assetType, influencers, currentInfluencer, resultObj, limit, callback) {
+var getContentFromInfluencerFromAPI = function (assetType, influencers, currentInfluencer, resultObj, limit, offset, callback) {
   switch (assetType) {
     case 'tweet':
       var Twitter = require("machinepack-twitternodemachines");
@@ -490,7 +520,7 @@ var getContentFromInfluencerFromAPI = function (assetType, influencers, currentI
         count: limit
       }).exec((err, result) => {
         console.log(result);
-        contentCallback('tweet', err, result, influencers, currentInfluencer, resultObj, limit, callback);
+        contentCallback('tweet', err, result, influencers, currentInfluencer, resultObj, limit, offset, callback);
       });
       break;
     case 'instagram post':
@@ -501,7 +531,7 @@ var getContentFromInfluencerFromAPI = function (assetType, influencers, currentI
         screenName: influencers[currentInfluencer].actname,
         postCount: limit
       }).exec((err, result) => {
-        contentCallback('instagram post', err, result, influencers, currentInfluencer, resultObj, limit, callback);
+        contentCallback('instagram post', err, result, influencers, currentInfluencer, resultObj, limit, offset, callback);
       });
       break;
     case 'youtube video':
@@ -513,13 +543,13 @@ var getContentFromInfluencerFromAPI = function (assetType, influencers, currentI
         channelName: influencers[currentInfluencer].actname,
         count: limit
       }).exec((err, result) => {
-        contentCallback('youtube video', err, result, influencers, currentInfluencer, resultObj, limit, callback);
+        contentCallback('youtube video', err, result, influencers, currentInfluencer, resultObj, limit, offset, callback);
       });
       break;
   }
 };
 
-var contentCallback = function (assetType, err, result, influencers, currentInfluencer, resultObj, limit, callback) {
+var contentCallback = function (assetType, err, result, influencers, currentInfluencer, resultObj, limit, offset, callback) {
   if (err) {
     console.log("Error at getContentFromInfluencerFromAPI");
     console.log(err);
@@ -533,7 +563,7 @@ var contentCallback = function (assetType, err, result, influencers, currentInfl
       }
     }
     if (currentInfluencer != (influencers.length - 1)) {
-      getContentFromInfluencerFromAPI(assetType, influencers, currentInfluencer + 1, resultObj, limit, callback);
+      getContentFromInfluencerFromAPI(assetType, influencers, currentInfluencer + 1, resultObj, limit, offset, callback);
     }
     else {
       callback(resultObj);

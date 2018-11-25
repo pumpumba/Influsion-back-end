@@ -34,7 +34,26 @@ var self = module.exports = {
     },
     //Retrieves posts from influencers from a specific social media platform that a user follows.
     getFollowedInfluencersPosts: function (userID, limit, platform, databaseClient, callback) {
-        var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = " + userID + ") ";
+        var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = " + userID + ") AND PROMOTED = FALSE";
+        if (platform != "all")
+            dbRequest = dbRequest + "AND platform = '" + platform + "'";
+
+        dbRequest = dbRequest + " ORDER BY POSTED DESC LIMIT " + limit + ";";
+
+        databaseClient.query(dbRequest, (err, dbResult) => {
+            //We get a problem if login is
+            var dbResults = dbResult;
+            if (dbResults != undefined && dbResults != null) {
+                dbResults["retrieveSuccess"] = true;
+            } else {
+                dbResults = {};
+                dbResults["retrieveSuccess"] = false;
+            }
+            callback(dbResults);
+        });
+    },
+    getFollowedPromotedPosts: function (userID, limit, platform, databaseClient, callback) {
+        var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = " + userID + ") AND PROMOTED = TRUE ";
         if (platform != "all")
             dbRequest = dbRequest + "AND platform = '" + platform + "'";
 
@@ -369,7 +388,7 @@ var self = module.exports = {
         });
     },
 
-    getPromotedPosts: function(platform, limit, offset, databaseClient, callback) {
+    getPromotedPosts: function(platform, userID, limit, offset, databaseClient, callback) {
         var dbRequest = "WITH INFLLIST AS ( \
             SELECT INFLID \
             FROM USRFLWINFL \
@@ -410,7 +429,7 @@ var self = module.exports = {
         else {
             off = 0;
         }
-        var dbRequest = "SELECT * FROM POST ORDER BY POSTED DESC LIMIT " + limit + " OFFSET " + off;
+        var dbRequest = "SELECT * FROM PROMOTION ORDER BY STARTDATE DESC LIMIT " + limit + " OFFSET " + off;
         databaseClient.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
             if (dbResults != undefined) {
