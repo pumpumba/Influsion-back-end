@@ -94,7 +94,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
       dbFunctions.getFollowedInfluencersPosts(filterValue, limit, platform, databaseClient, (response) => {
         var resultFollowedInfluencerPosts = response['rows'];
         if (resultFollowedInfluencerPosts != undefined) {
-          dbFunctions.getAdvertisements(limit, offset, databaseClient, (response2) => {
+          dbFunctions.getAdvertisementFollowingFeed(limit, offset, databaseClient, (response2) => {
             var resultAdvertisements = response2['rows'];
             dbFunctions.getFollowedPromotedPosts(platform, filterValue, limit, offset, databaseClient, (response3) => {
               var resultPromotedPosts = response3['rows'];
@@ -118,7 +118,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
       dbFunctions.getLatestPosts(filterValue, platform, limit, databaseClient, (response) => {
         var resultPopularPosts = response['rows'];
         if (resultPopularPosts != undefined) {
-          dbFunctions.getAdvertisements(limit, offset, databaseClient, (response2) => {
+          dbFunctions.getAdvertisementsPopularFeed(limit, offset, databaseClient, (response2) => {
             var resultAdvertisements = response2['rows'];
             dbFunctions.getPromotedPosts(platform, filterValue, limit, offset, databaseClient, (response3) => {
               var resultPromotedPosts = response3['rows'];
@@ -162,7 +162,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
           if (currentInfluencerAccount < accounts.length) {
             var posts = [];
             console.log('get stuff from API!');
-            getContentFromInfluencerFromAPI(assetType, accounts, currentInfluencerAccount, posts, limit, (response2) => {
+            getContentFromInfluencerFromAPI(assetType, accounts, currentInfluencerAccount, posts, limit, offset, (response2) => {
               console.log(response2);
               if (response2.length != 0) {
                 storeContent(assetType, response2, 0, databaseClient, (response3) => {
@@ -177,7 +177,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
               }
               else {
                 if (currentAssetNum != (assetTypes.length - 1)) {
-                  getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+                  getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
                 }
                 else {
                   callback(resultObj);
@@ -433,6 +433,7 @@ var getPopularFeedWithCorrectOrder = function(advertisements, promotedPosts, pop
   var randPromotedPost;
   var randAdOrPost;
   var resultArray;
+  var usedAdvertisements;
   console.log("ADS: ");
   console.log(advertisements);
   console.log("PROMOTED POSTS: ");
@@ -441,6 +442,7 @@ var getPopularFeedWithCorrectOrder = function(advertisements, promotedPosts, pop
   while(count < limit) {
     randLengthTillAd = 4 + Math.floor(Math.random() * 6);
     var currentStart = popularPostCount;
+    var currentCount = count;
     if((count + randLengthTillAd) < limit) {
       randAdOrPost = Math.floor(Math.random()*2);
       console.log(randAdOrPost);
@@ -451,33 +453,42 @@ var getPopularFeedWithCorrectOrder = function(advertisements, promotedPosts, pop
         console.log(count);
       }
       if(randAdOrPost == 0) {
-        console.log("hello00000000000");
-        resultArray = insertAdvertisementIntoResult(ads, resultObj, advertisements);
+        resultArray = insertAdvertisementIntoResult(ads, resultObj, advertisements, usedAdvertisements);
         resultObj = resultArray[0];
         ads = resultArray[1];
-        console.log("hello1111");
-        console.log("helloXXXXXXXX");
+        usedAdvertisements = resultArray[2];
       }
       else {
         if(promPosts.length == 0) {
-          console.log("hello1111");
-          resultArray = insertAdvertisementIntoResult(ads, resultObj, advertisements);
-          console.log("hello1111");
+          resultArray = insertAdvertisementIntoResult(ads, resultObj, advertisements, usedAdvertisements);
           resultObj = resultArray[0];
           ads = resultArray[1];
-          console.log("hello1111");
-          console.log("hello1111");
-          console.log("hello22222");
+          usedAdvertisements = resultArray[2];
+          console.log("USEEEEED");
+          console.log(usedAdvertisements);
         }
         else {
-          console.log("hello33333");
           randPromotedPost = Math.floor(Math.random()*promPosts.length);
           resultObj.push(promPosts[randPromotedPost]);
           delete promPosts[randPromotedPost];
-          console.log("hello44444");
         }
       }
-      console.log("bach here again");
+      if((10+currentCount) < limit) {
+        for(var i = randLengthTillAd+currentStart+1;i<(10+currentStart);i++) {
+          resultObj.push(popularPosts[i]);
+          popularPostCount += 1;
+          count += 1;
+          console.log(count);
+        }
+      }
+      else {
+        for(var i = randLengthTillAd+currentStart+1;i<(currentStart+(limit-currentCount));i++) {
+          resultObj.push(popularPosts[i]);
+          popularPostCount += 1;
+          count += 1;
+          console.log(count);
+        }
+      }
       count += 1;
     }
     else {
@@ -493,16 +504,26 @@ var getPopularFeedWithCorrectOrder = function(advertisements, promotedPosts, pop
   callback(resultObj);
 };
 
-var insertAdvertisementIntoResult = function(ads, resultObj, advertisements) {
+var insertAdvertisementIntoResult = function(ads, resultObj, usedAdvertisements) {
   var newResultObj = resultObj;
   var randAdvertisement = Math.floor(Math.random()*ads.length);
+  console.log('Random number %i', randAdvertisement);
+  console.log(ads.length);
   var newAds = ads;
-  newResultObj.push(ads[randAdvertisement]);
-  delete newAds[randAdvertisement];
-  if(newAds.length == 0) {
-    newAds = advertisements;
+  var newUsedAds = usedAdvertisements;
+  if(newAds.length == 1) {
+    newResultObj.push(ads[randAdvertisement]);
+    newUsedAds.push(ads[randAdvertisement]);
+    newAds = newUsedAds;
+    newUsedAds = [];
   }
-  return [newResultObj, newAds];
+  else {
+    newResultObj.push(ads[randAdvertisement]);
+    newUsedAds.push(ads[randAdvertisement]);
+    newAds = newAds.splice(randAdvertisement, 1);
+    console.log('Length of newAds %i', newAds.length);
+  }
+  return [newResultObj, newAds, newUsedAds];
 };
 //Gets content from a specific influencer from a social media API.
 var getContentFromInfluencerFromAPI = function (assetType, influencers, currentInfluencer, resultObj, limit, offset, callback) {

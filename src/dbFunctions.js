@@ -421,7 +421,7 @@ var self = module.exports = {
         });
     },
 
-    getAdvertisements: function(limit, offset, databaseClient, callback) {
+    getAdvertisementsPopularFeed: function(limit, offset, databaseClient, callback) {
         var off;
         if(offset != undefined) {
             off = offset;
@@ -429,7 +429,28 @@ var self = module.exports = {
         else {
             off = 0;
         }
-        var dbRequest = "SELECT * FROM PROMOTION ORDER BY STARTDATE DESC LIMIT " + limit + " OFFSET " + off;
+        var dbRequest = "SELECT * FROM PROMOTION WHERE POPULARFEED = TRUE ORDER BY STARTDATE DESC LIMIT " + limit + " OFFSET " + off;
+        databaseClient.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+            if (dbResults != undefined) {
+                dbResults["retrieveSuccess"] = true;
+            } else {
+                dbResults = {};
+                dbResults["retrieveSuccess"] = false;
+            }
+            callback(dbResults);
+        });
+    },
+
+    getAdvertisementsFollowingFeed: function(limit, offset, databaseClient, callback) {
+        var off;
+        if(offset != undefined) {
+            off = offset;
+        }
+        else {
+            off = 0;
+        }
+        var dbRequest = "SELECT * FROM PROMOTION WHERE FOLLOWINGFEED = TRUE ORDER BY STARTDATE DESC LIMIT " + limit + " OFFSET " + off;
         databaseClient.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
             if (dbResults != undefined) {
