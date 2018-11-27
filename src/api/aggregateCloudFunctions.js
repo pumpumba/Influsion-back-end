@@ -529,7 +529,7 @@ var getContentFromInfluencerFromAPI = function (assetType, influencers, currentI
       break;
     case 'instagram post':
       var Instagram = require("machinepack-instagramnodemachines2");
-      Instagram.getInstagramPosts({
+      Instagram.getInstaPosts({
         accessToken: process.env.INSTAGRAM_ACCESS_TOKEN,
         accessId: process.env.INSTAGRAM_ID,
         screenName: influencers[currentInfluencer].actname,
