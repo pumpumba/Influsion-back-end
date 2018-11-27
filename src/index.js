@@ -156,12 +156,17 @@ app.post("/db/create_tv_operator", (req, res) => {
   var inputObj = req.body;
   var tv_op_name = inputObj.operatorname;
   var pwd = inputObj.password;
+  var email = inputObj.email;
   bcrypt.hash(pwd, saltRounds, function (err, hash) {
-    var dbRequest = "INSERT INTO TVOPERATOR (TVOPERATORNAME, HASHEDPWD) VALUES ('" + tv_op_name + "', '" + hash + "');"
+    var dbRequest = "INSERT INTO TVOPERATOR (TVOPERATORNAME, HASHEDPWD, EMAIL) VALUES ('" + tv_op_name + "', '" + hash + "', '"+email+"');"
 
     client.query(dbRequest, (err, dbResult) => {
+      if (dbResult != null && dbResult != undefined) {
+          res.json(dbResult);
+      } else {
+          res.json(err);
+      }
 
-      res.json(dbResult);
 
     });
 
@@ -328,6 +333,24 @@ app.get("/db/get_counts", (req, res) => {
   client.query(dbRequest, (err, dbResult) => {
     res.json(dbResult);
   });
+});
+
+app.post("/db/add_ad_click", (req, res) => {
+  var inputObj = req.body;
+  var usrID = inputObj.user_id;
+  var adID = inputObj.ad_id;
+  var dbRequest = "INSERT INTO TVOPERATORCONTENTCLICK (USRID, ADID) VALUES ("+usrID+","+adID+");";
+  client.query(dbRequest, (err, dbResult) => {
+    var dbResults = dbResult;
+    if (dbResults != undefined) {
+      dbResults["insertionSuccess"] = true;
+    } else {
+      dbResults = {};
+      dbResults["insertionSuccess"] = false;
+    }
+    res.json(dbResults);
+  });
+
 });
 
 app.get("/db/get_most_followed_influencers", (req, res) => {
@@ -704,4 +727,24 @@ app.get("/db/get_all_info_infl", (req, res) => {
     res.json(dbResults);
   });
 
+});
+
+app.get("/db/get_avg_age_usrs_click", (req, res) => {
+  var ad_id = req["query"]["ad_id"];
+
+  console.log(ad_id);
+  var dbRequest = "WITH USERSCLICKED AS ( \
+    SELECT DISTINCT(USRID) FROM TVOPERATORCONTENTCLICK WHERE ADID = "+ad_id+" \
+  ) \
+  SELECT CAST (AVG(USR.AGE) AS INTEGER) AS AVGAGE FROM USR, USERSCLICKED WHERE USR.USRID = USERSCLICKED.USRID;"
+  client.query(dbRequest, (err, dbResult) => {
+    var dbResults = dbResult["rows"];
+    if (dbResults != undefined) {
+      dbResults["retrieveSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["retrieveSuccess"] = false;
+    }
+    res.json(dbResults);
+  });
 });
