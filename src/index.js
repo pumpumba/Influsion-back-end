@@ -90,6 +90,49 @@ app.post("/db/insert_post", (req, res) => {
     });
 });
 
+// Create ad
+app.post("/db/create_ad", (req, res) => {
+  var inputObj = req.body;
+  var dbRequest = "INSERT INTO TVOPERATORCONTENT(TITLE, TVOPERATORID, IMGURL, TEXTDESCRIPTION, ADDITIONALINFORMATION, SHOWINPOPULARFEED, SHOWINFOLLOWINGFEED) \
+    VALUES ('" + inputObj.title + "', \
+    " + inputObj.tvoperatorid + ", \
+    '" + inputObj.imgurl + "', \
+    '" + inputObj.textdescription + "', \
+    '" + inputObj.additionalinformation + "', \
+    " + inputObj.showinpopularfeed + ", \
+    " + inputObj.showinfollowingfeed + ");";
+
+    client.query(dbRequest, (err, dbResult) => {
+      var dbResults = dbResult;
+      if (dbResults != undefined && dbResults != null) {
+        dbResults["createSuccess"] = true;
+      } else {
+        dbResults = {};
+        dbResults["createSuccess"] = false;
+      }
+
+      res.json(dbResults);
+    });
+});
+
+// Remove ad
+app.post("/db/remove_ad", (req, res) => {
+  var inputObj = req.body;
+  var dbRequest = "DELETE FROM TVOPERATORCONTENT WHERE ADID = " + inputObj.id + ";";
+  console.log(dbRequest);
+  client.query(dbRequest, (err, dbResult) => {
+      var dbResults = dbResult;
+      if (dbResults != undefined && dbResults != null) {
+          dbResults["deleteSuccess"] = true;
+      } else {
+          dbResults = {};
+          dbResults["deleteSuccess"] = false;
+      }
+
+      res.json(dbResults);
+  });
+});
+
 // Returns posts from all influencers that a user follows.
 app.get("/db/get_followed_infl_posts", (req, res) => {
   var usrID = req["query"]["userid"];
