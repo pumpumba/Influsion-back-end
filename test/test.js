@@ -1,5 +1,4 @@
 process.env.NODE_ENV = "test";
-
 //Require the dev-dependencies
 let chai = require("chai");
 let chaiHttp = require("chai-http");
@@ -13,13 +12,6 @@ let should = chai.should();
 
 //DATABASE
 // pools will use environment variables
-// for connection information
-console.log("user: ", process.env.DATABASE_USER,
-  "host: ", process.env.DATABASE_HOST,
-  "database: ", process.env.DATABASE_NAME,
-  "password: ", process.env.DATABASE_PASSWORD,
-  "port: ", process.env.DATABASE_PORT)
-
 const pool = new Pool({
   user: process.env.DATABASE_USER,
   host: process.env.DATABASE_HOST,
@@ -39,18 +31,6 @@ const client = new Client({
 });
 client.connect();
 
-client.query("SELECT NOW()", (err, res) => {
-  if (process.env.NODE_ENV == "test") {
-    //console.log(err, res);
-  }
-  //client.end();
-});
-
-/* dbRequest = "SELECT * FROM INFLUENCER";
-client.query(dbRequest, (err, dbResult) => {
-  //console.log(err, dbResult)
-}); */
-
 chai.use(chaiHttp);
 
 describe("/GET aggregate health", () => {
@@ -60,9 +40,6 @@ describe("/GET aggregate health", () => {
       .get("/aggregate/health")
       .end((err, res) => {
         res.should.have.status(200);
-        /*
-        res.body.should.be.a("array");
-        res.body.length.should.be.eql(0); */
         done();
       });
   });
@@ -112,7 +89,7 @@ describe("/POST update content in empty DB from each platform individually", () 
         done();
       });
   });
-  /* it("it should update instagram content in an empty DB", done => {
+  it("it should update instagram content in an empty DB", done => {
     chai
       .request(server)
       .post("/aggregate/content")
@@ -129,7 +106,7 @@ describe("/POST update content in empty DB from each platform individually", () 
         //res.body.length.should.be.eql(0);
         done();
       });
-  }); */
+  });
   it("it should update twitter content in an empty DB", done => {
     chai
       .request(server)
@@ -144,7 +121,6 @@ describe("/POST update content in empty DB from each platform individually", () 
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.a("array");
-        //res.body.length.should.be.eql(0);
         done();
       });
   });
@@ -165,7 +141,6 @@ describe("/POST get popular content from empty dataase from each platform indivi
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.a("array");
-        res.body.length.should.be.eql(0);
         done();
       });
   });
@@ -184,7 +159,6 @@ describe("/POST get popular content from empty dataase from each platform indivi
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.a("array");
-        res.body.length.should.be.eql(0);
         done();
       });
   });
@@ -203,14 +177,13 @@ describe("/POST get popular content from empty dataase from each platform indivi
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.a("array");
-        res.body.length.should.be.eql(0);
         done();
       });
   });
 
-  insertDBData();
 });
 
+insertDBData();
 //Insert data into DB
 function insertDBData() {
   dbData.data.forEach(element => {
@@ -256,7 +229,7 @@ function testWithFilledDB() {
           done();
         });
     });
-    /* it("it should update instagram content in an filled DB", done => {
+    it("it should update instagram content in an filled DB", done => {
       chai
         .request(server)
         .post("/aggregate/content")
@@ -272,7 +245,7 @@ function testWithFilledDB() {
           res.body.should.be.a("array");
           done();
         });
-    }); */
+    });
     it("it should update youtube content in an filled DB", done => {
       chai
         .request(server)
@@ -301,9 +274,7 @@ function testWithFilledDB() {
         .type("application/x-www-form-urlencoded")
         .send({
           'assetType[0]': 'tweet',
-          'filterType[0]': 'update platform accounts',
-          filterValue: '1',
-          limit: '2'
+          'filterType[0]': 'update platform accounts'
         })
         .end((err, res) => {
           res.should.have.status(200);
@@ -318,9 +289,7 @@ function testWithFilledDB() {
         .type("application/x-www-form-urlencoded")
         .send({
           'assetType[0]': 'instagram post',
-          'filterType[0]': 'update platform accounts',
-          filterValue: '1',
-          limit: '2'
+          'filterType[0]': 'update platform accounts'
         })
         .end((err, res) => {
           res.should.have.status(200);
@@ -335,9 +304,7 @@ function testWithFilledDB() {
         .type("application/x-www-form-urlencoded")
         .send({
           'assetType[0]': 'youtube video',
-          'filterType[0]': 'update platform accounts',
-          filterValue: '1',
-          limit: '2'
+          'filterType[0]': 'update platform accounts'
         })
         .end((err, res) => {
           res.should.have.status(200);
@@ -348,7 +315,7 @@ function testWithFilledDB() {
   });
 
   //Get posts from each platform individually
-  describe("/POST get popular content from filled dataase from each platform individually", () => {
+  describe("/POST get popular content from filled database from each platform individually", () => {
     it("it should get youtube content from an filled DB", done => {
       chai
         .request(server)
@@ -406,7 +373,7 @@ function testWithFilledDB() {
 
   //Get posts from all platforms at the same time 
   describe("/POST get popular content in filled DB from all platforms", () => {
-    it("it should get twitter content from an filled DB", done => {
+    it("it should get content from all platforms from a filled DB", done => {
       chai
         .request(server)
         .post("/aggregate/content")
@@ -415,7 +382,7 @@ function testWithFilledDB() {
           'assetType[0]': 'all',
           'filterType[0]': 'popular',
           filterValue: '1',
-          limit: '2'
+          limit: '5'
         })
         .end((err, res) => {
           res.should.have.status(200);
@@ -426,8 +393,8 @@ function testWithFilledDB() {
   });
 
   //Get influencer MKHBD 
-  describe("/POST get popular content in filled DB from all platforms", () => {
-    it("it should get twitter content from an filled DB", done => {
+  describe("/POST get influencer with id=1 from a filled DB", () => {
+    it("it should get influencer with id=1", done => {
       chai
         .request(server)
         .post("/aggregate/content")
@@ -447,8 +414,8 @@ function testWithFilledDB() {
   });
 
   //Get user MKHBD 
-  describe("/POST get popular content in filled DB from all platforms", () => {
-    it("it should get twitter content from an filled DB", done => {
+  describe("/POST get user with id=1 from a filled DB", () => {
+    it("it should get user with id=1", done => {
       chai
         .request(server)
         .post("/aggregate/content")
