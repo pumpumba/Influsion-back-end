@@ -101,7 +101,7 @@ app.get("/db/get_followed_infl_posts", (req, res) => {
     if (dbResults != undefined && dbResults != null) {
       dbResults["retrieveSuccess"] = true;
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["retrieveSuccess"] = false;
     }
 
@@ -185,13 +185,13 @@ app.post("/db/login_tv_operator", (req, res) => {
         if (resultCompare == true) {
           dbResults["loginSuccess"] = true;
         } else {
-          dbResults = err;
+          dbResults = {};
           dbResults["loginSuccess"] = false;
         }
         res.json({ dbResults });
       });
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["loginSuccess"] = false;
       res.json({ dbResults });
     }
@@ -207,7 +207,7 @@ app.get("/db/get_user", (req, res) => {
     if (dbResults != undefined) {
       dbResults["retrieveSuccess"] = true;
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["retrieveSuccess"] = false;
     }
     res.json(dbResults);
@@ -222,7 +222,7 @@ app.get("/db/get_all_users", (req, res) => {
     if (dbResults != undefined) {
       dbResults["retrieveSuccess"] = true;
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["retrieveSuccess"] = false;
     }
     res.json(dbResults);
@@ -279,7 +279,7 @@ app.get("/db/get_clicks_promoted_influencers", (req, res) => {
       var dbResults = dbResult["rows"];
       dbResults["retrieveSuccess"] = true;
     } else {
-      var dbResults = err;
+      var dbResults = {};
       dbResults["retrieveSuccess"] = false;
     }
     res.json(dbResults);
@@ -298,7 +298,7 @@ app.post("/db/influencer_promotion", (req, res) => {
     if (dbResults != undefined) {
       dbResults["createSuccess"] = true;
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["createSuccess"] = false;
     }
     res.json(dbResults);
@@ -316,8 +316,31 @@ app.post("/db/hashtag_promotion", (req, res) => {
     if (dbResults != undefined) {
       dbResults["createSuccess"] = true;
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["createSuccess"] = false;
+    }
+    res.json(dbResults);
+  });
+});
+
+app.get("/db/get_counts", (req, res) => {
+  var dbRequest = "SELECT (SELECT COUNT(DISTINCT USR) FROM USR) as NRUSERS, (SELECT COUNT(DISTINCT INFLUENCERID) FROM INFLUENCER) AS NRINFLUENCERS;";
+  client.query(dbRequest, (err, dbResult) => {
+    res.json(dbResult);
+  });
+});
+
+app.get("/db/get_most_followed_influencers", (req, res) => {
+  var limit = req["query"]["limit"];
+  var dbRequest = "SELECT (SELECT COUNT(*) FROM USRFLWINFL WHERE USRFLWINFL.INFLID = I.INFLUENCERID) AS NRFOLLOWING, I.INFLUENCERNAME FROM INFLUENCER AS I ORDER BY NRFOLLOWING DESC LIMIT "+limit+";";
+
+  client.query(dbRequest, (err, dbResult) => {
+    var dbResults = dbResult["rows"];
+    if (dbResults != undefined) {
+      dbResults["retrieveSuccess"] = true;
+    } else {
+      dbResults = {};
+      dbResults["retrieveSuccess"] = false;
     }
     res.json(dbResults);
   });
@@ -336,7 +359,9 @@ app.get("/db/get_for_autosearch", (req, res) => {
           'actname', \
           PACC.actname, \
           'platform', \
-          PACC.PLATFORM))) \
+          PACC.PLATFORM, \
+          'img_url', \
+          PACC.IMGURL))) \
           AS PFACCS FROM PLATFORMACCOUNT AS PACC \
           GROUP BY INFLID \
   ), IPC AS ( \
@@ -350,7 +375,7 @@ app.get("/db/get_for_autosearch", (req, res) => {
     if (dbResults != undefined) {
       dbResults["retrieveSuccess"] = true;
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["retrieveSuccess"] = false;
     }
     res.json(dbResults);
@@ -367,7 +392,7 @@ app.post("/db/delete_user_like", (req, res) => {
     if (dbResults != undefined) {
       dbResults["deleteSuccess"] = true;
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["deleteSuccess"] = false;
     }
     res.json(dbResults);
@@ -419,9 +444,12 @@ app.post("/db/delete_user", (req, res) => {
 
     if (dbResults != undefined) {
       var hashPassword = dbResult["rows"][0].hashedpwd;
+      /*
+      DELETE FROM USRLIKEPOST WHERE USRID = "+ usrID + "; \
+          DELETE FROM USRVISIT WHERE usrid = "+ usrID + "; \ */
 
       bcrypt.compare(password, hashPassword, function (err, resultCompare) {
-        if (resultCompare == true) {
+        if (resultCompare == false) {
           var dbRequest = "BEGIN; \
           DELETE FROM USRFLWINFL WHERE FLWRID = "+ usrID + "; \
           DELETE FROM USRLIKEPOST WHERE USRID = "+ usrID + "; \
@@ -434,22 +462,22 @@ app.post("/db/delete_user", (req, res) => {
             console.log(dbResults);
             if (dbResults != undefined) {
               dbResults["deleteSuccess"] = true;
+              res.json(dbResults);
             } else {
-              dbResults = err;
+              dbResults = {};
               dbResults["deleteSuccess"] = false;
+              res.json(dbResults);
             }
-            res.json(dbResults);
           });
 
         } else {
-          dbResults = err;
+          dbResults = {};
           dbResults["deleteSuccess"] = false;
+          res.json(dbResults);
         }
-
-        res.json({ dbResults });
       });
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["deleteSuccess"] = false;
 
       res.json({ dbResults });
@@ -542,6 +570,13 @@ app.post("/db/search_influencer", (req, res) => {
 
 app.listen(port, hostname);
 console.log(`Running on http://${hostname}.${port}`);
+
+app.get("/db/get_user_ages", (req, res) => {
+  var dbRequest = "SELECT AGE FROM USR;";
+  client.query(dbRequest, (err, dbResult) => {
+    res.json(dbResult);
+  });
+});
 
 // Updates a platformaccount with the info sent in.
 /* OBSERVE: THIS FUNCTION ONLY RETURNS THE CORRECT REQUEST. I HAVE TRIED THE REQUESTS IN TERMINAL,
@@ -663,7 +698,7 @@ app.get("/db/get_all_info_infl", (req, res) => {
     if (dbResults != undefined) {
       dbResults["retrieveSuccess"] = true;
     } else {
-      dbResults = err;
+      dbResults = {};
       dbResults["retrieveSuccess"] = false;
     }
     res.json(dbResults);
