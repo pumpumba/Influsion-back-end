@@ -427,7 +427,7 @@ var self = module.exports = {
         });
     },
 
-    getAdvertisementsPopularFeed: function (limit, offset, databaseClient, callback) {
+    getAdvertisementsPopularFeed: function (tvoperatorID, limit, offset, databaseClient, callback) {
         var off;
         if (offset != undefined) {
             off = offset;
@@ -435,7 +435,7 @@ var self = module.exports = {
         else {
             off = 0;
         }
-        var dbRequest = "SELECT * FROM PROMOTION WHERE POPULARFEED = TRUE ORDER BY STARTDATE DESC LIMIT " + limit + " OFFSET " + off;
+        var dbRequest = "SELECT * FROM TVOPERATORCONTENT WHERE SHOWINPOPULARFEED = TRUE AND TVOPERATORID = "+ tvoperatorID +" LIMIT " + limit + " OFFSET " + off;
         databaseClient.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
             if (dbResults != undefined) {
@@ -456,7 +456,7 @@ var self = module.exports = {
         else {
             off = 0;
         }
-        var dbRequest = "SELECT * FROM PROMOTION WHERE FOLLOWINGFEED = TRUE ORDER BY STARTDATE DESC LIMIT " + limit + " OFFSET " + off;
+        var dbRequest = "SELECT * FROM TVOPERATORCONTENT WHERE SHOWINFOLLOWINGFEED = TRUE AND TVOPERATORID = "+ tvoperatorID +" LIMIT " + limit + " OFFSET " + off;
         databaseClient.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
             if (dbResults != undefined) {

@@ -115,12 +115,12 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
       });
       break;
     case "popular":
-      dbFunctions.getLatestPosts(filterValue, platform, limit, databaseClient, (response) => {
+      dbFunctions.getLatestPosts(filterValue[0], platform, limit, databaseClient, (response) => {
         var resultPopularPosts = response['rows'];
         if (resultPopularPosts != undefined) {
-          dbFunctions.getAdvertisementsPopularFeed(limit, offset, databaseClient, (response2) => {
+          dbFunctions.getAdvertisementsPopularFeed(filterValue[1], limit, offset, databaseClient, (response2) => {
             var resultAdvertisements = response2['rows'];
-            dbFunctions.getPromotedPosts(platform, filterValue, limit, offset, databaseClient, (response3) => {
+            dbFunctions.getPromotedPosts(platform, filterValue[0], limit, offset, databaseClient, (response3) => {
               var resultPromotedPosts = response3['rows'];
               getPopularFeedWithCorrectOrder(resultAdvertisements, resultPromotedPosts, resultPopularPosts, limit, offset, databaseClient, (response4) => {
                 resultObj = response4;
