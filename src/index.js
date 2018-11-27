@@ -97,7 +97,7 @@ app.post("/db/insert_post", (req, res) => {
         });
 });
 
-app.post("/db/remove_exclude_influencer", (req, res) => {
+app.post("/db/remove_excluded_or_promoted_influencer", (req, res) => {
     var inputObj = req.body;
     var dbRequest = "DELETE FROM INFLUENCERPROMOTED WHERE INFLUENCERID = " + inputObj.influencerId +";";
     client.query(dbRequest, (err, dbResult) => {
@@ -132,6 +132,20 @@ app.post("/db/list_all_excluded_influencers", (req, res)=> {
     client.query(dbRequest, (err, dbResult) => {
         var dbResults = dbResult;
         console.log(dbResults);
+        if (dbResults != undefined && dbResults != null) {
+            dbResults["createSuccess"] = true;
+        } else {
+            dbResults = {};
+            dbResults["createSuccess"] = false;
+        }
+        res.json(dbResults['rows']);
+    });
+});
+
+app.post("/db/list_all_promoted_influencers", (req, res)=> {
+    var dbRequest = "SELECT * FROM INFLUENCER WHERE INFLUENCERID IN(SELECT INFLUENCERID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'promotion');";
+    client.query(dbRequest, (err, dbResult) => {
+        var dbResults = dbResult;
         if (dbResults != undefined && dbResults != null) {
             dbResults["createSuccess"] = true;
         } else {

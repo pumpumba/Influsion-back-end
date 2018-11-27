@@ -94,7 +94,6 @@ var self = module.exports = {
                 databaseClient.query(dbRequest, (err, dbResult) => {
                     var dbResults = dbResult;
                     if (dbResults != undefined && dbResults["rowCount"] == 1) {
-                        console.log("UPDATES POST");
                         dbResults["createSuccess"] = true;
                     } else {
                         console.log("FAILURE AT INSERTING OR UPDATING POST");

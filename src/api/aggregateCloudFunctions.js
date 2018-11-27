@@ -429,8 +429,6 @@ var getPopularFeedWithCorrectOrder = function(advertisements, promotedPosts, pop
   var randAdOrPost;
   var resultArray;
   var usedAdvertisements = [];
-  console.log(promotedPosts);
-  console.log("HELLO");
   while(count < limit) {
     randLengthTillAd = 4 + Math.floor(Math.random() * 6);
     var currentStart = popularPostCount;
@@ -490,7 +488,6 @@ var getPopularFeedWithCorrectOrder = function(advertisements, promotedPosts, pop
 
 var insertAdvertisementIntoResult = function(ads, resultObj, usedAdvertisements) {
   var newResultObj = resultObj;
-  console.log(ads);
   var rand = Math.random()*ads.length;
   var randAdvertisement = Math.floor(rand);
   var newAds = ads;
@@ -522,7 +519,6 @@ var getContentFromInfluencerFromAPI = function (assetType, influencers, currentI
         userScreenName: influencers[currentInfluencer].actname,
         count: limit
       }).exec((err, result) => {
-        console.log(result);
         contentCallback('tweet', err, result, influencers, currentInfluencer, resultObj, limit, offset, callback);
       });
       break;
