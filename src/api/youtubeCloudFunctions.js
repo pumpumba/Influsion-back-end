@@ -87,6 +87,25 @@ var getContent = function(assetTypes, filterTypes, filterValue, context, limit, 
             callback("The cloud component failed to provide any content");
         }
       break;
+    case "youtube channel":
+      switch (filterTypes[currentFilterNum]) {
+        case "influencer":
+          switch (filterValue) {
+            default:
+              require("dotenv").load();
+              youtube.getChannelYoutube({
+                googleEmail: process.env.GOOGLE_CLIENT_EMAIL,
+                googlePrivateKey: process.env.GOOGLE_PRIVATE_KEY,
+                channelName: filterValue
+              }).exec((err, result) => {
+                callbackFunction([result], assetTypes, filterTypes, filterValue, context, currentAssetNum, currentFilterNum, resultObj, callback);
+              });
+          }
+          break;
+        default:
+          callback("The cloud component failed to provide any content");
+      }
+    break;
     default:
       callback("The cloud component failed to provide any content");
   }

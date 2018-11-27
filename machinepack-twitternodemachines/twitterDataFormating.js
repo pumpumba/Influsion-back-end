@@ -5,70 +5,65 @@ var self = module.exports = {
         });
         return popularTweets;
     },
+
+    twitterAccountFormat: function(accountInformation) {
+      if(accountInformation != undefined) {
+        var imageUrl = profileImageFormat(accountInformation.profile_image_url);
+        var regex = /'/gi;
+        var jsonContent = JSON.stringify(accountInformation).replace(regex, "''");
+        var essentialInformation = {
+          "platform" : 'twitter',
+          "accountName" : accountInformation.screen_name,
+          "followersCount" : accountInformation.followers_count,
+          "createdAtUnixTime" : new Date(accountInformation.created_at).getTime(),
+          "accountUrl" : 'https://twitter.com/' + accountInformation.screen_name,
+          "imageUrl": imageUrl,
+          "verified": accountInformation.verified,
+          "platformContent": null
+        };
+      }
+      return essentialInformation;
+    },
+
     formatJson: function(tweets) {
         var formatedTweets = [];
-        console.log(Array.isArray(tweets));
-        console.log(tweets);
 
         if((Array.isArray(tweets))) {
           for (var i = 0; i < tweets.length; i++) {
             var tweet = {
               "platform": "twitter",
-              "user_id": tweets[i].user.id,
-              "user_url": "",
-              "user_name": tweets[i].user.name,
-              "user_screen_name": tweets[i].user.screen_name,
-              "user_followers_count": tweets[i].user.followers_count,
-              "user_verified": tweets[i].user.verified,
-              "user_profile_image_url": tweets[i].user.profile_image_url,
-              "tweet_id": tweets[i].id_str,
-              "tweet_text": tweets[i].text,
-              "tweet_url": "",
-              "tweet_favorite_count": tweets[i].favorite_count,
-              "tweet_retweet_count": tweets[i].retweet_count,
-              "tweet_created_at": tweets[i].created_at,
-              "tweet_hashtags": [],
-              "tweet_media": []
+              "userId": tweets[i].user.id,
+              "userUrl": "",
+              "userName": tweets[i].user.name,
+              "userScreenName": tweets[i].user.screen_name,
+              "userFollowersCount": tweets[i].user.followers_count,
+              "userVerified": tweets[i].user.verified,
+              "userProfileImageUrl": tweets[i].user.profile_image_url,
+              "tweetId": tweets[i].id_str,
+              "tweetText": tweets[i].text,
+              "tweetUrl": "",
+              "tweetFavoriteCount": tweets[i].favorite_count,
+              "tweetRetweetCount": tweets[i].retweet_count,
+              "tweetCreatedAt": tweets[i].created_at,
+              "tweetHashtags": [],
+              "tweetMedia": []
             };
-            var textLength = tweet.tweet_text.length;
-            var url_length = 'http://t.co'.length;
-            if(textLength > url_length) {
-              for(var k = 0; k<(textLength - url_length - 1);k++) {
-                if(tweet.tweet_text.substring(k, url_length + k) == 'http://t.co' || tweet.tweet_text.substring(k, url_length + k + 1) == 'https://t.co') {
-                  tweet.tweet_text = tweet.tweet_text.substring(0, k);
-                  break;
-                }
-              }
+            tweet.tweetText = removeLinkInTweetText(tweet);
+            if(!(tweet.tweetText != undefined)) {
+              tweet.tweetText = tweets[i].text;
             }
-            tweet.user_url = "https://twitter.com/" + tweet.user_screen_name;
-            tweet.tweet_url = "https://twitter.com/" + tweet.user_screen_name + "/status/" + tweet.tweet_id;
+            tweet.userUrl = "https://twitter.com/" + tweet.userScreenName;
+            tweet.tweetUrl = "https://twitter.com/" + tweet.userScreenName + "/status/" + tweet.tweetId;
 
             // Add hashtags
-            for (var j = 0; j < tweets[i].entities.hashtags.length; j++){
-              tweet.tweet_hashtags.push(tweets[i].entities.hashtags[j].text)
-            }
+            tweet.tweetHashtags = addHashTags(tweets[i]);
 
             // Add media
-            if (tweets[i].entities.media != null) {
-              if (tweets[i].extended_entities != null) { // Multiple pictures/media
-                for (var j = 0; j < tweets[i].extended_entities.media.length; j++){
-                  tweet.tweet_media.push(tweets[i].extended_entities.media[j].media_url);
-                }
-              } else { // One picture/media
-                for (var j = 0; j < tweets[i].entities.media.length; j++){
-                  tweet.tweet_media.push(tweets[i].entities.media[j].media_url);
-                }
-              }
-            }
+            tweet.tweetMedia = addMedia(tweets[i]);
 
             // Get the higher res image
-            var fileType = tweet.user_profile_image_url.substring(tweet.user_profile_image_url.length - 4, tweet.user_profile_image_url.length);
-            tweet.user_profile_image_url = tweet.user_profile_image_url.substring(0, tweet.user_profile_image_url.length - 11);
-            //var n = tweet.user_profile_image_url.lastIndexOf(".");
-            //var fileType = tweet.user_profile_image_url.substring(n, tweet.user_profile_image_url.length);
-            //tweet.user_profile_image_url = tweet.user_profile_image_url.substring(0, n - 7);
-            tweet.user_profile_image_url = tweet.user_profile_image_url + fileType;
-
+            tweet.userProfileImageUrl = profileImageFormat(tweet.userProfileImageUrl);
+            //Add the tweet to the list of tweets
             formatedTweets.push(tweet);
           }
         }
@@ -100,3 +95,51 @@ var self = module.exports = {
         }
     }
   };
+  var profileImageFormat = function(oldImageUrl) {
+    var imageUrl = oldImageUrl;
+    var n = imageUrl.lastIndexOf(".");
+    var fileType = imageUrl.substring(n, imageUrl.length);
+    imageUrl = imageUrl.substring(0, n - 7);
+    imageUrl = imageUrl + fileType;
+    return imageUrl;
+  };
+  var addHashTags = function(tweet) {
+    hashtags = [];
+    for (var j = 0; j < tweet.entities.hashtags.length; j++){
+      hashtags.push(tweet.entities.hashtags[j].text)
+    }
+    return hashtags;
+  };
+  var addMedia = function(tweet) {
+    media = [];
+    if (tweet.entities.media != null) {
+      if (tweet.extended_entities != null) { // Multiple pictures/media
+        for (var j = 0; j < tweet.extended_entities.media.length; j++){
+          media.push(tweet.extended_entities.media[j].media_url);
+        }
+      } else { // One picture/media
+        for (var j = 0; j < tweet.entities.media.length; j++){
+          media.push(tweet.entities.media[j].media_url);
+        }
+      }
+    }
+    return media;
+  }
+
+  var removeLinkInTweetText = function(tweet) {
+    var tweetText;
+    var textLength = tweet.tweetText.length;
+    var urlLength = 'http://t.co'.length;
+    if(textLength > urlLength) {
+      for(var k = 0; k<(textLength - urlLength - 1);k++) {
+        if(tweet.tweetText.substring(k, urlLength + k) == 'http://t.co' || tweet.tweetText.substring(k, urlLength + k + 1) == 'https://t.co') {
+          tweetText = tweet.tweetText.substring(0, k);
+          break;
+        }
+      }
+    }
+    else {
+      tweetText = tweet.tweetText;
+    }
+    return tweetText;
+  }

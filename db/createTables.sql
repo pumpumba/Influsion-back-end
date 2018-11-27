@@ -65,8 +65,10 @@ CREATE TABLE POST (
   PLATFORM PF NOT NULL, -- Defining which platform the post comes from
   USRTXTCONTENT TEXT, -- Can be the post description, e.g., the text below an image on instagram etc.
   POSTED TIMESTAMPTZ, -- When the post was posted. Fetchable from platform.
-  POSTPLATFORMID INTEGER, -- The specific id on the platform for the post.
+  POSTPLATFORMID VARCHAR, -- The specific id on the platform for the post.
   POSTURL VARCHAR UNIQUE, -- The url for the post
+  PROFILEPIC VARCHAR, -- The profile picture from the platform account.
+  PROMOTED BOOLEAN NOT NULL DEFAULT FALSE, -- If the post is promoted or not.
   PLATFORMCONTENT JSON --TODO: decide whether JSONB or JSON is best. JSONB supports indexing, is faster to process but slower to insert.
 );
 
@@ -131,6 +133,9 @@ CREATE TABLE PROMOTION (
   PROMOTIONID SERIAL PRIMARY KEY,
   PROMOTIONNAME VARCHAR NOT NULL,
   TVOPERATORID INTEGER REFERENCES TVOPERATOR(TVOPERATORID) NOT NULL,
+  PICTURE VARCHAR NOT NULL,
+  FOLLOWINGFEED BOOLEAN NOT NULL DEFAULT FALSE,
+  POPULARFEED BOOLEAN NOT NULL DEFAULT FALSE,
   STARTDATE TIMESTAMPTZ,
   ENDDATE TIMESTAMPTZ
 );
