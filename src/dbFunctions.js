@@ -34,7 +34,26 @@ var self = module.exports = {
     },
     //Retrieves posts from influencers from a specific social media platform that a user follows.
     getFollowedInfluencersPosts: function (userID, limit, platform, databaseClient, callback) {
-        var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = " + userID + ") ";
+        var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = " + userID + ") AND PROMOTED = FALSE";
+        if (platform != "all")
+            dbRequest = dbRequest + "AND platform = '" + platform + "'";
+
+        dbRequest = dbRequest + " ORDER BY POSTED DESC LIMIT " + limit + ";";
+
+        databaseClient.query(dbRequest, (err, dbResult) => {
+            //We get a problem if login is
+            var dbResults = dbResult;
+            if (dbResults != undefined && dbResults != null) {
+                dbResults["retrieveSuccess"] = true;
+            } else {
+                dbResults = {};
+                dbResults["retrieveSuccess"] = false;
+            }
+            callback(dbResults);
+        });
+    },
+    getFollowedPromotedPosts: function (userID, limit, platform, databaseClient, callback) {
+        var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = " + userID + ") AND PROMOTED = TRUE ";
         if (platform != "all")
             dbRequest = dbRequest + "AND platform = '" + platform + "'";
 
@@ -312,12 +331,12 @@ var self = module.exports = {
             FROM USRFLWINFL \
             WHERE FLWRID = "+ userID + " \
             ), P AS ( \
-            SELECT * FROM POST ";
+            SELECT * FROM POST WHERE PROMOTED = FALSE";
         if (platform != 'all') {
-            dbRequest = dbRequest + " WHERE PLATFORM  = '" + platform + "' ";
+            dbRequest = dbRequest + " AND PLATFORM  = '" + platform + "' ";
         }
 
-        dbRequest = dbRequest + "ORDER BY POSTED DESC LIMIT " + limit + " \
+        dbRequest = dbRequest + " ORDER BY POSTED DESC LIMIT " + limit + " \
           ) \
           SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
             FROM P ORDER BY POSTED DESC";
@@ -368,6 +387,82 @@ var self = module.exports = {
             callback(dbResults);
         });
     },
+
+    getPromotedPosts: function(platform, userID, limit, offset, databaseClient, callback) {
+        var dbRequest = "WITH INFLLIST AS ( \
+            SELECT INFLID \
+            FROM USRFLWINFL \
+            WHERE FLWRID = "+ userID + " \
+            ), P AS ( \
+            SELECT * FROM POST WHERE PROMOTED = TRUE";
+        if (platform != 'all') {
+            dbRequest = dbRequest + " AND PLATFORM  = '" + platform + "' ";
+        }
+        var off;
+        if(offset != undefined) {
+            off = offset;
+        }
+        else {
+            off = 0;
+        }
+        dbRequest = dbRequest + " ORDER BY POSTED DESC LIMIT " + limit + " OFFSET " + off + " \
+          ) \
+          SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
+            FROM P ORDER BY POSTED DESC";
+        databaseClient.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+            if (dbResults != undefined) {
+                dbResults["retrieveSuccess"] = true;
+            } else {
+                dbResults = {};
+                dbResults["retrieveSuccess"] = false;
+            }
+            callback(dbResults);
+        });
+    },
+
+    getAdvertisementsPopularFeed: function(limit, offset, databaseClient, callback) {
+        var off;
+        if(offset != undefined) {
+            off = offset;
+        }
+        else {
+            off = 0;
+        }
+        var dbRequest = "SELECT * FROM PROMOTION WHERE POPULARFEED = TRUE ORDER BY STARTDATE DESC LIMIT " + limit + " OFFSET " + off;
+        databaseClient.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+            if (dbResults != undefined) {
+                dbResults["retrieveSuccess"] = true;
+            } else {
+                dbResults = {};
+                dbResults["retrieveSuccess"] = false;
+            }
+            callback(dbResults);
+        });
+    },
+
+    getAdvertisementsFollowingFeed: function(limit, offset, databaseClient, callback) {
+        var off;
+        if(offset != undefined) {
+            off = offset;
+        }
+        else {
+            off = 0;
+        }
+        var dbRequest = "SELECT * FROM PROMOTION WHERE FOLLOWINGFEED = TRUE ORDER BY STARTDATE DESC LIMIT " + limit + " OFFSET " + off;
+        databaseClient.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+            if (dbResults != undefined) {
+                dbResults["retrieveSuccess"] = true;
+            } else {
+                dbResults = {};
+                dbResults["retrieveSuccess"] = false;
+            }
+            callback(dbResults);
+        });
+    },
+
     //Logins a user by doing a check in the database if login credentials are correct.
     login: function (password, username, databaseClient, callback) {
         var dbRequest = "SELECT * FROM usr WHERE usrname = '" + username + "'";
