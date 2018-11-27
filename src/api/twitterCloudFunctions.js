@@ -1,9 +1,8 @@
 var self = module.exports = {
   // the twitter/health call
   health: function(req, res) {
-    res.send(
-      "<h1>Hello! Welcome to Pumba!</h1> <p> For Twitter API alternative, go to ./api/twitter </p>"
-    );
+    res.status(200);
+    res.send("HTTP response 200 code OK.");
   },
   //The twitter/filters call
   filters: function(req, res) {
@@ -12,8 +11,11 @@ var self = module.exports = {
     switch (assetType) {
       case "tweet":
         switch (filterType) {
-          case "user":
-            res.json(["Popular", "<enter your influencers username>"]);
+          case "influencer":
+            res.json(["<enter your influencers username>"]);
+            break;
+          case "popular":
+            res.json(['<no input needed>']);
             break;
           default:
             res.json(["Nothing available"]);
@@ -62,14 +64,14 @@ var self = module.exports = {
   }
 };
 
-var callbackFunction = function(result, assetTypes, filterTypes, filterValue, context, currentAssetNum, currentFilterNum, resultObj, callback) {
+var callbackFunction = function(result, assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, callback) {
   if (result != undefined) {
     for (var k = 0; k < result.length; k++) {
       resultObj.push(result[k]);
     }
   }
   if (currentAssetNum != (assetTypes.length - 1)) {
-    self.getContent(assetTypes, filterTypes, filterValue, context, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
+    getContent(assetTypes, filterTypes, filterValue, context, limit, currentAssetNum + 1, currentFilterNum + 1, resultObj, callback);
   }
   else {
     callback(resultObj);
@@ -81,35 +83,32 @@ var getContent = function(assetTypes, filterTypes, filterValue, context, limit, 
   switch (assetTypes[currentAssetNum]) {
     case "tweet":
         switch (filterTypes[currentFilterNum]) {
-          case "user":
-            switch (filterValue) {
-              case "Popular":
-              var screenNames = ["elonmusk", "justinbieber", "barackobama", "potus", "billgates", "beyonce"];
-                Twitter.getPopularTweets({
-                  consumerKey: process.env.TWITTER_CONSUMER_KEY,
-                  consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
-                  accessToken: process.env.TWITTER_ACCESS_TOKEN,
-                  accessSecret: process.env.TWITTER_ACCESS_SECRET,
-                  bearerToken: process.env.TWITTER_BEARER_TOKEN,
-                  userScreenNames: screenNames,
-                  count: limit
-                }).exec((err, response) => {
-                  callbackFunction(response, assetTypes, filterTypes, filterValue, context, currentAssetNum, currentFilterNum, resultObj, callback);
-                });
-                break;
-              default:
-                Twitter.getUserTweets({
-                  consumerKey: process.env.TWITTER_CONSUMER_KEY,
-                  consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
-                  accessToken: process.env.TWITTER_ACCESS_TOKEN,
-                  accessSecret: process.env.TWITTER_ACCESS_SECRET,
-                  bearerToken: process.env.TWITTER_BEARER_TOKEN,
-                  userScreenName: filterValue,
-                  count: limit
-                }).exec((err, response) => {
-                  callbackFunction(response, assetTypes, filterTypes, filterValue, context, currentAssetNum, currentFilterNum, resultObj, callback);
-                });
-            }
+          case "influencer":
+            Twitter.getUserTweets({
+              consumerKey: process.env.TWITTER_CONSUMER_KEY,
+              consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
+              accessToken: process.env.TWITTER_ACCESS_TOKEN,
+              accessSecret: process.env.TWITTER_ACCESS_SECRET,
+              bearerToken: process.env.TWITTER_BEARER_TOKEN,
+              userScreenName: filterValue,
+              count: limit
+            }).exec((err, response) => {
+              callbackFunction(response, assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, callback);
+            });
+            break;
+          case "popular":
+            var screenNames = ["elonmusk", "justinbieber", "barackobama", "potus", "billgates", "beyonce"];
+            Twitter.getPopularTweets({
+              consumerKey: process.env.TWITTER_CONSUMER_KEY,
+              consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
+              accessToken: process.env.TWITTER_ACCESS_TOKEN,
+              accessSecret: process.env.TWITTER_ACCESS_SECRET,
+              bearerToken: process.env.TWITTER_BEARER_TOKEN,
+              userScreenNames: screenNames,
+              count: limit
+            }).exec((err, response) => {
+              callbackFunction(response, assetTypes, filterTypes, filterValue, context, limit, currentAssetNum, currentFilterNum, resultObj, callback);
+            });
             break;
           default:
             callback("The cloud component failed to provide any content");

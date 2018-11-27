@@ -8,7 +8,7 @@ var self = module.exports = {
       var filterType = req["query"]["filterType"];
       var assetType = req["query"]["assetType"];
       switch (assetType) {
-        case "Instagram post":
+        case "instagram post":
           switch (filterType) {
             case "user":
               res.json(["Popular", "<enter your influencers username>"]);

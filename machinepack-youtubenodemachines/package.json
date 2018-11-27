@@ -1,12 +1,12 @@
 {
-  "name": "machinepack-twitternodemachines",
-  "version": "1.40.0",
-  "description": "Gets content from twitter.",
+  "name": "machinepack-youtubenodemachines",
+  "version": "2.4.0",
+  "description": "Gets content from Youtube",
   "scripts": {
     "test": "node ./node_modules/test-machinepack-mocha/bin/testmachinepack-mocha.js"
   },
   "keywords": [
-    "TwitterNodeMachines",
+    "youtubenodemachines",
     "machines",
     "machinepack"
   ],
@@ -16,18 +16,19 @@
     "machine": "^12.2.5"
   },
   "devDependencies": {
-    "test-machinepack-mocha": "^2.1.5",
-    "lodash": "^4.17.11",
-    "util": "^0.11.0",
-    "twitter": "^1.7.1"
+    "test-machinepack-mocha": "^2.1.5"
   },
   "machinepack": {
-    "friendlyName": "TwitterNodeMachines",
+    "friendlyName": "youtubenodemachines",
     "machineDir": "machines/",
     "machines": [
-      "getPopularTweets",
-      "getUserTweets",
+      "getChannelYoutube",
+      "getChannelYoutubeVideos",
       "getAccountInformation"
     ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pumpumba/project_TBD.git"
   }
 }

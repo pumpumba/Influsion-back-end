@@ -1,26 +1,35 @@
---CREATE TABLE INFLUENCER (
---  INFLUENCERID INT PRIMARY KEY NOT NULL,
---  INFLUENCERNAME VARCHAR(30) NOT NULL,
---  REALNAME VARCHAR(30),
---  AGE INT,
---  COUNTRYID INT REFERENCES LOCATION(LOCATIONID),
---  CITYID INT REFERENCES LOCATION(LOCATIONID)
---);
--- Create a user
+-- This file is partially intended to fill DB with some sample content, but also develop queries
+--
+
 INSERT INTO USR (USRNAME, HASHEDPWD, EMAIL, AGE, SEX)
   VALUES ('Filleboy', 'BAJSBAJS', 'c.filip.cornell@gmail.com', 24, 'Male');
 
 INSERT INTO LOCATION (LOCATIONNAME, LOCATIONTYPE) VALUES ('Sweden', 'COUNTRY');
 INSERT INTO LOCATION (LOCATIONNAME, LOCATIONTYPE) VALUES ('United States', 'COUNTRY');
+
 -- locationtype has to be inserted with caps!
 INSERT INTO LOCATION (LOCATIONNAME, LOCATIONTYPE, COUNTRYID) VALUES ('New York', 'CITY', (select locationid from location where location.locationname = 'United States'));
 INSERT INTO LOCATION (LOCATIONNAME, LOCATIONTYPE, COUNTRYID) VALUES ('Stockholm', 'CITY', (select locationid from location where location.locationname = 'Sweden'));
-INSERT INTO INFLUENCER (INFLUENCERNAME, REALNAME, AGE, PICTURELINK, SEX) VALUES ('Bill Gates', 'Bill Gates', 62, 'https://pbs.twimg.com/profile_images/988775660163252226/XpgonN0X_400x400.jpg', 'Male');
+INSERT INTO INFLUENCER (INFLUENCERNAME, REALNAME, AGE, PICLINK, SEX) VALUES ('Bill Gates', 'Bill Gates', 62, 'https://pbs.twimg.com/profile_images/988775660163252226/XpgonN0X_400x400.jpg', 'Male');
 INSERT INTO INFLUENCER (INFLUENCERNAME, REALNAME, AGE, CITYID, COUNTRYID, SEX) VALUES ('Jockiboi', 'Joakim Lundell', 33, (select locationid from location where location.locationname = 'Stockholm'),(select locationid from location where location.locationname = 'Sweden'), 'Male');
+
 -- Add a platform account
 INSERT INTO PLATFORMACCOUNT(INFLID, ACTNAME, PLATFORM, NRFLWRS, MEMBERSINCE, ACTURL) VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE INFLUENCERNAME = 'Bill Gates'), 'BillG', 'instagram', 23121, (SELECT NOW()::date), 'instagram.com/BillG');
 INSERT INTO PLATFORMACCOUNT(INFLID, ACTNAME, PLATFORM, NRFLWRS, MEMBERSINCE, ACTURL) VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE INFLUENCERNAME = 'Bill Gates'), 'BillGates', 'twitter', 211121, (SELECT NOW()::date), 'twitter.com/BillG');
 INSERT INTO PLATFORMACCOUNT(INFLID, ACTNAME, PLATFORM, NRFLWRS, MEMBERSINCE, ACTURL) VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE INFLUENCERNAME = 'Jockiboi'), 'Jockiboi', 'instagram', 23121, (SELECT NOW()::date), 'instagram.com/Jockiboi');
+-- added this to be able to add sample influencer promotion information.
+SELECT * FROM INFLUENCER;
+INSERT INTO TVOPERATOR(TVOPERATORNAME, HASHEDPWD) VALUES ('Zenterio1', 'Zenterio');
+INSERT INTO TVOPERATOR(TVOPERATORNAME, HASHEDPWD) VALUES ('Another TV Operator', 'Zenterio');
+INSERT INTO PROMOTION(TVOPERATORID, PROMOTIONNAME) VALUES (1, 'Zenterio standard promotion');
+INSERT INTO PROMOTION(TVOPERATORID, PROMOTIONNAME) VALUES (1, 'Zenterio selected promotion');
+INSERT INTO PROMOTION(TVOPERATORID, PROMOTIONNAME) VALUES (2, 'TV operator''s promotion');
+INSERT INTO INFLUENCERPROMOTED(INFLUENCERID, PROMOTIONID) VALUES (1,1);
+INSERT INTO INFLUENCERPROMOTED(INFLUENCERID, PROMOTIONID, PROMOTIONTYPE) VALUES (2,1, 'demotion');
+--INSERT INTO INFLUENCERPROMOTED(INFLUENCERID, PROMOTIONID, PROMOTIONTYPE) VALUES (2,1, 'demotion');
+INSERT INTO INFLUENCERPROMOTED(INFLUENCERID, PROMOTIONID, PROMOTIONTYPE) VALUES (2,2, 'demotion');
+INSERT INTO TAG (TAGNAME) VALUES ('metoo');
+INSERT INTO TAGPROMOTED(TAGID, PROMOTIONID, PROMOTIONTYPE) VALUES ((SELECT TAGID FROM TAG WHERE TAGNAME = 'metoo'),1, 'promotion');
 -- Update country of a specific influencer
 UPDATE INFLUENCER SET COUNTRYID = (select locationid from location where location.locationname = 'United States') WHERE INFLUENCERNAME = 'Bill Gates';
 
@@ -104,7 +113,7 @@ WITH INFLUENCERWITHPLATFORMACCOUNTS AS (
 SELECT * FROM INFLUENCERWITHPLATFORMACCOUNTS AS I
   ORDER BY INFLUENCERNAME;
 
--- INSERT A USER
+-- INSERT A USER into the DB
 INSERT INTO POST(INFLID, NRLIKES, PLATFORM, USRTXTCONTENT, POSTED, POSTURL, PLATFORMCONTENT)
   VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE REALNAME = 'Bill Gates'), 1231, 'instagram', 'Chilliaang at the WEF. Cool', (SELECT NOW()), 'instagram.com/aasdq', NULL);
 
@@ -173,16 +182,145 @@ SELECT * FROM (
   INFLUENCER.INFLUENCERID = PLATFORMACCOUNT.INFLID
 ) AS INFLUENCERWITHPLATFORMACCOUNTS;
 
--- Perform a search for influencers based on keywords
+
+-- WITH B AS (
+--   SELECT I.INFLUENCERNAME, U.INFLID
+--   INFLUENCER AS I
+--
+-- )
+-- SELECT B.INFLUENCERNAME, ARRAY(SELECT ACTNAME || ' : ' || PLATFORM
+--   FROM PLATFORMACCOUNT
+--   WHERE INFLID = B.INFLID) FROM B;
+-- Perform a search for influencers based on names.
+--
+-- WITH I AS (
+--     SELECT DISTINCT INFLUENCER.INFLID, INFLUENCER.INFLUENCERNAME, INFLUENCER.REALNAME,
+-- )
+-- SELECT json_build_object('pics',
+--   json_agg(
+--     json_build_object('platform',
+--       platformaccount.platform,
+--       'piclink',
+--       platformaccount.imgurl)))
+--       AS pics FROM platformaccount as p;
+--
+--       , json_build_object('pics',
+--         json_agg(
+--           json_build_object('platform',
+--             platformaccount.platform,
+--             'piclink',
+--             platformaccount.imgurl)))
+--             AS pics
+--
+--             WITH INFLUENCERWITHPLATFORMACCOUNTS AS (
+--               SELECT INFLUENCER.*, PLATFORMACCOUNT.* FROM INFLUENCER
+--               INNER JOIN PLATFORMACCOUNT ON
+--               INFLUENCER.INFLUENCERID = PLATFORMACCOUNT.INFLID
+--               AND INFLUENCER.INFLUENCERID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = 1)
+--               )
+
+-- WITH PLATFORMACCOUNTS AS (
+--   SELECT PACC.INFLID, json_build_object('platformaccounts',
+--     json_agg(
+--       json_build_object('nr_flwrs',
+--         PACC.NRFLWRS,
+--         'member_since',
+--         PACC.MEMBERSINCE,
+--         'act_url',
+--         PACC.ACTURL,
+--         'is_verified',
+--         PACC.VERIFIED,
+--         'usr_desc',
+--         PACC.USRDESC,
+--         'platform',
+--         PACC.platform,
+--         'piclink',
+--         PACC.imgurl,
+--         'actname',
+--         PACC.actname,
+--         'platform_content',
+--         PACC.platformcontent)))
+--         AS PFACCS FROM PLATFORMACCOUNT AS PACC
+--         GROUP BY INFLID
+-- ), USERPOSTS AS (
+--   SELECT P.INFLID, json_build_object('platformaccounts',
+--     json_agg(
+--       json_build_object('post_id',
+--         P.POSTID,
+--         'nr_likes',
+--         P.NRLIKES,
+--         'platform',
+--         P.PLATFORM,
+--         'usr_text_content',
+--         P.USRTXTCONTENT,
+--         'posted',
+--         P.POSTED,
+--         'post_platform_id',
+--         P.POSTPLATFORMID,
+--         'platform_content',
+--         P.platformcontent)))
+--         AS posts FROM POST AS P
+--         GROUP BY INFLID
+-- ), IPC AS (
+--   SELECT INFLUENCER.*, USERPOSTS.POSTS, PLATFORMACCOUNTS.PFACCS FROM INFLUENCER
+--   INNER JOIN PLATFORMACCOUNTS ON
+--   INFLUENCER.INFLUENCERID = PLATFORMACCOUNTS.INFLID
+--   INNER JOIN USERPOSTS ON
+--   PLATFORMACCOUNTS.INFLID = USERPOSTS.INFLID
+--   --WHERE LOWER(INFLUENCERNAME) LIKE '%anna%' OR LOWER(REALNAME) LIKE '%anna%' OR LOWER(ACTNAME) LIKE '%anna%'
+--   --GROUP BY INFLUENCERID, INFLUENCERNAME, ACTNAME
+-- ), FINALTABLE AS (
+--   SELECT * FROM IMGURLS INNER JOIN IPC ON IPC.INFLUENCERID = IMGURLS.INFLID
+-- )
+--  SELECT DISTINCT ON (INFLID, INFLUENCERNAME, REALNAME) INFLID, INFLUENCERNAME, REALNAME, PICS FROM FINALTABLE;
 
 
 
+-- Retrieve influencer id, real name and all account names
+WITH INFLLIST AS (
+  SELECT INFLID
+  FROM USRFLWINFL
+  WHERE FLWRID = 2
+), PLATFORMACCOUNTS AS (
+  SELECT PACC.INFLID, json_build_object('platformaccounts',
+    json_agg(
+      json_build_object(
+        'actname',
+        PACC.actname,
+        'platform',
+        PACC.PLATFORM,
+        'imgurl',
+        PACC.IMGURL)))
+        AS PFACCS FROM PLATFORMACCOUNT AS PACC
+        GROUP BY INFLID
+), IPC AS (
+  SELECT INFLUENCER.INFLUENCERNAME, INFLUENCER.REALNAME, PLATFORMACCOUNTS.* FROM INFLUENCER
+  INNER JOIN PLATFORMACCOUNTS ON
+  INFLUENCER.INFLUENCERID = PLATFORMACCOUNTS.INFLID
+)
+ SELECT DISTINCT ON (IPC.INFLID, IPC.INFLUENCERNAME, IPC.REALNAME) IPC.*, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLLIST.INFLID IN(IPC.INFLID)) AS USRFOLLOWINGINFLUENCER FROM IPC;
+
+-- Search alternative if it would be too heavy to do the query above.
+-- This one will fetch a picture if there is a profile picture for any of the platformaccounts.
+-- If there is no picture, it will return null and a placeholder shall be held frontend.
+SELECT DISTINCT ON (I.INFLUENCERID, I.INFLUENCERNAME, I.REALNAME) I.INFLUENCERID, I.INFLUENCERNAME, I.REALNAME, P.IMGURL FROM INFLUENCER AS I
+  INNER JOIN PLATFORMACCOUNT AS P ON I.INFLUENCERID = P.INFLID
+  WHERE LOWER(I.INFLUENCERNAME) LIKE '%anna%' OR LOWER(I.REALNAME) LIKE '%anna%' OR LOWER(P.ACTNAME) LIKE '%anna%';
+
+--SELECT DISTINCT INFLUENCERID, INFLUENCERNAME, ACTNAME FROM INFLUENCERWITHPLATFORMACCOUNTS AS I WHERE LOWER(INFLUENCERNAME) LIKE '%bill%' OR LOWER(REALNAME) = '%bill%' OR LOWER(ACTNAME) = '%bill%'
+--  ORDER BY INFLUENCERNAME;
 -- Select all promoted influencers and all their platformaccounts based on
+
+-- Count number of clicks for each influencer or post related to a tag.
+
+
+-- Count number of clicks on promoted hashtags
+
+--SELECT
 
 -- Count number of visits on a profile based on
 
 SELECT COUNT(*) FROM USRVISIT WHERE INFLID = (SELECT influencerID FROM INFLUENCER where REALNAME = 'Jockiboi');
-
 
 -- Get all posts related to a tag
 
@@ -192,3 +330,74 @@ SELECT * FROM POST WHERE POST.POSTID = ANY(
 
 --Update a post
 UPDATE POST SET platform = ('twitter') WHERE postid = 1;
+
+-- Get amount of clicks on promoted influencers
+SELECT I.INFLID, COUNT(*) AS NRCLICKS, (SELECT
+  (COUNT(*) >= 1)
+  FROM INFLUENCERPROMOTED
+  WHERE INFLUENCERID IN(I.INFLID)
+  AND PROMOTIONID = 1) AS ISPROMOTEDBYCAMPAIGN
+  FROM USRVISIT AS I GROUP BY I.INFLID
+  ORDER BY NRCLICKS DESC;
+
+SELECT I.INFLID, COUNT(*) AS NRCLICKS, (SELECT
+  (COUNT(*) >= 1)
+  FROM INFLUENCERPROMOTED
+  WHERE INFLUENCERID IN(I.INFLID)
+  AND PROMOTIONID IN(SELECT PROMOTIONID FROM PROMOTION WHERE TVOPERATORID = 1)) AS ISPROMOTEDBYCAMPAIGN
+  FROM USRVISIT AS I GROUP BY I.INFLID
+  ORDER BY NRCLICKS DESC;
+-- Fetch ALL information related to a specific influencer, including account information etc.
+
+WITH PLATFORMACCOUNTS AS (
+  SELECT PACC.INFLID, json_build_object('platformaccounts',
+    json_agg(
+      json_build_object('nr_flwrs',
+        PACC.NRFLWRS,
+        'member_since',
+        PACC.MEMBERSINCE,
+        'act_url',
+        PACC.ACTURL,
+        'is_verified',
+        PACC.VERIFIED,
+        'usr_desc',
+        PACC.USRDESC,
+        'platform',
+        PACC.platform,
+        'piclink',
+        PACC.imgurl,
+        'actname',
+        PACC.actname,
+        'platform_content',
+        PACC.platformcontent)))
+        AS PFACCS FROM PLATFORMACCOUNT AS PACC
+        WHERE INFLID = 1
+        GROUP BY INFLID
+), USERPOSTS AS (
+  SELECT P.INFLID, json_build_object('platformaccounts',
+    json_agg(
+      json_build_object('post_id',
+        P.POSTID,
+        'nr_likes',
+        P.NRLIKES,
+        'platform',
+        P.PLATFORM,
+        'usr_text_content',
+        P.USRTXTCONTENT,
+        'posted',
+        P.POSTED,
+        'post_platform_id',
+        P.POSTPLATFORMID,
+        'platform_content',
+        P.platformcontent)))
+        AS posts FROM POST AS P
+        WHERE INFLID = 1
+        GROUP BY INFLID
+), IPC AS (
+  SELECT INFLUENCER.*, USERPOSTS.POSTS, PLATFORMACCOUNTS.PFACCS FROM INFLUENCER
+  INNER JOIN PLATFORMACCOUNTS ON
+  INFLUENCER.INFLUENCERID = PLATFORMACCOUNTS.INFLID
+  INNER JOIN USERPOSTS ON
+  PLATFORMACCOUNTS.INFLID = USERPOSTS.INFLID
+)
+SELECT * FROM IPC;
