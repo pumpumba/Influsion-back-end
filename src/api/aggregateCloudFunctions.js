@@ -433,44 +433,35 @@ var getPopularFeedWithCorrectOrder = function(advertisements, promotedPosts, pop
   var randPromotedPost;
   var randAdOrPost;
   var resultArray;
-  var usedAdvertisements;
-  console.log("ADS: ");
-  console.log(advertisements);
-  console.log("PROMOTED POSTS: ");
-  console.log(promotedPosts);
-  console.log(limit);
+  var usedAdvertisements = [];
   while(count < limit) {
     randLengthTillAd = 4 + Math.floor(Math.random() * 6);
     var currentStart = popularPostCount;
     var currentCount = count;
     if((count + randLengthTillAd) < limit) {
       randAdOrPost = Math.floor(Math.random()*2);
-      console.log(randAdOrPost);
       for(var i = currentStart;i<(randLengthTillAd+currentStart);i++) {
         resultObj.push(popularPosts[i]);
         popularPostCount += 1;
         count += 1;
-        console.log(count);
       }
       if(randAdOrPost == 0) {
-        resultArray = insertAdvertisementIntoResult(ads, resultObj, advertisements, usedAdvertisements);
+        resultArray = insertAdvertisementIntoResult(ads, resultObj, usedAdvertisements);
         resultObj = resultArray[0];
         ads = resultArray[1];
         usedAdvertisements = resultArray[2];
       }
       else {
         if(promPosts.length == 0) {
-          resultArray = insertAdvertisementIntoResult(ads, resultObj, advertisements, usedAdvertisements);
+          resultArray = insertAdvertisementIntoResult(ads, resultObj, usedAdvertisements);
           resultObj = resultArray[0];
           ads = resultArray[1];
           usedAdvertisements = resultArray[2];
-          console.log("USEEEEED");
-          console.log(usedAdvertisements);
         }
         else {
           randPromotedPost = Math.floor(Math.random()*promPosts.length);
           resultObj.push(promPosts[randPromotedPost]);
-          delete promPosts[randPromotedPost];
+          promPosts.splice(randPromotedPost, 1);
         }
       }
       if((10+currentCount) < limit) {
@@ -478,7 +469,6 @@ var getPopularFeedWithCorrectOrder = function(advertisements, promotedPosts, pop
           resultObj.push(popularPosts[i]);
           popularPostCount += 1;
           count += 1;
-          console.log(count);
         }
       }
       else {
@@ -486,7 +476,6 @@ var getPopularFeedWithCorrectOrder = function(advertisements, promotedPosts, pop
           resultObj.push(popularPosts[i]);
           popularPostCount += 1;
           count += 1;
-          console.log(count);
         }
       }
       count += 1;
@@ -498,30 +487,26 @@ var getPopularFeedWithCorrectOrder = function(advertisements, promotedPosts, pop
         count += 1;
       }
     }
-    console.log(count);
-    console.log(count + randLengthTillAd)
   }
   callback(resultObj);
 };
 
 var insertAdvertisementIntoResult = function(ads, resultObj, usedAdvertisements) {
   var newResultObj = resultObj;
-  var randAdvertisement = Math.floor(Math.random()*ads.length);
-  console.log('Random number %i', randAdvertisement);
-  console.log(ads.length);
+  var rand = Math.random()*ads.length;
+  var randAdvertisement = Math.floor(rand);
   var newAds = ads;
   var newUsedAds = usedAdvertisements;
   if(newAds.length == 1) {
-    newResultObj.push(ads[randAdvertisement]);
-    newUsedAds.push(ads[randAdvertisement]);
+    newResultObj.push(newAds[randAdvertisement]);
+    newUsedAds.push(newAds[randAdvertisement]);
     newAds = newUsedAds;
     newUsedAds = [];
   }
   else {
-    newResultObj.push(ads[randAdvertisement]);
-    newUsedAds.push(ads[randAdvertisement]);
-    newAds = newAds.splice(randAdvertisement, 1);
-    console.log('Length of newAds %i', newAds.length);
+    newResultObj.push(newAds[randAdvertisement]);
+    newUsedAds.push(newAds[randAdvertisement]);
+    newAds.splice(randAdvertisement, 1);
   }
   return [newResultObj, newAds, newUsedAds];
 };
@@ -530,7 +515,6 @@ var getContentFromInfluencerFromAPI = function (assetType, influencers, currentI
   switch (assetType) {
     case 'tweet':
       var Twitter = require("machinepack-twitternodemachines");
-      console.log('calling twitter');
       Twitter.getUserTweets({
         consumerKey: process.env.TWITTER_CONSUMER_KEY,
         consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
@@ -540,7 +524,6 @@ var getContentFromInfluencerFromAPI = function (assetType, influencers, currentI
         userScreenName: influencers[currentInfluencer].actname,
         count: limit
       }).exec((err, result) => {
-        console.log(result);
         contentCallback('tweet', err, result, influencers, currentInfluencer, resultObj, limit, offset, callback);
       });
       break;
