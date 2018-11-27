@@ -143,7 +143,6 @@ app.post("/db/list_all_promoted_influencers", (req, res)=> {
     var dbRequest = "SELECT * FROM INFLUENCER WHERE INFLUENCERID IN(SELECT INFLUENCERID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'promotion');";
     client.query(dbRequest, (err, dbResult) => {
         var dbResults = dbResult;
-        console.log(dbResults);
         if (dbResults != undefined && dbResults != null) {
             dbResults["createSuccess"] = true;
         } else {
