@@ -62,6 +62,9 @@ app.use("/twitter", twitterCloudComponent);
 var youtubeCloudComponent = require("./api/youtubeCloudComponent");
 app.use("/youtube", youtubeCloudComponent);
 
+var instagramCloudComponent = require("./api/instagramCloudComponent");
+app.use("/instagram", instagramCloudComponent);
+
 //Main page routing
 app.get("/", (req, res) => {
     res.send(

@@ -151,9 +151,9 @@ var self = module.exports = {
         dbRequest = dbRequest.substr(0, dbRequest.length - 2);
         dbRequest = dbRequest + " WHERE INFLID = " + influencerId + " AND PLATFORM = '" + platform + "';";
         /*UPDATE PLATFORMACCOUNT SET ACTNAME = 'jakepaulchannel', NRFLWRS = 17555583,
-         MEMBERSINCE = to_timestamp(1379619076000), 
-         ACTURL = 'https://www.youtube.com/channel/UCcgVECVN4OKV6DH1jLkqmcA', 
-         IMGURL = 'https://yt3.ggpht.com/a-/AN66SAwSC_sOp-Fs7FF6SJDtnaouQlpEL4iHGHg1ag=s800-mo-c-c0xffffffff-rj-k-no', 
+         MEMBERSINCE = to_timestamp(1379619076000),
+         ACTURL = 'https://www.youtube.com/channel/UCcgVECVN4OKV6DH1jLkqmcA',
+         IMGURL = 'https://yt3.ggpht.com/a-/AN66SAwSC_sOp-Fs7FF6SJDtnaouQlpEL4iHGHg1ag=s800-mo-c-c0xffffffff-rj-k-no',
          VERIFIED = false WHERE INFLID = 46 AND PLATFORM = 'youtube'; */
 
         // Here, I just send back the actual db request. Should be different when actually implementing it for real.
