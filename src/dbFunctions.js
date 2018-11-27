@@ -33,8 +33,8 @@ var self = module.exports = {
         });
     },
     //Retrieves posts from influencers from a specific social media platform that a user follows.
-    getFollowedInfluencersPosts: function (userID, limit, platform, databaseClient, callback) {
-        var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = " + userID + ") AND PROMOTED = FALSE";
+    getFollowedInfluencersPosts: function (userID, limit, offset, platform, databaseClient, callback) {
+        var dbRequest = "SELECT * FROM POST WHERE INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = " + userID + ") AND (PROMOTED = FALSE AND INFLID NOT IN (SELECT INFLID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'promotion'))";
         if (platform != "all")
             dbRequest = dbRequest + "AND platform = '" + platform + "'";
 
@@ -52,10 +52,10 @@ var self = module.exports = {
             callback(dbResults);
         });
     },
-    getFollowedPromotedPosts: function (userID, limit, platform, databaseClient, callback) {
-        var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = " + userID + ") AND PROMOTED = TRUE ";
+    getFollowedPromotedPosts: function (platform, userID, limit, offset, databaseClient, callback) {
+        var dbRequest = "SELECT * FROM POST WHERE INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = " + userID + ") AND (PROMOTED = TRUE OR INFLID IN(SELECT INFLUENCERID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'promotion'))";
         if (platform != "all")
-            dbRequest = dbRequest + "AND platform = '" + platform + "'";
+            dbRequest = dbRequest + "AND PLATFORM = '" + platform + "'";
 
         dbRequest = dbRequest + " ORDER BY POSTED DESC LIMIT " + limit + ";";
 
@@ -91,10 +91,8 @@ var self = module.exports = {
                 POSTED = to_timestamp(" + unixtime + "), POSTURL = '" + postUrl + "',\
                 PROFILEPIC = '"+ profilePicture + "', PLATFORMCONTENT = '" + jsonContent + "'::json";
                 dbRequest = dbRequest + " WHERE POSTURL = '" + postUrl + "';";
-                console.log(dbRequest);
                 databaseClient.query(dbRequest, (err, dbResult) => {
                     var dbResults = dbResult;
-                    console.log(dbResults);
                     if (dbResults != undefined && dbResults["rowCount"] == 1) {
                         console.log("UPDATES POST");
                         dbResults["createSuccess"] = true;
@@ -161,6 +159,9 @@ var self = module.exports = {
             var dbResults = dbResult;
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["updateSuccess"] = true;
+                if(imageURL != undefined) {
+                    var dbQuery2 = "UPDATE INFLUENCER SET PICLINK = '"+ imageURL +"' WHERE INFLID = "+ influencerId +";";
+                }
             } else {
                 console.log("Failed: ");
                 console.log(dbResult);
@@ -337,7 +338,7 @@ var self = module.exports = {
             FROM USRFLWINFL \
             WHERE FLWRID = "+ userID + " \
             ), P AS ( \
-            SELECT * FROM POST WHERE PROMOTED = FALSE";
+            SELECT * FROM POST WHERE PROMOTED = FALSE AND INFLID NOT IN (SELECT INFLUENCERID FROM INFLUENCERPROMOTED)";
         if (platform != 'all') {
             dbRequest = dbRequest + " AND PLATFORM  = '" + platform + "' ";
         }
@@ -400,7 +401,7 @@ var self = module.exports = {
             FROM USRFLWINFL \
             WHERE FLWRID = "+ userID + " \
             ), P AS ( \
-            SELECT * FROM POST WHERE PROMOTED = TRUE";
+            SELECT * FROM POST WHERE (PROMOTED = TRUE OR INFLID IN (SELECT INFLUENCERID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'promotion'))";
         if (platform != 'all') {
             dbRequest = dbRequest + " AND PLATFORM  = '" + platform + "' ";
         }
@@ -448,7 +449,7 @@ var self = module.exports = {
         });
     },
 
-    getAdvertisementsFollowingFeed: function (limit, offset, databaseClient, callback) {
+    getAdvertisementsFollowingFeed: function (tvoperatorID, limit, offset, databaseClient, callback) {
         var off;
         if (offset != undefined) {
             off = offset;

@@ -91,26 +91,26 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
       });
       break;
     case "user":
-      dbFunctions.getFollowedInfluencersPosts(filterValue, limit, platform, databaseClient, (response) => {
+      dbFunctions.getFollowedInfluencersPosts(filterValue[0], limit, offset, platform, databaseClient, (response) => {
         var resultFollowedInfluencerPosts = response['rows'];
         if (resultFollowedInfluencerPosts != undefined) {
-          dbFunctions.getAdvertisementFollowingFeed(limit, offset, databaseClient, (response2) => {
+          dbFunctions.getAdvertisementsFollowingFeed(filterValue[1], limit, offset, databaseClient, (response2) => {
             var resultAdvertisements = response2['rows'];
-            dbFunctions.getFollowedPromotedPosts(platform, filterValue, limit, offset, databaseClient, (response3) => {
+            dbFunctions.getFollowedPromotedPosts(platform, filterValue[0], limit, offset, databaseClient, (response3) => {
               var resultPromotedPosts = response3['rows'];
               getPopularFeedWithCorrectOrder(resultAdvertisements, resultPromotedPosts, resultFollowedInfluencerPosts, limit, offset, databaseClient, (response4) => {
                 resultObj = response4;
+                if (currentAssetNum != (assetTypes.length - 1)) {
+                  //Go into next iteration of getContent
+                  getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
+                }
+                else {
+                  //All iterations done, send back the result
+                  callback(resultObj);
+                }
               });
             });
           });
-        }
-        if (currentAssetNum != (assetTypes.length - 1)) {
-          //Go into next iteration of getContent
-          getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
-        }
-        else {
-          //All iterations done, send back the result
-          callback(resultObj);
         }
       });
       break;
@@ -132,7 +132,6 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
                   //All iterations done, send back the result
                   callback(resultObj);
                 }
-
               });
             });
           });
@@ -145,7 +144,6 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
       break;
     //Updates the database with new content from our social media API:s
     case "update":
-      console.log('UPDATING!!!');
       if (platform == 'all') {
         callback('Can not update all platform at once. Update each one by one.');
       }
@@ -161,9 +159,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
           var currentInfluencerAccount = 0;
           if (currentInfluencerAccount < accounts.length) {
             var posts = [];
-            console.log('get stuff from API!');
             getContentFromInfluencerFromAPI(assetType, accounts, currentInfluencerAccount, posts, limit, offset, (response2) => {
-              console.log(response2);
               if (response2.length != 0) {
                 storeContent(assetType, response2, 0, databaseClient, (response3) => {
                   resultObj.push("Success");
@@ -292,7 +288,6 @@ var storeContent = function (assetType, posts, postNum, databaseClient, callback
 };
 
 var updateAccount = function (accountInformations, accountNum, databaseClient, callback) {
-  console.log(accountInformations[accountNum]);
   dbFunctions.updatePlatformAccount(accountInformations[accountNum].influencerId, accountInformations[accountNum].accountName,
       accountInformations[accountNum].platform, accountInformations[accountNum].followersCount, accountInformations[accountNum].createdAtUnixTime,
       accountInformations[accountNum].accountUrl, accountInformations[accountNum].imageUrl, accountInformations[accountNum].verified, accountInformations[accountNum].jsonContent, databaseClient, (response) => {
@@ -434,6 +429,8 @@ var getPopularFeedWithCorrectOrder = function(advertisements, promotedPosts, pop
   var randAdOrPost;
   var resultArray;
   var usedAdvertisements = [];
+  console.log(promotedPosts);
+  console.log("HELLO");
   while(count < limit) {
     randLengthTillAd = 4 + Math.floor(Math.random() * 6);
     var currentStart = popularPostCount;
@@ -493,6 +490,7 @@ var getPopularFeedWithCorrectOrder = function(advertisements, promotedPosts, pop
 
 var insertAdvertisementIntoResult = function(ads, resultObj, usedAdvertisements) {
   var newResultObj = resultObj;
+  console.log(ads);
   var rand = Math.random()*ads.length;
   var randAdvertisement = Math.floor(rand);
   var newAds = ads;
@@ -524,6 +522,7 @@ var getContentFromInfluencerFromAPI = function (assetType, influencers, currentI
         userScreenName: influencers[currentInfluencer].actname,
         count: limit
       }).exec((err, result) => {
+        console.log(result);
         contentCallback('tweet', err, result, influencers, currentInfluencer, resultObj, limit, offset, callback);
       });
       break;
@@ -560,7 +559,6 @@ var contentCallback = function (assetType, err, result, influencers, currentInfl
   } else {
     if (result != undefined) {
       for (var k = 0; k < result.length; k++) {
-        console.log(result[k]);
         result[k].influencerId = influencers[currentInfluencer].inflid;
         result[k].profilePictureFromAccount = influencers[currentInfluencer].imgurl;
         resultObj.push(result[k]);
