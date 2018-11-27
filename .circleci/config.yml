@@ -7,9 +7,6 @@ jobs:
   build:
     docker:
       - image: circleci/node:latest
-      #   auth:
-      #    username: $DOCKER_LOGIN
-      #   password: $DOCKER_PWD
 
     working_directory: ~/repo
     branches:
@@ -38,27 +35,17 @@ jobs:
           name: Docker build server
           command: |
             docker build -f Dockerfile -t mezzersmite/$BACK_END_IMAGE_NAME:$TAG .
-
       - run:
           name: Push server to docker hub
           command: |
             docker login -u $DOCKER_LOGIN -p $DOCKER_PWD
             docker push mezzersmite/$BACK_END_IMAGE_NAME:$TAG
-
       - run:
           name: Docker build database
           command: |
             docker build -f Dockerfile.db -t mezzersmite/$BACK_END_DB_IMAGE_NAME:$TAG .
-
       - run:
           name: Push database to docker hub
           command: |
             docker login -u $DOCKER_LOGIN -p $DOCKER_PWD
             docker push mezzersmite/$BACK_END_DB_IMAGE_NAME:$TAG
-      # run tests!
-      #- run: roliga tests kanske
-
-      #- run:
-      #   name: Deploy to Azure back-end VM
-      #echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
-

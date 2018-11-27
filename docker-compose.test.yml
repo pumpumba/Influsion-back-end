@@ -1,0 +1,26 @@
+version: "3"
+services:
+  sut:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    ports:
+      - "80:8080"
+    volumes:
+      - "./src:/usr/src/app/src"
+      - ".:/usr/src/app/test/report"
+    depends_on:
+      - "db"
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 10; done; echo Waiting for database; npm test'
+  db:
+    container_name: "postgres"
+    image: "postgres"
+    restart: "always"
+    ports:
+      - "5432:5432"
+    volumes:
+      - "./db/createTables.sql:/docker-entrypoint-initdb.d/createTables.sql"
+    environment:
+      POSTGRES_PASSWORD: "erikandfiliprules987"
+      POSTGRES_DB: "pumbadb"
+      POSTGRES_USER: "pumbapumba"

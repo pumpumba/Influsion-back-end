@@ -86,10 +86,10 @@ var self = module.exports = {
                 dbResults["createSuccess"] = true;
                 callback(dbResults);
             } else {
-                dbRequest = "UPDATE POST SET INFLID = "+ influencerID +", NRLIKES = "+ numLikes +",\
-                PLATFORM = '"+ platform +"', USRTXTCONTENT = '"+ userTextContent +"',\
-                POSTED = to_timestamp(" + unixtime + "), POSTURL = '"+ postUrl +"',\
-                PROFILEPIC = '"+ profilePicture +"', PLATFORMCONTENT = '" + jsonContent + "'::json";
+                dbRequest = "UPDATE POST SET INFLID = " + influencerID + ", NRLIKES = " + numLikes + ",\
+                PLATFORM = '"+ platform + "', USRTXTCONTENT = '" + userTextContent + "',\
+                POSTED = to_timestamp(" + unixtime + "), POSTURL = '" + postUrl + "',\
+                PROFILEPIC = '"+ profilePicture + "', PLATFORMCONTENT = '" + jsonContent + "'::json";
                 dbRequest = dbRequest + " WHERE POSTURL = '" + postUrl + "';";
                 console.log(dbRequest);
                 databaseClient.query(dbRequest, (err, dbResult) => {
@@ -109,7 +109,7 @@ var self = module.exports = {
         });
     },
 
-    updatePlatformAccount: function(influencerId, accountName, platform, followersCount, memberSince, actURL, imageURL, isVerified, platformContent, databaseClient, callback) {
+    updatePlatformAccount: function (influencerId, accountName, platform, followersCount, memberSince, actURL, imageURL, isVerified, platformContent, databaseClient, callback) {
         //Put everything into a json object.
         var jsonObject = {
             "ACTNAME": accountName, //check
@@ -130,20 +130,20 @@ var self = module.exports = {
                     case "ACTNAME":
                     case "ACTURL":
                     case "IMGURL":
-                    dbRequest = dbRequest + key + " = '" + jsonObject[key] + "', ";
-                    break;
+                        dbRequest = dbRequest + key + " = '" + jsonObject[key] + "', ";
+                        break;
                     case "NRFLWRS":
                     case "VERIFIED":
-                    dbRequest = dbRequest + key + " = " + jsonObject[key] + ", ";
-                    break;
+                        dbRequest = dbRequest + key + " = " + jsonObject[key] + ", ";
+                        break;
                     case "MEMBERSINCE":
-                    dbRequest = dbRequest + key + " = to_timestamp(" + jsonObject[key] + "), ";
-                    break;
+                        dbRequest = dbRequest + key + " = to_timestamp(" + jsonObject[key] + "), ";
+                        break;
                     case "PLATFORMCONTENT":
-                    // Do note that we might have to do regex if we send in json objects here, and replace ' with '' to escape.
-                    // in that case, do regex on jsonObj[key]
-                    dbRequest = dbRequest + key + " = '" + jsonObject[key] + "'::json, ";
-                    break;
+                        // Do note that we might have to do regex if we send in json objects here, and replace ' with '' to escape.
+                        // in that case, do regex on jsonObj[key]
+                        dbRequest = dbRequest + key + " = '" + jsonObject[key] + "'::json, ";
+                        break;
                 }
             }
         }
@@ -173,7 +173,9 @@ var self = module.exports = {
     //makes a user unfollows an influencer
     unfollowInfluencer: function (userID, influencerID, databaseClient, callback) {
         var dbRequest = "DELETE FROM USRFLWINFL WHERE FLWRID = " + userID + " AND INFLID = " + influencerID + ";";
-        console.log(dbRequest);
+        if (process.env.NODE_ENV !== "test") {
+            console.log(dbRequest);
+        }
         databaseClient.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
             if (dbResults != undefined) {
@@ -189,7 +191,6 @@ var self = module.exports = {
     addFollowInfluencer: function (userID, influencerID, databaseClient, callback) {
         var dbRequest = "INSERT INTO USRFLWINFL (FLWRID, INFLID) VALUES (" + userID + "," + influencerID + ");";
 
-
         databaseClient.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
@@ -204,7 +205,6 @@ var self = module.exports = {
 
     //Retrieves the platforms accounts of a users followed influencers.
     getPlatformAccountsFromFollowedInfluencers: function (userID, orderBy, databaseClient, callback) {
-
         var dbRequest = "WITH INFLUENCERWITHPLATFORMACCOUNTS AS ( \
             SELECT INFLUENCER.*, PLATFORMACCOUNT.* FROM INFLUENCER \
             INNER JOIN PLATFORMACCOUNT ON \
@@ -258,8 +258,12 @@ var self = module.exports = {
     addUserVisit: function (userID, influencerID, typeOfVisit, databaseClient, callback) {
         var dbRequest = "INSERT INTO USRVISIT(USRID, INFLID, TYPEOFVISIT) VALUES (" + userID + "," + influencerID + ",'" + typeOfVisit + "');";
         databaseClient.query(dbRequest, (err, dbResult) => {
-            console.log(err);
-            console.log(dbResult);
+            if (process.env.NODE_ENV !== "test") {
+                console.log(err);
+            }
+            if (process.env.NODE_ENV !== "test") {
+                console.log(dbResult);
+            }
             var dbResults = dbResult;
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["createSuccess"] = true;
@@ -276,7 +280,9 @@ var self = module.exports = {
         bcrypt.hash(password, saltRounds, function (err, hash) {
             var dbRequest = "UPDATE USR SET USRNAME = '" + username + "', HASHEDPWD = '" + hash + "', age = " + age + ", email = '" + email + "', sex = '" + sex + "' WHERE usrid = " + userID + ";";
             databaseClient.query(dbRequest, (err, dbResult) => {
-                console.log(dbResult); //We get a problem if login is
+                if (process.env.NODE_ENV !== "test") {
+                    console.log(dbResult); //We get a problem if login is
+                }
                 var dbResults = dbResult;
                 if (dbResults != undefined) {
 
@@ -388,7 +394,7 @@ var self = module.exports = {
         });
     },
 
-    getPromotedPosts: function(platform, userID, limit, offset, databaseClient, callback) {
+    getPromotedPosts: function (platform, userID, limit, offset, databaseClient, callback) {
         var dbRequest = "WITH INFLLIST AS ( \
             SELECT INFLID \
             FROM USRFLWINFL \
@@ -399,7 +405,7 @@ var self = module.exports = {
             dbRequest = dbRequest + " AND PLATFORM  = '" + platform + "' ";
         }
         var off;
-        if(offset != undefined) {
+        if (offset != undefined) {
             off = offset;
         }
         else {
@@ -421,9 +427,9 @@ var self = module.exports = {
         });
     },
 
-    getAdvertisementsPopularFeed: function(limit, offset, databaseClient, callback) {
+    getAdvertisementsPopularFeed: function (limit, offset, databaseClient, callback) {
         var off;
-        if(offset != undefined) {
+        if (offset != undefined) {
             off = offset;
         }
         else {
@@ -442,9 +448,9 @@ var self = module.exports = {
         });
     },
 
-    getAdvertisementsFollowingFeed: function(limit, offset, databaseClient, callback) {
+    getAdvertisementsFollowingFeed: function (limit, offset, databaseClient, callback) {
         var off;
-        if(offset != undefined) {
+        if (offset != undefined) {
             off = offset;
         }
         else {
