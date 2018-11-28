@@ -33,8 +33,8 @@ var self = module.exports = {
         });
     },
     //Retrieves posts from influencers from a specific social media platform that a user follows.
-    getFollowedInfluencersPosts: function (userID, limit, platform, databaseClient, callback) {
-        var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = " + userID + ") AND PROMOTED = FALSE";
+    getFollowedInfluencersPosts: function (userID, limit, offset, platform, databaseClient, callback) {
+        var dbRequest = "SELECT * FROM POST WHERE INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = " + userID + ") AND (PROMOTED = FALSE AND INFLID NOT IN (SELECT INFLID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'promotion'))";
         if (platform != "all")
             dbRequest = dbRequest + "AND platform = '" + platform + "'";
 
@@ -52,10 +52,10 @@ var self = module.exports = {
             callback(dbResults);
         });
     },
-    getFollowedPromotedPosts: function (userID, limit, platform, databaseClient, callback) {
-        var dbRequest = "SELECT * FROM POST AS P WHERE P.INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = " + userID + ") AND PROMOTED = TRUE ";
+    getFollowedPromotedPosts: function (platform, userID, limit, offset, databaseClient, callback) {
+        var dbRequest = "SELECT * FROM POST WHERE INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = " + userID + ") AND (PROMOTED = TRUE OR INFLID IN(SELECT INFLUENCERID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'promotion'))";
         if (platform != "all")
-            dbRequest = dbRequest + "AND platform = '" + platform + "'";
+            dbRequest = dbRequest + "AND PLATFORM = '" + platform + "'";
 
         dbRequest = dbRequest + " ORDER BY POSTED DESC LIMIT " + limit + ";";
 
@@ -86,17 +86,14 @@ var self = module.exports = {
                 dbResults["createSuccess"] = true;
                 callback(dbResults);
             } else {
-                dbRequest = "UPDATE POST SET INFLID = "+ influencerID +", NRLIKES = "+ numLikes +",\
-                PLATFORM = '"+ platform +"', USRTXTCONTENT = '"+ userTextContent +"',\
-                POSTED = to_timestamp(" + unixtime + "), POSTURL = '"+ postUrl +"',\
-                PROFILEPIC = '"+ profilePicture +"', PLATFORMCONTENT = '" + jsonContent + "'::json";
+                dbRequest = "UPDATE POST SET INFLID = " + influencerID + ", NRLIKES = " + numLikes + ",\
+                PLATFORM = '"+ platform + "', USRTXTCONTENT = '" + userTextContent + "',\
+                POSTED = to_timestamp(" + unixtime + "), POSTURL = '" + postUrl + "',\
+                PROFILEPIC = '"+ profilePicture + "', PLATFORMCONTENT = '" + jsonContent + "'::json";
                 dbRequest = dbRequest + " WHERE POSTURL = '" + postUrl + "';";
-                console.log(dbRequest);
                 databaseClient.query(dbRequest, (err, dbResult) => {
                     var dbResults = dbResult;
-                    console.log(dbResults);
                     if (dbResults != undefined && dbResults["rowCount"] == 1) {
-                        console.log("UPDATES POST");
                         dbResults["createSuccess"] = true;
                     } else {
                         console.log("FAILURE AT INSERTING OR UPDATING POST");
@@ -109,7 +106,7 @@ var self = module.exports = {
         });
     },
 
-    updatePlatformAccount: function(influencerId, accountName, platform, followersCount, memberSince, actURL, imageURL, isVerified, platformContent, databaseClient, callback) {
+    updatePlatformAccount: function (influencerId, accountName, platform, followersCount, memberSince, actURL, imageURL, isVerified, platformContent, databaseClient, callback) {
         //Put everything into a json object.
         var jsonObject = {
             "ACTNAME": accountName, //check
@@ -130,20 +127,20 @@ var self = module.exports = {
                     case "ACTNAME":
                     case "ACTURL":
                     case "IMGURL":
-                    dbRequest = dbRequest + key + " = '" + jsonObject[key] + "', ";
-                    break;
+                        dbRequest = dbRequest + key + " = '" + jsonObject[key] + "', ";
+                        break;
                     case "NRFLWRS":
                     case "VERIFIED":
-                    dbRequest = dbRequest + key + " = " + jsonObject[key] + ", ";
-                    break;
+                        dbRequest = dbRequest + key + " = " + jsonObject[key] + ", ";
+                        break;
                     case "MEMBERSINCE":
-                    dbRequest = dbRequest + key + " = to_timestamp(" + jsonObject[key] + "), ";
-                    break;
+                        dbRequest = dbRequest + key + " = to_timestamp(" + jsonObject[key] + "), ";
+                        break;
                     case "PLATFORMCONTENT":
-                    // Do note that we might have to do regex if we send in json objects here, and replace ' with '' to escape.
-                    // in that case, do regex on jsonObj[key]
-                    dbRequest = dbRequest + key + " = '" + jsonObject[key] + "'::json, ";
-                    break;
+                        // Do note that we might have to do regex if we send in json objects here, and replace ' with '' to escape.
+                        // in that case, do regex on jsonObj[key]
+                        dbRequest = dbRequest + key + " = '" + jsonObject[key] + "'::json, ";
+                        break;
                 }
             }
         }
@@ -151,9 +148,9 @@ var self = module.exports = {
         dbRequest = dbRequest.substr(0, dbRequest.length - 2);
         dbRequest = dbRequest + " WHERE INFLID = " + influencerId + " AND PLATFORM = '" + platform + "';";
         /*UPDATE PLATFORMACCOUNT SET ACTNAME = 'jakepaulchannel', NRFLWRS = 17555583,
-         MEMBERSINCE = to_timestamp(1379619076000), 
-         ACTURL = 'https://www.youtube.com/channel/UCcgVECVN4OKV6DH1jLkqmcA', 
-         IMGURL = 'https://yt3.ggpht.com/a-/AN66SAwSC_sOp-Fs7FF6SJDtnaouQlpEL4iHGHg1ag=s800-mo-c-c0xffffffff-rj-k-no', 
+         MEMBERSINCE = to_timestamp(1379619076000),
+         ACTURL = 'https://www.youtube.com/channel/UCcgVECVN4OKV6DH1jLkqmcA',
+         IMGURL = 'https://yt3.ggpht.com/a-/AN66SAwSC_sOp-Fs7FF6SJDtnaouQlpEL4iHGHg1ag=s800-mo-c-c0xffffffff-rj-k-no',
          VERIFIED = false WHERE INFLID = 46 AND PLATFORM = 'youtube'; */
 
         // Here, I just send back the actual db request. Should be different when actually implementing it for real.
@@ -161,6 +158,9 @@ var self = module.exports = {
             var dbResults = dbResult;
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["updateSuccess"] = true;
+                if(imageURL != undefined) {
+                    var dbQuery2 = "UPDATE INFLUENCER SET PICLINK = '"+ imageURL +"' WHERE INFLID = "+ influencerId +";";
+                }
             } else {
                 console.log("Failed: ");
                 console.log(dbResult);
@@ -173,7 +173,9 @@ var self = module.exports = {
     //makes a user unfollows an influencer
     unfollowInfluencer: function (userID, influencerID, databaseClient, callback) {
         var dbRequest = "DELETE FROM USRFLWINFL WHERE FLWRID = " + userID + " AND INFLID = " + influencerID + ";";
-        console.log(dbRequest);
+        if (process.env.NODE_ENV !== "test") {
+            console.log(dbRequest);
+        }
         databaseClient.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
             if (dbResults != undefined) {
@@ -189,7 +191,6 @@ var self = module.exports = {
     addFollowInfluencer: function (userID, influencerID, databaseClient, callback) {
         var dbRequest = "INSERT INTO USRFLWINFL (FLWRID, INFLID) VALUES (" + userID + "," + influencerID + ");";
 
-
         databaseClient.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
@@ -204,7 +205,6 @@ var self = module.exports = {
 
     //Retrieves the platforms accounts of a users followed influencers.
     getPlatformAccountsFromFollowedInfluencers: function (userID, orderBy, databaseClient, callback) {
-
         var dbRequest = "WITH INFLUENCERWITHPLATFORMACCOUNTS AS ( \
             SELECT INFLUENCER.*, PLATFORMACCOUNT.* FROM INFLUENCER \
             INNER JOIN PLATFORMACCOUNT ON \
@@ -258,8 +258,12 @@ var self = module.exports = {
     addUserVisit: function (userID, influencerID, typeOfVisit, databaseClient, callback) {
         var dbRequest = "INSERT INTO USRVISIT(USRID, INFLID, TYPEOFVISIT) VALUES (" + userID + "," + influencerID + ",'" + typeOfVisit + "');";
         databaseClient.query(dbRequest, (err, dbResult) => {
-            console.log(err);
-            console.log(dbResult);
+            if (process.env.NODE_ENV !== "test") {
+                console.log(err);
+            }
+            if (process.env.NODE_ENV !== "test") {
+                console.log(dbResult);
+            }
             var dbResults = dbResult;
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["createSuccess"] = true;
@@ -274,25 +278,39 @@ var self = module.exports = {
     //Modifies a users account information
     modifyUser: function (password, username, age, email, sex, userID, databaseClient, callback) {
         bcrypt.hash(password, saltRounds, function (err, hash) {
-            var dbRequest = "UPDATE USR SET USRNAME = '" + username + "', HASHEDPWD = '" + hash + "', age = " + age + ", email = '" + email + "', sex = '" + sex + "' WHERE usrid = " + userID + ";";
-            databaseClient.query(dbRequest, (err, dbResult) => {
-                console.log(dbResult); //We get a problem if login is
-                var dbResults = dbResult;
-                if (dbResults != undefined) {
-
-
-                    dbResults["updateSuccess"] = true;
-                } else if (dbResults == undefined) {
-                    dbResults = {};
-                    dbResults["updateSuccess"] = false;
-
-                } else if (dbResults["rowCount"] == 2) {
-                    console.log("2 or more updated. GRAVE ERROR in database.");
-                } else {
-                    dbResults = {};
-                    dbResults["updateSuccess"] = false;
+            var dbRequestCheckUser = "SELECT * FROM USR WHERE USRID = "+ userID + ";";
+            databaseClient.query(dbRequestCheckUser, (err, dbResult1) => {
+                if(dbResult1['rows'].length == 0) {
+                    var dbResults = {};
+                    dbResults['updateSuccess'] = false;
+                    callback(dbResults);
                 }
-                callback(dbResults);
+                else {
+                    var dbRequestUpdate = "UPDATE USR SET USRNAME = '" + username + "', HASHEDPWD = '" + hash + "', age = " + age + ", email = '" + email + "', sex = '" + sex + "' WHERE usrid = " + userID + ";";
+
+                    databaseClient.query(dbRequestUpdate, (err, dbResult) => {
+                        if (process.env.NODE_ENV !== "test") {
+                            console.log(dbResult); //We get a problem if login is
+                        }
+                        console.log(dbResult);
+                        var dbResults = dbResult;
+                        if (dbResults != undefined) {
+
+
+                            dbResults["updateSuccess"] = true;
+                        } else if (dbResults == undefined) {
+                            dbResults = {};
+                            dbResults["updateSuccess"] = false;
+
+                        } else if (dbResults["rowCount"] == 2) {
+                            console.log("2 or more updated. GRAVE ERROR in database.");
+                        } else {
+                            dbResults = {};
+                            dbResults["updateSuccess"] = false;
+                        }
+                        callback(dbResults);
+                    });
+                }
             });
         });
     },
@@ -331,7 +349,7 @@ var self = module.exports = {
             FROM USRFLWINFL \
             WHERE FLWRID = "+ userID + " \
             ), P AS ( \
-            SELECT * FROM POST WHERE PROMOTED = FALSE";
+            SELECT * FROM POST WHERE PROMOTED = FALSE AND INFLID NOT IN (SELECT INFLUENCERID FROM INFLUENCERPROMOTED)";
         if (platform != 'all') {
             dbRequest = dbRequest + " AND PLATFORM  = '" + platform + "' ";
         }
@@ -388,18 +406,18 @@ var self = module.exports = {
         });
     },
 
-    getPromotedPosts: function(platform, userID, limit, offset, databaseClient, callback) {
+    getPromotedPosts: function (platform, userID, limit, offset, databaseClient, callback) {
         var dbRequest = "WITH INFLLIST AS ( \
             SELECT INFLID \
             FROM USRFLWINFL \
             WHERE FLWRID = "+ userID + " \
             ), P AS ( \
-            SELECT * FROM POST WHERE PROMOTED = TRUE";
+            SELECT * FROM POST WHERE (PROMOTED = TRUE OR INFLID IN (SELECT INFLUENCERID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'promotion'))";
         if (platform != 'all') {
             dbRequest = dbRequest + " AND PLATFORM  = '" + platform + "' ";
         }
         var off;
-        if(offset != undefined) {
+        if (offset != undefined) {
             off = offset;
         }
         else {
@@ -421,15 +439,15 @@ var self = module.exports = {
         });
     },
 
-    getAdvertisementsPopularFeed: function(limit, offset, databaseClient, callback) {
+    getAdvertisementsPopularFeed: function (tvoperatorID, limit, offset, databaseClient, callback) {
         var off;
-        if(offset != undefined) {
+        if (offset != undefined) {
             off = offset;
         }
         else {
             off = 0;
         }
-        var dbRequest = "SELECT * FROM PROMOTION WHERE POPULARFEED = TRUE ORDER BY STARTDATE DESC LIMIT " + limit + " OFFSET " + off;
+        var dbRequest = "SELECT * FROM TVOPERATORCONTENT WHERE SHOWINPOPULARFEED = TRUE AND TVOPERATORID = "+ tvoperatorID +" LIMIT " + limit + " OFFSET " + off;
         databaseClient.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
             if (dbResults != undefined) {
@@ -442,15 +460,15 @@ var self = module.exports = {
         });
     },
 
-    getAdvertisementsFollowingFeed: function(limit, offset, databaseClient, callback) {
+    getAdvertisementsFollowingFeed: function (tvoperatorID, limit, offset, databaseClient, callback) {
         var off;
-        if(offset != undefined) {
+        if (offset != undefined) {
             off = offset;
         }
         else {
             off = 0;
         }
-        var dbRequest = "SELECT * FROM PROMOTION WHERE FOLLOWINGFEED = TRUE ORDER BY STARTDATE DESC LIMIT " + limit + " OFFSET " + off;
+        var dbRequest = "SELECT * FROM TVOPERATORCONTENT WHERE SHOWINFOLLOWINGFEED = TRUE AND TVOPERATORID = "+ tvoperatorID +" LIMIT " + limit + " OFFSET " + off;
         databaseClient.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
             if (dbResults != undefined) {

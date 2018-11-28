@@ -5,6 +5,12 @@ module.exports = (function() {
 
   app = express.Router();
 
+  app.get("/", (req, res) => {
+    res.send(
+      "<h1>Hello! Welcome to Pumba!</h1>"
+    );
+  });
+
   app.get("/health", (req, res) => {
     functions.health(req, res);
   });
