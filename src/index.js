@@ -100,10 +100,10 @@ app.post("/db/remove_excluded_or_promoted_influencer", (req, res) => {
     client.query(dbRequest, (err, dbResult) => {
         var dbResults = dbResult;
         if (dbResults != undefined && dbResults != null) {
-            dbResults["createSuccess"] = true;
+            dbResults["deleteSuccess"] = true;
         } else {
             dbResults = {};
-            dbResults["createSuccess"] = false;
+            dbResults["deleteSuccess"] = false;
         }
         res.json(dbResults);
     });
