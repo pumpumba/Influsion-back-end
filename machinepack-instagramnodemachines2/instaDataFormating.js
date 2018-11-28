@@ -11,20 +11,21 @@ var self = module.exports = {
     },
 
     instagramAccountFormat: function(accountInformation) {
-      if(accountInformation != undefined) {
+      console.log(accountInformation);
+      if(!(accountInformation.hasOwnProperty("error"))) {
+        if((accountInformation.business_discovery.hasOwnProperty("profile_picture_url"))){
         var imageUrl = accountInformation.business_discovery.profile_picture_url;
         var regex = /'/gi;
         var jsonContent = JSON.stringify(accountInformation).replace(regex, "''");
+      }
         var essentialInformation = {
           "platform" : 'instagram',
           "accountName" : accountInformation.business_discovery.username,
           "followersCount" : accountInformation.business_discovery.followers_count,
-          // "createdAtUnixTime" : new Date(accountInformation.created_at).getTime(),
           "createdAtUnixTime": null,
           "accountUrl" : 'https://www.instagram.com/' + accountInformation.business_discovery.username,
           "imageUrl": imageUrl,
-          // "verified": accountInformation.verified,
-          "verified": true,
+          "verified": null,
           "platformContent": null
         };
       }
