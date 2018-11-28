@@ -572,7 +572,7 @@ app.post("/db/delete_user", (req, res) => {
                 DELETE FROM USRVISIT WHERE usrid = "+ usrID + "; \ */
 
             bcrypt.compare(password, hashPassword, function (err, resultCompare) {
-                if (resultCompare == false) {
+                if (resultCompare == true) {
                     var dbRequest = "BEGIN; \
           DELETE FROM USRFLWINFL WHERE FLWRID = "+ usrID + "; \
           DELETE FROM USRLIKEPOST WHERE USRID = "+ usrID + "; \
@@ -584,6 +584,7 @@ app.post("/db/delete_user", (req, res) => {
                         console.log("We are here");
                         console.log(dbResults);
                         if (dbResults != undefined) {
+                            dbResults = {};
                             dbResults["deleteSuccess"] = true;
                             res.json(dbResults);
                         } else {
