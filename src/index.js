@@ -171,6 +171,75 @@ app.post("/db/promote_influencer", (req, res)=> {
     });
 });
 
+app.post("/db/promote_influencer", (req, res)=> {
+    var inputObj = req.body;
+    var dbRequest = "INSERT INTO INFLUENCERPROMOTED(INFLUENCERID, PROMOTIONID, PROMOTIONTYPE) VALUES ("+ inputObj.influencerId +", 1, 'promotion');";
+    client.query(dbRequest, (err, dbResult) => {
+        var dbResults = dbResult;
+        if (dbResults != undefined && dbResults != null) {
+            dbResults["createSuccess"] = true;
+        } else {
+            dbResults = {};
+            dbResults["createSuccess"] = false;
+        }
+        res.json(dbResults);
+    });
+});
+
+app.post("/db/remove_promote_tag_post", (req, res) =>  {
+    var inputObj = req.body;
+    var postID = inputObj.postid;
+    var dbRequestCheckPost = "SELECT * FROM POST WHERE POSTID = "+ postID + ";";
+    client.query(dbRequestCheckPost, (err, dbResult1) => {
+        if(dbResult1['rows'].length == 0) {
+            var dbResults = {};
+            dbResults['removePromoteSuccess'] = false;
+            res.json(dbResults);
+        }
+        else {
+            var dbRequest = "UPDATE POST SET PROMOTED = FALSE WHERE POSTID = " + postID + ";";
+            client.query(dbRequest, (err, dbResult) => {
+                var dbResults = {};
+                if(dbResult != undefined) {
+                    dbResults['removePromoteSuccess'] = true;
+                    res.json(dbResults);
+                }
+                else {
+                    dbResults['removePromoteSuccess'] = false;
+                    res.json(dbResults);
+                }
+            });
+        }
+    });
+});
+
+app.post("/db/promote_post", (req, res) =>  {
+    var inputObj = req.body;
+    var postID = inputObj.postid;
+    var dbRequestCheckPost = "SELECT * FROM POST WHERE POSTID = "+ postID + ";";
+    client.query(dbRequestCheckPost, (err, dbResult1) => {
+        if(dbResult1['rows'].length == 0) {
+            var dbResults = {};
+            dbResults['promoteSuccess'] = false;
+            res.json(dbResults);
+        }
+        else {
+            var dbRequest = "UPDATE POST SET PROMOTED = TRUE WHERE POSTID = " + postID + ";";
+            client.query(dbRequest, (err, dbResult) => {
+                var dbResults = {};
+                if(dbResult != undefined) {
+                    dbResults['promoteSuccess'] = true;
+                    res.json(dbResults);
+                }
+                else {
+                    dbResults['promoteSuccess'] = false;
+                    res.json(dbResults);
+                }
+            });
+        }
+    });
+});
+
 // Create ad
 app.post("/db/create_ad", (req, res) => {
   var inputObj = req.body;
@@ -633,14 +702,25 @@ app.post("/db/change_tv_op_info", (req, res) => {
     var tv_op_id = inputObj.tv_op_id;
     var tv_op_name = inputObj.operatorname;
     var pwd = inputObj.password;
-    bcrypt.hash(pwd, saltRounds, function (err, hash) {
-        var dbRequest = "UPDATE TVOPERATOR SET TVOPERATORNAME = '" + tv_op_name + "', HASHEDPWD = '" + hash + "' WHERE TVOPERATORID = " + tv_op_id + ";"
-        client.query(dbRequest, (err, dbResult) => {
 
-            res.json(dbResult);
+    var dbRequestCheckOperator = "SELECT * FROM TVOPERATOR WHERE TVOPERATORID = "+ tv_op_id + ";";
+    client.query(dbRequestCheckOperator, (err, dbResult1) => {
+        if(dbResult1['rows'].length == 0) {
+            var dbResults = {};
+            dbResults['updateSuccess'] = false;
+            res.json(dbResults);
+        }
+        else {
+            bcrypt.hash(pwd, saltRounds, function (err, hash) {
+                var dbRequest = "UPDATE TVOPERATOR SET TVOPERATORNAME = '" + tv_op_name + "', HASHEDPWD = '" + hash + "' WHERE TVOPERATORID = " + tv_op_id + ";"
+                client.query(dbRequest, (err, dbResult) => {
+
+                    res.json(dbResult);
 
 
-        });
+                });
+            });
+        }
     });
 });
 
