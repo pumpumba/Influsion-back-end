@@ -127,30 +127,44 @@ app.post("/db/exclude_influencer", (req, res)=> {
     });
 });
 
-app.post("/db/list_all_excluded_influencers", (req, res)=> {
+app.get("/db/list_all_excluded_influencers", (req, res)=> {
     var dbRequest = "SELECT * FROM INFLUENCER WHERE INFLUENCERID IN(SELECT INFLUENCERID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'demotion');";
     client.query(dbRequest, (err, dbResult) => {
         var dbResults = dbResult;
         console.log(dbResults);
         if (dbResults != undefined && dbResults != null) {
-            dbResults["createSuccess"] = true;
+            dbResults["retrieveSuccess"] = true;
         } else {
             dbResults = {};
-            dbResults["createSuccess"] = false;
+            dbResults["retrieveSuccess"] = false;
         }
         res.json(dbResults['rows']);
     });
 });
 
-app.post("/db/list_all_promoted_influencers", (req, res)=> {
+app.get("/db/list_all_promoted_influencers", (req, res)=> {
     var dbRequest = "SELECT * FROM INFLUENCER WHERE INFLUENCERID IN(SELECT INFLUENCERID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'promotion');";
     client.query(dbRequest, (err, dbResult) => {
         var dbResults = dbResult;
         if (dbResults != undefined && dbResults != null) {
-            dbResults["createSuccess"] = true;
+            dbResults["retrieveSuccess"] = true;
         } else {
             dbResults = {};
-            dbResults["createSuccess"] = false;
+            dbResults["retrieveSuccess"] = false;
+        }
+        res.json(dbResults['rows']);
+    });
+});
+
+app.get("/db/list_all_promoted_posts", (req, res)=> {
+    var dbRequest = "SELECT * FROM POST WHERE PROMOTED = TRUE;";
+    client.query(dbRequest, (err, dbResult) => {
+        var dbResults = dbResult;
+        if (dbResults != undefined && dbResults != null) {
+            dbResults["retrieveSuccess"] = true;
+        } else {
+            dbResults = {};
+            dbResults["retrieveSuccess"] = false;
         }
         res.json(dbResults['rows']);
     });

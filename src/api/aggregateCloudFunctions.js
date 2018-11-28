@@ -92,12 +92,27 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
       break;
     case "user":
       dbFunctions.getFollowedInfluencersPosts(filterValue[0], limit, offset, platform, databaseClient, (response) => {
-        var resultFollowedInfluencerPosts = response['rows'];
+        if(response['retrieveSuccess'] == true) {
+          var resultFollowedInfluencerPosts = response['rows'];
+        }
+        else {
+          var resultFollowedInfluencerPosts = [];
+        }
         if (resultFollowedInfluencerPosts != undefined) {
           dbFunctions.getAdvertisementsFollowingFeed(filterValue[1], limit, offset, databaseClient, (response2) => {
-            var resultAdvertisements = response2['rows'];
+            if(response2['retrieveSuccess'] == true) {
+              var resultAdvertisements = response2['rows'];
+            }
+            else {
+              var resultAdvertisements = [];
+            }
             dbFunctions.getFollowedPromotedPosts(platform, filterValue[0], limit, offset, databaseClient, (response3) => {
-              var resultPromotedPosts = response3['rows'];
+              if(response3['retrieveSuccess'] == true) {
+                var resultPromotedPosts = response3['rows'];
+              }
+              else {
+                var resultPromotedPosts = [];
+              }
               getPopularFeedWithCorrectOrder(resultAdvertisements, resultPromotedPosts, resultFollowedInfluencerPosts, limit, offset, databaseClient, (response4) => {
                 resultObj = response4;
                 if (currentAssetNum != (assetTypes.length - 1)) {
@@ -116,12 +131,27 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
       break;
     case "popular":
       dbFunctions.getLatestPosts(filterValue[0], platform, limit, databaseClient, (response) => {
-        var resultPopularPosts = response['rows'];
+        if(response['retrieveSuccess'] == true) {
+          var resultPopularPosts = response['rows'];
+        }
+        else {
+          var resultPopularPosts = [];
+        }
         if (resultPopularPosts != undefined) {
           dbFunctions.getAdvertisementsPopularFeed(filterValue[1], limit, offset, databaseClient, (response2) => {
-            var resultAdvertisements = response2['rows'];
+            if(response2['retrieveSuccess'] == true) {
+              var resultAdvertisements = response2['rows'];
+            }
+            else {
+              var resultAdvertisements = [];
+            }
             dbFunctions.getPromotedPosts(platform, filterValue[0], limit, offset, databaseClient, (response3) => {
-              var resultPromotedPosts = response3['rows'];
+              if(response3['retrieveSuccess'] == true) {
+                var resultPromotedPosts = response3['rows'];
+              }
+              else {
+                var resultPromotedPosts = [];
+              }
               getPopularFeedWithCorrectOrder(resultAdvertisements, resultPromotedPosts, resultPopularPosts, limit, offset, databaseClient, (response4) => {
                 resultObj = response4;
                 if (currentAssetNum != (assetTypes.length - 1)) {
