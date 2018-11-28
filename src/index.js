@@ -282,7 +282,7 @@ app.post("/db/remove_ad", (req, res) => {
   });
 });
 
-
+// Get ads 
 app.get("/db/get_ads", (req, res) => {
   var dbRequest = "SELECT * FROM TVOPERATORCONTENT;";
   client.query(dbRequest, (err, dbResult) => {
