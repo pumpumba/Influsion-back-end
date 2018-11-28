@@ -278,27 +278,39 @@ var self = module.exports = {
     //Modifies a users account information
     modifyUser: function (password, username, age, email, sex, userID, databaseClient, callback) {
         bcrypt.hash(password, saltRounds, function (err, hash) {
-            var dbRequest = "UPDATE USR SET USRNAME = '" + username + "', HASHEDPWD = '" + hash + "', age = " + age + ", email = '" + email + "', sex = '" + sex + "' WHERE usrid = " + userID + ";";
-            databaseClient.query(dbRequest, (err, dbResult) => {
-                if (process.env.NODE_ENV !== "test") {
-                    console.log(dbResult); //We get a problem if login is
+            var dbRequestCheckUser = "SELECT * FROM USR WHERE USRID = "+ userID + ";";
+            databaseClient.query(dbRequestCheckUser, (err, dbResult1) => {
+                if(dbResult1['rows'].length == 0) {
+                    var dbResults = {};
+                    dbResults['updateSuccess'] = false;
+                    callback(dbResults);
                 }
-                var dbResults = dbResult;
-                if (dbResults != undefined) {
+                else {
+                    var dbRequestUpdate = "UPDATE USR SET USRNAME = '" + username + "', HASHEDPWD = '" + hash + "', age = " + age + ", email = '" + email + "', sex = '" + sex + "' WHERE usrid = " + userID + ";";
+
+                    databaseClient.query(dbRequestUpdate, (err, dbResult) => {
+                        if (process.env.NODE_ENV !== "test") {
+                            console.log(dbResult); //We get a problem if login is
+                        }
+                        console.log(dbResult);
+                        var dbResults = dbResult;
+                        if (dbResults != undefined) {
 
 
-                    dbResults["updateSuccess"] = true;
-                } else if (dbResults == undefined) {
-                    dbResults = {};
-                    dbResults["updateSuccess"] = false;
+                            dbResults["updateSuccess"] = true;
+                        } else if (dbResults == undefined) {
+                            dbResults = {};
+                            dbResults["updateSuccess"] = false;
 
-                } else if (dbResults["rowCount"] == 2) {
-                    console.log("2 or more updated. GRAVE ERROR in database.");
-                } else {
-                    dbResults = {};
-                    dbResults["updateSuccess"] = false;
+                        } else if (dbResults["rowCount"] == 2) {
+                            console.log("2 or more updated. GRAVE ERROR in database.");
+                        } else {
+                            dbResults = {};
+                            dbResults["updateSuccess"] = false;
+                        }
+                        callback(dbResults);
+                    });
                 }
-                callback(dbResults);
             });
         });
     },
