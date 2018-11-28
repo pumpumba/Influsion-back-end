@@ -119,7 +119,6 @@ app.post("/db/create_ad", (req, res) => {
 app.post("/db/remove_ad", (req, res) => {
   var inputObj = req.body;
   var dbRequest = "DELETE FROM TVOPERATORCONTENT WHERE ADID = " + inputObj.id + ";";
-  console.log(dbRequest);
   client.query(dbRequest, (err, dbResult) => {
       var dbResults = dbResult;
       if (dbResults != undefined && dbResults != null) {
@@ -127,6 +126,22 @@ app.post("/db/remove_ad", (req, res) => {
       } else {
           dbResults = {};
           dbResults["deleteSuccess"] = false;
+      }
+
+      res.json(dbResults);
+  });
+});
+
+
+app.get("/db/get_ads", (req, res) => {
+  var dbRequest = "SELECT * FROM TVOPERATORCONTENT;";
+  client.query(dbRequest, (err, dbResult) => {
+      var dbResults = dbResult;
+      if (dbResults != undefined && dbResults != null) {
+          dbResults["retrieveSuccess"] = true;
+      } else {
+          dbResults = {};
+          dbResults["retrieveSuccess"] = false;
       }
 
       res.json(dbResults);
