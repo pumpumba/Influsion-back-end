@@ -478,17 +478,28 @@ var getFeedWithCorrectOrder = function(advertisements, promotedPosts, popularPos
         count += 1;
       }
       if(randAdOrPost == 0) {
-        resultArray = insertAdvertisementIntoResult(ads, resultObj, usedAdvertisements);
-        resultObj = resultArray[0];
-        ads = resultArray[1];
-        usedAdvertisements = resultArray[2];
-      }
-      else {
-        if(promPosts.length == 0) {
+        if(advertisements.length != 0) {
           resultArray = insertAdvertisementIntoResult(ads, resultObj, usedAdvertisements);
           resultObj = resultArray[0];
           ads = resultArray[1];
           usedAdvertisements = resultArray[2];
+        }
+        else {
+          if(promPosts.length != 0) {
+            randPromotedPost = Math.floor(Math.random()*promPosts.length);
+            resultObj.push(promPosts[randPromotedPost]);
+            promPosts.splice(randPromotedPost, 1);
+          }
+        }
+      }
+      else {
+        if(promPosts.length == 0) {
+          if(advertisements.length != 0) {
+            resultArray = insertAdvertisementIntoResult(ads, resultObj, usedAdvertisements);
+            resultObj = resultArray[0];
+            ads = resultArray[1];
+            usedAdvertisements = resultArray[2];
+          }
         }
         else {
           randPromotedPost = Math.floor(Math.random()*promPosts.length);
