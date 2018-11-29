@@ -1,0 +1,34 @@
+{
+  "name": "machinepack-instagramnodemachines2",
+  "version": "1.6.0",
+  "description": "Gets content from Instagram through the Instagram Graph API.",
+  "scripts": {
+    "test": "node ./node_modules/test-machinepack-mocha/bin/testmachinepack-mocha.js"
+  },
+  "keywords": [
+    "instagramnodemachines2",
+    "machines",
+    "machinepack"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "machine": "^12.2.5"
+  },
+  "devDependencies": {
+    "test-machinepack-mocha": "^2.1.5"
+  },
+  "machinepack": {
+    "friendlyName": "instagramnodemachines2",
+    "machineDir": "machines/",
+    "machines": [
+      "getInstaPosts",
+      "getPopularInstaPosts",
+      "getAccountInformation"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pumpumba/Influsion-back-end.git"
+  }
+}
