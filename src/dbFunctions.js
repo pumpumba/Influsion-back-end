@@ -266,7 +266,6 @@ var self = module.exports = {
         var dbRequest = "SELECT * FROM INFLUENCER WHERE INFLUENCERID IN(SELECT INFLUENCERID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'demotion');";
         client.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
-            console.log(dbResults);
             if (dbResults != undefined && dbResults != null) {
                 dbResults["retrieveSuccess"] = true;
             } else {
