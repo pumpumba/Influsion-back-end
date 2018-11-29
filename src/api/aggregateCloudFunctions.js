@@ -113,7 +113,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
               else {
                 var resultPromotedPosts = [];
               }
-              getPopularFeedWithCorrectOrder(resultAdvertisements, resultPromotedPosts, resultFollowedInfluencerPosts, limit, offset, databaseClient, (response4) => {
+              getFeedWithCorrectOrder(resultAdvertisements, resultPromotedPosts, resultFollowedInfluencerPosts, limit, offset, databaseClient, (response4) => {
                 resultObj = response4;
                 if (currentAssetNum != (assetTypes.length - 1)) {
                   //Go into next iteration of getContent
@@ -152,7 +152,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
               else {
                 var resultPromotedPosts = [];
               }
-              getPopularFeedWithCorrectOrder(resultAdvertisements, resultPromotedPosts, resultPopularPosts, limit, offset, databaseClient, (response4) => {
+              getFeedWithCorrectOrder(resultAdvertisements, resultPromotedPosts, resultPopularPosts, limit, offset, databaseClient, (response4) => {
                 resultObj = response4;
                 if (currentAssetNum != (assetTypes.length - 1)) {
                   //Go into next iteration of getContent
@@ -448,7 +448,7 @@ var insertContentToDB = function (assetType, posts, postNum, influencerID, likeC
   });
 };
 
-var getPopularFeedWithCorrectOrder = function(advertisements, promotedPosts, popularPosts, limit, offset, databaseClient, callback) {
+var getFeedWithCorrectOrder = function(advertisements, promotedPosts, popularPosts, oldLimit, offset, databaseClient, callback) {
   var resultObj = [];
   var count = 0;
   var popularPostCount = 0;
@@ -459,6 +459,13 @@ var getPopularFeedWithCorrectOrder = function(advertisements, promotedPosts, pop
   var randAdOrPost;
   var resultArray;
   var usedAdvertisements = [];
+  var limit;
+  if(popularPosts.length +(Math.floor(popularPosts.length / 10.0)) <= (oldLimit)) {
+    limit = popularPosts.length +(Math.floor(popularPosts.length / 10.0));
+  }
+  else {
+    limit = oldLimit;
+  }
   while(count < limit) {
     randLengthTillAd = 4 + Math.floor(Math.random() * 6);
     var currentStart = popularPostCount;
