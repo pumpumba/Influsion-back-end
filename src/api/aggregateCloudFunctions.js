@@ -460,8 +460,6 @@ var getFeedWithCorrectOrder = function(advertisements, promotedPosts, popularPos
   var resultArray;
   var usedAdvertisements = [];
   var limit;
-  console.log("HEEELOOO");
-  console.log(advertisements);
   if(popularPosts.length +(Math.floor(popularPosts.length / 10.0)) <= (oldLimit)) {
     limit = popularPosts.length +(Math.floor(popularPosts.length / 10.0));
   }
