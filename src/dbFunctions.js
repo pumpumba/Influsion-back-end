@@ -109,7 +109,7 @@ var self = module.exports = {
         });
     },
 
-    removePromoteTagPostPopular: function(postID, callback) {
+    removePromoteTagPostPopular: function(postID, client, callback) {
         var dbRequestCheckPost = "SELECT * FROM POST WHERE POSTID = "+ postID + ";";
         client.query(dbRequestCheckPost, (err, dbResult1) => {
             if(dbResult1['rows'].length == 0) {
@@ -134,7 +134,7 @@ var self = module.exports = {
         });
     },
 
-    removePromoteTagPostFollowing: function(postID, callback) {
+    removePromoteTagPostFollowing: function(postID, client, callback) {
         var dbRequestCheckPost = "SELECT * FROM POST WHERE POSTID = "+ postID + ";";
         client.query(dbRequestCheckPost, (err, dbResult1) => {
             if(dbResult1['rows'].length == 0) {
@@ -159,7 +159,7 @@ var self = module.exports = {
         });
     },
 
-    promotePostPopular: function(postID, callback) {
+    promotePostPopular: function(postID, client, callback) {
         var dbRequestCheckPost = "SELECT * FROM POST WHERE POSTID = "+ postID + ";";
         client.query(dbRequestCheckPost, (err, dbResult1) => {
             if(dbResult1['rows'].length == 0) {
@@ -184,7 +184,7 @@ var self = module.exports = {
         });
     },
 
-    promotePostFollowing: function(postID, callback) {
+    promotePostFollowing: function(postID, client, callback) {
         var dbRequestCheckPost = "SELECT * FROM POST WHERE POSTID = "+ postID + ";";
         client.query(dbRequestCheckPost, (err, dbResult1) => {
             if(dbResult1['rows'].length == 0) {
@@ -209,7 +209,7 @@ var self = module.exports = {
         });
     },
 
-    removeAd: function(adID, callback) {
+    removeAd: function(adID, client, callback) {
         var dbRequest = "DELETE FROM TVOPERATORCONTENT WHERE ADID = " + adID + ";";
         client.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
@@ -224,7 +224,7 @@ var self = module.exports = {
         });
     },
 
-    createAd: function(title, tvOperatorID, imgurl, textDescription, additionalInformation, showInPopularFeed, showInFollowingFeed, callback) {
+    createAd: function(title, tvOperatorID, imgurl, textDescription, additionalInformation, showInPopularFeed, showInFollowingFeed, client, callback) {
         var dbRequest = "INSERT INTO TVOPERATORCONTENT(TITLE, TVOPERATORID, IMGURL, TEXTDESCRIPTION, ADDITIONALINFORMATION, SHOWINPOPULARFEED, SHOWINFOLLOWINGFEED) \
             VALUES ('" + title + "', \
             " + tvOperatorID + ", \
@@ -247,7 +247,7 @@ var self = module.exports = {
         });
     },
 
-    getAllAds: function(tvOperatorID, callback){
+    getAllAds: function(tvOperatorID, client, callback){
         var dbRequest = "SELECT * FROM TVOPERATORCONTENT WHERE TVOPERATORID = "+ tvOperatorID +";";
         client.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
@@ -262,7 +262,7 @@ var self = module.exports = {
         });
     },
 
-    getExcludedInfluencers: function(callback) {
+    getExcludedInfluencers: function(client, callback) {
         var dbRequest = "SELECT * FROM INFLUENCER WHERE INFLUENCERID IN(SELECT INFLUENCERID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'demotion');";
         client.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
@@ -277,7 +277,7 @@ var self = module.exports = {
         });
     },
 
-    removeExcludedOrPromotedInfluencer: function(influencerID, callback) {
+    removeExcludedOrPromotedInfluencer: function(influencerID, client, callback) {
         var dbRequest = "DELETE FROM INFLUENCERPROMOTED WHERE INFLUENCERID = " + influencerID +";";
         client.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
@@ -291,7 +291,7 @@ var self = module.exports = {
         });
     },
 
-    getPromotedInfluencers: function(callback) {
+    getPromotedInfluencers: function(client, callback) {
         var dbRequest = "SELECT * FROM INFLUENCER WHERE INFLUENCERID IN(SELECT INFLUENCERID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'promotion');";
         client.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
@@ -306,7 +306,7 @@ var self = module.exports = {
         });
     },
 
-    getAllPromotedPostsPopular: function(callback){
+    getAllPromotedPostsPopular: function(client, callback){
         var dbRequest = "SELECT * FROM POST WHERE PROMOTEDPOPULAR = TRUE;";
         client.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
@@ -320,7 +320,7 @@ var self = module.exports = {
         });
     },
 
-    getAllPromotedPostsFollowing: function(tvOperatorID, callback) {
+    getAllPromotedPostsFollowing: function(tvOperatorID, client, callback) {
         var dbRequest = "SELECT * FROM POST WHERE PROMOTEDFOLLOWING = TRUE;";
         client.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
@@ -334,7 +334,7 @@ var self = module.exports = {
         });
     },
 
-    excludeInfluencer: function(influencerID, callback) {
+    excludeInfluencer: function(influencerID, client, callback) {
         var dbRequest = "INSERT INTO INFLUENCERPROMOTED(INFLUENCERID, PROMOTIONID, PROMOTIONTYPE) VALUES ("+ influencerID +", 1, 'promotion');";
         client.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
@@ -348,7 +348,7 @@ var self = module.exports = {
         });
     },
 
-    promoteInfluencer: function(influencerID, callback) {
+    promoteInfluencer: function(influencerID, client, callback) {
         var dbRequest = "INSERT INTO INFLUENCERPROMOTED(INFLUENCERID, PROMOTIONID, PROMOTIONTYPE) VALUES ("+ influencerID +", 1, 'demotion');";
         client.query(dbRequest, (err, dbResult) => {
             var dbResults = dbResult;
