@@ -260,6 +260,84 @@ app.post("/db/add_user_like", (req, res) => {
 
 });
 
+app.get("/db/get_most_followed_users_clicked_promo", (req,res) => {
+  var limit = req["query"]["limit"];
+  var ad_id = req["query"]["ad_id"];
+  var dbRequest = "WITH USERSCLICKEDADV AS ( \
+    SELECT DISTINCT(USRID)  \
+    FROM TVOPERATORCONTENTCLICK  \
+    WHERE ADID = "+ad_id+" \
+  ) \
+  SELECT INFLID, \
+  (SELECT INFLUENCER.INFLUENCERNAME \
+    FROM INFLUENCER \
+    WHERE INFLUENCER.INFLUENCERID = USRFLWINFL.INFLID) AS INFLUENCERNAME, \
+    COUNT(*) AS NRFOLLOWING \
+    FROM USRFLWINFL, USERSCLICKEDADV \
+    WHERE USRFLWINFL.FLWRID IN(USERSCLICKEDADV.USRID) \
+    GROUP BY INFLID \
+    ORDER BY NRFOLLOWING \
+    DESC LIMIT "+limit+";"
+
+    client.query(dbRequest, (err, dbResult) => {
+
+      if (dbResult != undefined) {
+        var dbResults = dbResult;
+        dbResults["retrieveSuccess"] = true;
+      } else {
+        var dbResults = err;
+        dbResults["retrieveSuccess"] = false;
+      }
+      res.json(dbResults);
+    });
+});
+
+app.get("/db/get_visits_over_time_for_ad", (req, res) => {
+  var ad_id = req["query"]["ad_id"];
+  var dbRequest = "WITH DATES AS ( \
+    SELECT VISITTIME::date FROM TVOPERATORCONTENTCLICK WHERE ADID = "+ad_id+" \
+  ) \
+  SELECT (SELECT "+ad_id+") AS ADID, \
+    DATES.VISITTIME AS DATEVISITED, \
+    COUNT(DATES.VISITTIME) AS NRVISITSONDAY \
+    FROM DATES \
+    GROUP BY DATEVISITED \
+    ORDER BY DATEVISITED ASC;";
+  client.query(dbRequest, (err, dbResult) => {
+
+    if (dbResult != undefined) {
+      var dbResults = dbResult["rows"];
+      dbResults["retrieveSuccess"] = true;
+    } else {
+      var dbResults = err;
+      dbResults["retrieveSuccess"] = false;
+    }
+    res.json(dbResults);
+  });
+
+})
+
+app.get("/db/get_top_clicked_influencers", (req, res) => {
+  var limit = req["query"]["limit"];
+  if (limit != undefined) {
+    var dbRequest = "SELECT COUNT(*) AS NRCLICKS, INFLUENCER.* FROM USRVISIT INNER JOIN INFLUENCER ON INFLUENCER.INFLUENCERID = USRVISIT.INFLID GROUP BY INFLUENCER.INFLUENCERID LIMIT "+limit+";";
+  } else {
+    var dbRequest = "SELECT COUNT(*) AS NRCLICKS, INFLUENCER.* FROM USRVISIT INNER JOIN INFLUENCER ON INFLUENCER.INFLUENCERID = USRVISIT.INFLID GROUP BY INFLUENCER.INFLUENCERID;";
+  }
+
+  client.query(dbRequest, (err, dbResult) => {
+
+    if (dbResult != undefined) {
+      var dbResults = dbResult;
+      dbResults["retrieveSuccess"] = true;
+    } else {
+      var dbResults = err;
+      dbResults["retrieveSuccess"] = false;
+    }
+    res.json(dbResults);
+  });
+});
+
 app.get("/db/get_clicks_promoted_influencers", (req, res) => {
   var inputObj = req.body;
   var promotion_id = req["query"]["promotion_id"];
