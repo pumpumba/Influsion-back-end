@@ -129,11 +129,11 @@ var self = module.exports = {
   var removeLinkInTweetText = function(tweet) {
     var tweetText;
     var textLength = tweet.tweetText.length;
-    var urlLength = 'http://t.co'.length;
+    var urlLength = '… http://t.co'.length;
     if(textLength > urlLength) {
       for(var k = 0; k<(textLength - urlLength - 1);k++) {
-        if(tweet.tweetText.substring(k, urlLength + k) == 'http://t.co' || tweet.tweetText.substring(k, urlLength + k + 1) == 'https://t.co') {
-          tweetText = tweet.tweetText.substring(0, k);
+        if(tweet.tweetText.substring(k, urlLength + k) == '… http://t.co' || tweet.tweetText.substring(k, urlLength + k + 1) == '… https://t.co') {
+          tweetText = tweet.tweetText.substring(0, k + 2);
           break;
         }
       }
