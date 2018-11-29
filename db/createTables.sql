@@ -68,7 +68,8 @@ CREATE TABLE POST (
   POSTPLATFORMID VARCHAR, -- The specific id on the platform for the post.
   POSTURL VARCHAR UNIQUE, -- The url for the post
   PROFILEPIC VARCHAR, -- The profile picture from the platform account.
-  PROMOTED BOOLEAN NOT NULL DEFAULT FALSE, -- If the post is promoted or not.
+  PROMOTEDPOPULAR BOOLEAN NOT NULL DEFAULT FALSE, -- If the post is promoted or not.
+  PROMOTEDFOLLOWING BOOLEAN NOT NULL DEFAULT FALSE,
   PLATFORMCONTENT JSON --TODO: decide whether JSONB or JSON is best. JSONB supports indexing, is faster to process but slower to insert.
 );
 

@@ -68,11 +68,13 @@ var self = module.exports = {
   }
 };
 
+
+
 //get content from specific asset type, continuation from getContent
 var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback) {
   switch (filterTypes[currentFilterNum]) {
     case "influencer":
-      dbFunctions.getContentFromInfluencer(platform, filterValue[0], limit, filterValue[1], databaseClient, (response) => {
+      dbFunctions.getContentFromInfluencer(platform, filterValue[0], limit, offset, filterValue[1], databaseClient, (response) => {
         result = response['rows'];
         if (result != undefined) {
           for (var k = 0; k < result.length; k++) {
@@ -130,7 +132,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
       });
       break;
     case "popular":
-      dbFunctions.getLatestPosts(filterValue[0], platform, limit, databaseClient, (response) => {
+      dbFunctions.getLatestPosts(filterValue[0], platform, limit, offset, databaseClient, (response) => {
         if(response['retrieveSuccess'] == true) {
           var resultPopularPosts = response['rows'];
         }
@@ -145,7 +147,7 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
             else {
               var resultAdvertisements = [];
             }
-            dbFunctions.getPromotedPosts(platform, filterValue[0], limit, offset, databaseClient, (response3) => {
+            dbFunctions.getPromotedPostsPopular(platform, filterValue[0], limit, offset, databaseClient, (response3) => {
               if(response3['retrieveSuccess'] == true) {
                 var resultPromotedPosts = response3['rows'];
               }
@@ -271,9 +273,119 @@ var getContent = function (assetTypes, filterTypes, filterValue, context, limit,
     case "all":
       getContentFromAsset('all', assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback);
       break;
+    case "ad":
+      getContentFromOperatorAsset(assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback)
+      break;
+    case "influencer":
+      getContentFromOperatorAsset(assetTypes[currentAssetNum], assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback)
+      break;
     default:
       callback("The cloud component failed to provide any content");
   }
+};
+
+var getContentFromOperatorAsset = function(assetType, assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum, currentFilterNum, resultObj, databaseClient, callback) {
+  switch (filterTypes[currentFilterNum]) {
+    case "create ad" :
+      dbFunctions.createAd(filterValue[0], filterValue[1], filterValue[2], filterValue[3], filterValue[4], filterValue[5], filterValue[6], (response) => {
+        resultObj.push(response);
+        if (currentAssetNum != (assetTypes.length - 1)) {
+          getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
+        }
+        else {
+          callback(resultObj);
+        }
+      });
+      break;
+    case "delete ad" : 
+      dbFunctions.removeAd(filterValue, (response) => {
+        resultObj.push(response);
+        if (currentAssetNum != (assetTypes.length - 1)) {
+          getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
+        }
+        else {
+          callback(resultObj);
+        }
+      });
+      break;
+    case "get ads" :
+      dbFunctions.getAllAds(filterValue, (response) => {
+        resultObj.push(response);
+        if (currentAssetNum != (assetTypes.length - 1)) {
+          getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
+        }
+        else {
+          callback(resultObj);
+        }
+      });
+      break;
+    case "promote post popular" :
+      dbFunctions.promotePostPopular(filterValue, (response) => {
+        resultObj.push(response);
+        if (currentAssetNum != (assetTypes.length - 1)) {
+          getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
+        }
+        else {
+          callback(resultObj);
+        }
+      });
+      break;
+    case "promote post following" :
+      dbFunctions.promotePostFollowing(filterValue, (response) => {
+        resultObj.push(response);
+        if (currentAssetNum != (assetTypes.length - 1)) {
+          getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
+        }
+        else {
+          callback(resultObj);
+        }
+      });
+      break;
+    case "remove promote tag post popular" :
+      dbFunctions.removePromoteTagPostPopular(filterValue, (response) => {
+        resultObj.push(response);
+        if (currentAssetNum != (assetTypes.length - 1)) {
+          getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
+        }
+        else {
+          callback(resultObj);
+        }
+      });
+      break;
+    case "remove promote tag post following" :
+      dbFunctions.removePromoteTagPostFollowing(filterValue, (response) => {
+        resultObj.push(response);
+        if (currentAssetNum != (assetTypes.length - 1)) {
+          getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
+        }
+        else {
+          callback(resultObj);
+        }
+      });
+      break;
+    case "get all promoted posts popular" :
+      dbFunctions.getAllPromotedPostsPopular((response) => {
+        resultObj.push(response);
+        if (currentAssetNum != (assetTypes.length - 1)) {
+          getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
+        }
+        else {
+          callback(resultObj);
+        }
+      });
+      break;
+    case "get all promoted posts following" :
+      dbFunctions.getAllPromotedPostsFollowing((response) => {
+        resultObj.push(response);
+        if (currentAssetNum != (assetTypes.length - 1)) {
+          getContent(assetTypes, filterTypes, filterValue, context, limit, offset, currentAssetNum + 1, currentFilterNum + 1, resultObj, databaseClient, callback);
+        }
+        else {
+          callback(resultObj);
+        }
+      });
+      break;
+    }
 };
 //Gets content from the specified influencers from a specific social media platform from our database.
 var getContentFromInfluencersFromPlatform = function (userID, influencerAccounts, currentInfluencer, resultObj, databaseClient, platform, callback) {
@@ -460,8 +572,6 @@ var getFeedWithCorrectOrder = function(advertisements, promotedPosts, popularPos
   var resultArray;
   var usedAdvertisements = [];
   var limit;
-  console.log("HEEELOOO");
-  console.log(advertisements);
   if(popularPosts.length +(Math.floor(popularPosts.length / 10.0)) <= (oldLimit)) {
     limit = popularPosts.length +(Math.floor(popularPosts.length / 10.0));
   }
