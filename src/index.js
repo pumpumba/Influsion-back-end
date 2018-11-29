@@ -157,7 +157,7 @@ app.get("/db/list_all_promoted_influencers", (req, res)=> {
 });
 
 app.get("/db/list_all_promoted_posts", (req, res)=> {
-    var dbRequest = "SELECT * FROM POST WHERE PROMOTED = TRUE;";
+    var dbRequest = "SELECT * FROM POST WHERE (PROMOTEDPOPULAR = TRUE OR PROMOTEDFOLLOWING = TRUE);";
     client.query(dbRequest, (err, dbResult) => {
         var dbResults = dbResult;
         if (dbResults != undefined && dbResults != null) {
