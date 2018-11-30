@@ -413,15 +413,21 @@ app.post("/db/get_follow_list_accounts", (req, res) => {
 
 // Creates a tv operator account.
 app.post("/db/create_tv_operator", (req, res) => {
-    var inputObj = req.body;
-    var tv_op_name = inputObj.operatorname;
-    var pwd = inputObj.password;
-    bcrypt.hash(pwd, saltRounds, function (err, hash) {
-        var dbRequest = "INSERT INTO TVOPERATOR (TVOPERATORNAME, HASHEDPWD) VALUES ('" + tv_op_name + "', '" + hash + "');"
 
-        client.query(dbRequest, (err, dbResult) => {
+  var inputObj = req.body;
+  var tv_op_name = inputObj.operatorname;
+  var pwd = inputObj.password;
+  var email = inputObj.email;
+  bcrypt.hash(pwd, saltRounds, function (err, hash) {
+    var dbRequest = "INSERT INTO TVOPERATOR (TVOPERATORNAME, HASHEDPWD, EMAIL) VALUES ('" + tv_op_name + "', '" + hash + "', '"+email+"');"
 
-            res.json(dbResult);
+    client.query(dbRequest, (err, dbResult) => {
+      if (dbResult != null && dbResult != undefined) {
+          res.json(dbResult);
+      } else {
+          res.json(err);
+      }
+
 
         });
 
@@ -515,6 +521,84 @@ app.post("/db/add_user_like", (req, res) => {
 
 });
 
+app.get("/db/get_most_followed_users_clicked_promo", (req,res) => {
+  var limit = req["query"]["limit"];
+  var ad_id = req["query"]["ad_id"];
+  var dbRequest = "WITH USERSCLICKEDADV AS ( \
+    SELECT DISTINCT(USRID)  \
+    FROM TVOPERATORCONTENTCLICK  \
+    WHERE ADID = "+ad_id+" \
+  ) \
+  SELECT INFLID, \
+  (SELECT INFLUENCER.INFLUENCERNAME \
+    FROM INFLUENCER \
+    WHERE INFLUENCER.INFLUENCERID = USRFLWINFL.INFLID) AS INFLUENCERNAME, \
+    COUNT(*) AS NRFOLLOWING \
+    FROM USRFLWINFL, USERSCLICKEDADV \
+    WHERE USRFLWINFL.FLWRID IN(USERSCLICKEDADV.USRID) \
+    GROUP BY INFLID \
+    ORDER BY NRFOLLOWING \
+    DESC LIMIT "+limit+";"
+
+    client.query(dbRequest, (err, dbResult) => {
+
+      if (dbResult != undefined) {
+        var dbResults = dbResult;
+        dbResults["retrieveSuccess"] = true;
+      } else {
+        var dbResults = err;
+        dbResults["retrieveSuccess"] = false;
+      }
+      res.json(dbResults);
+    });
+});
+
+app.get("/db/get_visits_over_time_for_ad", (req, res) => {
+  var ad_id = req["query"]["ad_id"];
+  var dbRequest = "WITH DATES AS ( \
+    SELECT VISITTIME::date FROM TVOPERATORCONTENTCLICK WHERE ADID = "+ad_id+" \
+  ) \
+  SELECT (SELECT "+ad_id+") AS ADID, \
+    DATES.VISITTIME AS DATEVISITED, \
+    COUNT(DATES.VISITTIME) AS NRVISITSONDAY \
+    FROM DATES \
+    GROUP BY DATEVISITED \
+    ORDER BY DATEVISITED ASC;";
+  client.query(dbRequest, (err, dbResult) => {
+
+    if (dbResult != undefined) {
+      var dbResults = dbResult["rows"];
+      dbResults["retrieveSuccess"] = true;
+    } else {
+      var dbResults = err;
+      dbResults["retrieveSuccess"] = false;
+    }
+    res.json(dbResults);
+  });
+
+})
+
+app.get("/db/get_top_clicked_influencers", (req, res) => {
+  var limit = req["query"]["limit"];
+  if (limit != undefined) {
+    var dbRequest = "SELECT COUNT(*) AS NRCLICKS, INFLUENCER.* FROM USRVISIT INNER JOIN INFLUENCER ON INFLUENCER.INFLUENCERID = USRVISIT.INFLID GROUP BY INFLUENCER.INFLUENCERID LIMIT "+limit+";";
+  } else {
+    var dbRequest = "SELECT COUNT(*) AS NRCLICKS, INFLUENCER.* FROM USRVISIT INNER JOIN INFLUENCER ON INFLUENCER.INFLUENCERID = USRVISIT.INFLID GROUP BY INFLUENCER.INFLUENCERID;";
+  }
+
+  client.query(dbRequest, (err, dbResult) => {
+
+    if (dbResult != undefined) {
+      var dbResults = dbResult;
+      dbResults["retrieveSuccess"] = true;
+    } else {
+      var dbResults = err;
+      dbResults["retrieveSuccess"] = false;
+    }
+    res.json(dbResults);
+  });
+});
+
 app.get("/db/get_clicks_promoted_influencers", (req, res) => {
     var inputObj = req.body;
     var promotion_id = req["query"]["promotion_id"];
@@ -588,6 +672,24 @@ app.get("/db/get_counts", (req, res) => {
     client.query(dbRequest, (err, dbResult) => {
         res.json(dbResult);
     });
+});
+
+app.post("/db/add_ad_click", (req, res) => {
+  var inputObj = req.body;
+  var usrID = inputObj.user_id;
+  var adID = inputObj.ad_id;
+  var dbRequest = "INSERT INTO TVOPERATORCONTENTCLICK (USRID, ADID) VALUES ("+usrID+","+adID+");";
+  client.query(dbRequest, (err, dbResult) => {
+    var dbResults = dbResult;
+    if (dbResults != undefined) {
+      dbResults["insertionSuccess"] = true;
+    } else {
+      dbResults = {};
+      dbResults["insertionSuccess"] = false;
+    }
+    res.json(dbResults);
+  });
+
 });
 
 app.get("/db/get_most_followed_influencers", (req, res) => {
@@ -972,5 +1074,27 @@ app.get("/db/get_all_info_infl", (req, res) => {
 
 });
 
+
+app.get("/db/get_avg_age_usrs_click", (req, res) => {
+  var ad_id = req["query"]["ad_id"];
+
+  console.log(ad_id);
+  var dbRequest = "WITH USERSCLICKED AS ( \
+    SELECT DISTINCT(USRID) FROM TVOPERATORCONTENTCLICK WHERE ADID = "+ad_id+" \
+  ) \
+  SELECT CAST (AVG(USR.AGE) AS INTEGER) AS AVGAGE FROM USR, USERSCLICKED WHERE USR.USRID = USERSCLICKED.USRID;"
+  client.query(dbRequest, (err, dbResult) => {
+    var dbResults = dbResult["rows"];
+    if (dbResults != undefined) {
+      dbResults["retrieveSuccess"] = true;
+    } else {
+      dbResults = err;
+      dbResults["retrieveSuccess"] = false;
+    }
+    res.json(dbResults);
+  });
+});
+
 //For testing
 module.exports = app;
+
