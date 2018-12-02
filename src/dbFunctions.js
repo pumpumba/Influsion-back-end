@@ -34,11 +34,12 @@ var self = module.exports = {
     },
     //Retrieves posts from influencers from a specific social media platform that a user follows.
     getFollowedInfluencersPosts: function (userID, limit, offset, platform, databaseClient, callback) {
-        var dbRequest = "SELECT * FROM POST WHERE INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = " + userID + ") AND (PROMOTED = FALSE AND INFLID NOT IN (SELECT INFLID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'promotion'))";
+        var dbRequest = "SELECT * FROM POST WHERE INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = " + userID + ") AND (PROMOTEDFOLLOWING = FALSE AND INFLID NOT IN (SELECT INFLID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'promotion'))";
         if (platform != "all")
             dbRequest = dbRequest + "AND platform = '" + platform + "'";
 
-        dbRequest = dbRequest + " ORDER BY POSTED DESC LIMIT " + limit + ";";
+        dbRequest = dbRequest + " ORDER BY POSTED DESC LIMIT " + limit + " OFFSET "+ offset +";";
+
 
         databaseClient.query(dbRequest, (err, dbResult) => {
             //We get a problem if login is
@@ -53,11 +54,11 @@ var self = module.exports = {
         });
     },
     getFollowedPromotedPosts: function (platform, userID, limit, offset, databaseClient, callback) {
-        var dbRequest = "SELECT * FROM POST WHERE INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = " + userID + ") AND (PROMOTED = TRUE OR INFLID IN(SELECT INFLUENCERID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'promotion'))";
+        var dbRequest = "SELECT * FROM POST WHERE INFLID IN(SELECT INFLID FROM USRFLWINFL WHERE FLWRID = " + userID + ") AND (PROMOTEDFOLLOWED = TRUE OR INFLID IN(SELECT INFLUENCERID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'promotion'))";
         if (platform != "all")
             dbRequest = dbRequest + "AND PLATFORM = '" + platform + "'";
 
-        dbRequest = dbRequest + " ORDER BY POSTED DESC LIMIT " + limit + ";";
+        dbRequest = dbRequest + " ORDER BY POSTED DESC LIMIT " + limit + " OFFSET "+ offset/10 +";";
 
         databaseClient.query(dbRequest, (err, dbResult) => {
             //We get a problem if login is
@@ -71,6 +72,8 @@ var self = module.exports = {
             callback(dbResults);
         });
     },
+
+
 
     //inserts a post into the database.
     insertPost: function (influencerID, numLikes, platform, userTextContent, unixtime, postID, postUrl, profilePicture, jsonContent, databaseClient, callback) {
@@ -103,6 +106,258 @@ var self = module.exports = {
                     callback(dbResults);
                 });
             }
+        });
+    },
+
+    removePromoteTagPostPopular: function(postID, client, callback) {
+        var dbRequestCheckPost = "SELECT * FROM POST WHERE POSTID = "+ postID + ";";
+        client.query(dbRequestCheckPost, (err, dbResult1) => {
+            if(dbResult1['rows'].length == 0) {
+                var dbResults = {};
+                dbResults['removePromoteSuccess'] = false;
+                callback(dbResults);
+            }
+            else {
+                var dbRequest = "UPDATE POST SET PROMOTEDPOPULAR = FALSE WHERE POSTID = " + postID + ";";
+                client.query(dbRequest, (err, dbResult) => {
+                    var dbResults = {};
+                    if(dbResult != undefined) {
+                        dbResults['removePromoteSuccess'] = true;
+                        callback(dbResults);
+                    }
+                    else {
+                        dbResults['removePromoteSuccess'] = false;
+                        callback(dbResults);
+                    }
+                });
+            }
+        });
+    },
+
+    removePromoteTagPostFollowing: function(postID, client, callback) {
+        var dbRequestCheckPost = "SELECT * FROM POST WHERE POSTID = "+ postID + ";";
+        client.query(dbRequestCheckPost, (err, dbResult1) => {
+            if(dbResult1['rows'].length == 0) {
+                var dbResults = {};
+                dbResults['removePromoteSuccess'] = false;
+                callback(dbResults);
+            }
+            else {
+                var dbRequest = "UPDATE POST SET PROMOTEDFOLLOWING = FALSE WHERE POSTID = " + postID + ";";
+                client.query(dbRequest, (err, dbResult) => {
+                    var dbResults = {};
+                    if(dbResult != undefined) {
+                        dbResults['removePromoteSuccess'] = true;
+                        callback(dbResults);
+                    }
+                    else {
+                        dbResults['removePromoteSuccess'] = false;
+                        callback(dbResults);
+                    }
+                });
+            }
+        });
+    },
+
+    promotePostPopular: function(postID, client, callback) {
+        var dbRequestCheckPost = "SELECT * FROM POST WHERE POSTID = "+ postID + ";";
+        client.query(dbRequestCheckPost, (err, dbResult1) => {
+            if(dbResult1['rows'].length == 0) {
+                var dbResults = {};
+                dbResults['promoteSuccess'] = false;
+                callback(dbResults);
+            }
+            else {
+                var dbRequest = "UPDATE POST SET PROMOTEDFOLLOWING = TRUE WHERE POSTID = " + postID + ";";
+                client.query(dbRequest, (err, dbResult) => {
+                    var dbResults = {};
+                    if(dbResult != undefined) {
+                        dbResults['promoteSuccess'] = true;
+                        callback(dbResults);
+                    }
+                    else {
+                        dbResults['promoteSuccess'] = false;
+                        callback(dbResults);
+                    }
+                });
+            }
+        });
+    },
+
+    promotePostFollowing: function(postID, client, callback) {
+        var dbRequestCheckPost = "SELECT * FROM POST WHERE POSTID = "+ postID + ";";
+        client.query(dbRequestCheckPost, (err, dbResult1) => {
+            if(dbResult1['rows'].length == 0) {
+                var dbResults = {};
+                dbResults['promoteSuccess'] = false;
+                callback(dbResults);
+            }
+            else {
+                var dbRequest = "UPDATE POST SET PROMOTEDPOPULAR = TRUE WHERE POSTID = " + postID + ";";
+                client.query(dbRequest, (err, dbResult) => {
+                    var dbResults = {};
+                    if(dbResult != undefined) {
+                        dbResults['promoteSuccess'] = true;
+                        callback(dbResults);
+                    }
+                    else {
+                        dbResults['promoteSuccess'] = false;
+                        callback(dbResults);
+                    }
+                });
+            }
+        });
+    },
+
+    removeAd: function(adID, client, callback) {
+        var dbRequest = "DELETE FROM TVOPERATORCONTENT WHERE ADID = " + adID + ";";
+        client.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+            if (dbResults != undefined && dbResults != null) {
+                dbResults["deleteSuccess"] = true;
+            } else {
+                dbResults = {};
+                dbResults["deleteSuccess"] = false;
+            }
+
+            callback(dbResults);
+        });
+    },
+
+    createAd: function(title, tvOperatorID, imgurl, textDescription, additionalInformation, showInPopularFeed, showInFollowingFeed, client, callback) {
+        var dbRequest = "INSERT INTO TVOPERATORCONTENT(TITLE, TVOPERATORID, IMGURL, TEXTDESCRIPTION, ADDITIONALINFORMATION, SHOWINPOPULARFEED, SHOWINFOLLOWINGFEED) \
+            VALUES ('" + title + "', \
+            " + tvOperatorID + ", \
+            '" + imgurl + "', \
+            '" + textDescription + "', \
+            '" + additionalInformation + "', \
+            " + showInPopularFeed + ", \
+            " + showInFollowingFeed + ");";
+
+        client.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+            if (dbResults != undefined && dbResults != null) {
+                dbResults["createSuccess"] = true;
+            } else {
+                dbResults = {};
+                dbResults["createSuccess"] = false;
+            }
+
+            callback(dbResults);
+        });
+    },
+
+    getAllAds: function(tvOperatorID, client, callback){
+        var dbRequest = "SELECT * FROM TVOPERATORCONTENT WHERE TVOPERATORID = "+ tvOperatorID +";";
+        client.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+            if (dbResults != undefined && dbResults != null) {
+                dbResults["retrieveSuccess"] = true;
+            } else {
+                dbResults = {};
+                dbResults["retrieveSuccess"] = false;
+            }
+
+            callback(dbResults);
+        });
+    },
+
+    getExcludedInfluencers: function(client, callback) {
+        var dbRequest = "SELECT * FROM INFLUENCER WHERE INFLUENCERID IN(SELECT INFLUENCERID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'demotion');";
+        client.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+            if (dbResults != undefined && dbResults != null) {
+                dbResults["retrieveSuccess"] = true;
+            } else {
+                dbResults = {};
+                dbResults["retrieveSuccess"] = false;
+            }
+            callback(dbResults['rows']);
+        });
+    },
+
+    removeExcludedOrPromotedInfluencer: function(influencerID, client, callback) {
+        var dbRequest = "DELETE FROM INFLUENCERPROMOTED WHERE INFLUENCERID = " + influencerID +";";
+        client.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+            if (dbResults != undefined && dbResults != null) {
+                dbResults["deleteSuccess"] = true;
+            } else {
+                dbResults = {};
+                dbResults["deleteSuccess"] = false;
+            }
+            callback(dbResults);
+        });
+    },
+
+    getPromotedInfluencers: function(client, callback) {
+        var dbRequest = "SELECT * FROM INFLUENCER WHERE INFLUENCERID IN(SELECT INFLUENCERID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'promotion');";
+        client.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+            console.log(dbResults);
+            if (dbResults != undefined && dbResults != null) {
+                dbResults["retrieveSuccess"] = true;
+            } else {
+                dbResults = {};
+                dbResults["retrieveSuccess"] = false;
+            }
+            callback(dbResults['rows']);
+        });
+    },
+
+    getAllPromotedPostsPopular: function(client, callback){
+        var dbRequest = "SELECT * FROM POST WHERE PROMOTEDPOPULAR = TRUE;";
+        client.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+            if (dbResults != undefined && dbResults != null) {
+                dbResults["retrieveSuccess"] = true;
+            } else {
+                dbResults = {};
+                dbResults["retrieveSuccess"] = false;
+            }
+            callback(dbResults['rows']);
+        });
+    },
+
+    getAllPromotedPostsFollowing: function(tvOperatorID, client, callback) {
+        var dbRequest = "SELECT * FROM POST WHERE PROMOTEDFOLLOWING = TRUE;";
+        client.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+            if (dbResults != undefined && dbResults != null) {
+                dbResults["retrieveSuccess"] = true;
+            } else {
+                dbResults = {};
+                dbResults["retrieveSuccess"] = false;
+            }
+            callback(dbResults['rows']);
+        });
+    },
+
+    excludeInfluencer: function(influencerID, client, callback) {
+        var dbRequest = "INSERT INTO INFLUENCERPROMOTED(INFLUENCERID, PROMOTIONID, PROMOTIONTYPE) VALUES ("+ influencerID +", 1, 'promotion');";
+        client.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+            if (dbResults != undefined && dbResults != null) {
+                dbResults["createSuccess"] = true;
+            } else {
+                dbResults = {};
+                dbResults["createSuccess"] = false;
+            }
+            callback(dbResults);
+        });
+    },
+
+    promoteInfluencer: function(influencerID, client, callback) {
+        var dbRequest = "INSERT INTO INFLUENCERPROMOTED(INFLUENCERID, PROMOTIONID, PROMOTIONTYPE) VALUES ("+ influencerID +", 1, 'demotion');";
+        client.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+            if (dbResults != undefined && dbResults != null) {
+                dbResults["createSuccess"] = true;
+            } else {
+                dbResults = {};
+                dbResults["createSuccess"] = false;
+            }
+            callback(dbResults);
         });
     },
 
@@ -343,18 +598,25 @@ var self = module.exports = {
         });
     },
     //Gets the latest posts from a specific social media platform(if specified, otherwise from all platforms)
-    getLatestPosts: function (userID, platform, limit, databaseClient, callback) {
+    getLatestPosts: function (userID, platform, limit, offset, databaseClient, callback) {
         var dbRequest = "WITH INFLLIST AS ( \
             SELECT INFLID \
             FROM USRFLWINFL \
             WHERE FLWRID = "+ userID + " \
             ), P AS ( \
-            SELECT * FROM POST WHERE PROMOTED = FALSE AND INFLID NOT IN (SELECT INFLUENCERID FROM INFLUENCERPROMOTED)";
+            SELECT * FROM POST WHERE PROMOTEDPOPULAR = FALSE AND INFLID NOT IN (SELECT INFLUENCERID FROM INFLUENCERPROMOTED)";
         if (platform != 'all') {
             dbRequest = dbRequest + " AND PLATFORM  = '" + platform + "' ";
         }
+        var off;
+        if (offset != undefined) {
+            off = offset;
+        }
+        else {
+            off = 0;
+        }
 
-        dbRequest = dbRequest + " ORDER BY POSTED DESC LIMIT " + limit + " \
+        dbRequest = dbRequest + " ORDER BY POSTED DESC LIMIT " + limit + " OFFSET " + off + " \
           ) \
           SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
             FROM P ORDER BY POSTED DESC";
@@ -370,7 +632,7 @@ var self = module.exports = {
         });
     },
     //Retrives posts/content from a specific influencer from a specific platform if provided
-    getContentFromInfluencer: function (platform, influencerID, limit, userID, databaseClient, callback) {
+    getContentFromInfluencer: function (platform, influencerID, limit, offset, userID, databaseClient, callback) {
         var dbRequest = "WITH P AS ( \
             SELECT * FROM POST \
             WHERE ";
@@ -382,6 +644,12 @@ var self = module.exports = {
           "
         if (limit != undefined) {
             dbRequest = dbRequest + " LIMIT " + limit;
+        }
+        if (offset != undefined) {
+            dbRequest = dbRequest + " OFFSET " + offset;
+        }
+        else {
+            dbRequest = dbRequest + " OFFSET " + 0;
         }
         dbRequest = dbRequest + "), INFLLIST AS ( \
             SELECT INFLID \
@@ -406,13 +674,46 @@ var self = module.exports = {
         });
     },
 
-    getPromotedPosts: function (platform, userID, limit, offset, databaseClient, callback) {
+    getPromotedPostsPopular: function (platform, userID, limit, offset, databaseClient, callback) {
         var dbRequest = "WITH INFLLIST AS ( \
             SELECT INFLID \
             FROM USRFLWINFL \
             WHERE FLWRID = "+ userID + " \
             ), P AS ( \
-            SELECT * FROM POST WHERE (PROMOTED = TRUE OR INFLID IN (SELECT INFLUENCERID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'promotion'))";
+            SELECT * FROM POST WHERE (PROMOTEDPOPULAR = TRUE OR INFLID IN (SELECT INFLUENCERID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'promotion'))";
+        if (platform != 'all') {
+            dbRequest = dbRequest + " AND PLATFORM  = '" + platform + "' ";
+        }
+        var off;
+        if (offset != undefined) {
+            off = offset;
+        }
+        else {
+            off = 0;
+        }
+        dbRequest = dbRequest + " ORDER BY POSTED DESC LIMIT " + limit + " OFFSET " + off + " \
+          ) \
+          SELECT *, (SELECT (COUNT(*) >= 1) FROM INFLLIST WHERE INFLID IN(P.INFLID)) AS USRFOLLOWINGINFLUENCER \
+            FROM P ORDER BY POSTED DESC";
+        databaseClient.query(dbRequest, (err, dbResult) => {
+            var dbResults = dbResult;
+            if (dbResults != undefined) {
+                dbResults["retrieveSuccess"] = true;
+            } else {
+                dbResults = {};
+                dbResults["retrieveSuccess"] = false;
+            }
+            callback(dbResults);
+        });
+    },
+
+    getPromotedPostsFollowing: function (platform, userID, limit, offset, databaseClient, callback) {
+        var dbRequest = "WITH INFLLIST AS ( \
+            SELECT INFLID \
+            FROM USRFLWINFL \
+            WHERE FLWRID = "+ userID + " \
+            ), P AS ( \
+            SELECT * FROM POST WHERE (PROMOTEDFOLLOWING = TRUE OR INFLID IN (SELECT INFLUENCERID FROM INFLUENCERPROMOTED WHERE PROMOTIONTYPE = 'promotion'))";
         if (platform != 'all') {
             dbRequest = dbRequest + " AND PLATFORM  = '" + platform + "' ";
         }

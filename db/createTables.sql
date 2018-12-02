@@ -68,7 +68,8 @@ CREATE TABLE POST (
   POSTPLATFORMID VARCHAR, -- The specific id on the platform for the post.
   POSTURL VARCHAR UNIQUE, -- The url for the post
   PROFILEPIC VARCHAR, -- The profile picture from the platform account.
-  PROMOTED BOOLEAN NOT NULL DEFAULT FALSE, -- If the post is promoted or not.
+  PROMOTEDPOPULAR BOOLEAN NOT NULL DEFAULT FALSE, -- If the post is promoted or not.
+  PROMOTEDFOLLOWING BOOLEAN NOT NULL DEFAULT FALSE,
   PLATFORMCONTENT JSON --TODO: decide whether JSONB or JSON is best. JSONB supports indexing, is faster to process but slower to insert.
 );
 
@@ -116,7 +117,8 @@ UNIQUE (ACTNAME,PLATFORM);
 CREATE TABLE TVOPERATOR (
   TVOPERATORID SERIAL PRIMARY KEY,
   TVOPERATORNAME VARCHAR UNIQUE NOT NULL, -- Changed to unique.
-  HASHEDPWD VARCHAR NOT NULL
+  HASHEDPWD VARCHAR NOT NULL,
+  EMAIL VARCHAR UNIQUE
 );
 
 -- Ads that has been created by the TV operators
@@ -130,6 +132,14 @@ CREATE TABLE TVOPERATORCONTENT (
   SHOWINPOPULARFEED BOOLEAN NOT NULL DEFAULT FALSE,
   SHOWINFOLLOWINGFEED BOOLEAN NOT NULL DEFAULT FALSE
 
+);
+
+CREATE TABLE TVOPERATORCONTENTCLICK (
+  CLICKID SERIAL PRIMARY KEY,
+  USRID INTEGER REFERENCES USR (USRID) NOT NULL, -- the id of the user that visited the influencer
+  ADID INTEGER REFERENCES TVOPERATORCONTENT(ADID) NOT NULL, -- id of the influencer that was visited
+  VISITTIME TIMESTAMPTZ NOT NULL DEFAULT NOW() --When the visit took place.
+  --TYPEOFVISIT VISITTYPE NOT NULL -- Type of visit. Did they see a post from a platform, or visit the user's profile?
 );
 
 -- A promotion that can be created by a tv operator.
@@ -171,7 +181,7 @@ UNIQUE (TAGID,PROMOTIONID);
 CREATE TABLE INFLUENCERPROMOTED (
   INFLUENCERID INTEGER REFERENCES INFLUENCER(INFLUENCERID) NOT NULL,
   PROMOTIONID INTEGER REFERENCES PROMOTION(PROMOTIONID) NOT NULL,
-  PROMOTIONTYPE PROMOTIONDEMOTION NOT NULL DEFAULT 'promotion'
+  PROMOTIONTYPE PROMOTIONDEMOTION NOT NULL DEFAULT 'demotion'
 );
 
 ALTER TABLE INFLUENCERPROMOTED -- constraint forcing us to store only one promotion/demotion for a tag for each promotion
