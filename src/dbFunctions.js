@@ -414,8 +414,8 @@ var self = module.exports = {
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["updateSuccess"] = true;
                 if(imageURL != undefined) {
-                    var dbQuery2 = "UPDATE INFLUENCER SET PICLINK = '"+ imageURL +"' WHERE INFLID = "+ influencerId +";";
-                    databaseClient.query(dbRequest, (err, dbResult) => {
+                    var dbQuery2 = "UPDATE INFLUENCER SET PICLINK = '"+ imageURL +"' WHERE INFLUENCERID = "+ influencerId +";";
+                    databaseClient.query(dbQuery2, (err, dbResult) => {
                         var dbResults = dbResult;
                         if (dbResults != undefined && dbResults["rowCount"] == 1) {
                             dbResults["updateSuccess"] = true;
