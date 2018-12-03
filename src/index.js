@@ -296,7 +296,7 @@ app.post("/db/remove_ad", (req, res) => {
   });
 });
 
-// Get ads 
+// Get ads
 app.get("/db/get_ads", (req, res) => {
   var dbRequest = "SELECT * FROM TVOPERATORCONTENT;";
   client.query(dbRequest, (err, dbResult) => {
@@ -655,7 +655,17 @@ app.post("/db/add_ad_click", (req, res) => {
 
 app.get("/db/get_most_followed_influencers", (req, res) => {
     var limit = req["query"]["limit"];
-    var dbRequest = "SELECT (SELECT COUNT(*) FROM USRFLWINFL WHERE USRFLWINFL.INFLID = I.INFLUENCERID) AS NRFOLLOWING, I.INFLUENCERNAME FROM INFLUENCER AS I ORDER BY NRFOLLOWING DESC LIMIT " + limit + ";";
+    var dbRequest = "SELECT (SELECT COUNT(*) FROM USRFLWINFL WHERE USRFLWINFL.INFLID = I.INFLUENCERID) AS NRFOLLOWING, I.INFLUENCERNAME, I.INFLUENCERID, (json_build_object('platformaccounts', \
+  json_agg( \
+    json_build_object( \
+      'actname', \
+      PACC.actname, \
+      'platform', \
+      PACC.PLATFORM, \
+      'imgurl', \
+      PACC.IMGURL))) \
+    ) AS IMGS \
+      FROM INFLUENCER AS I, PLATFORMACCOUNT AS PACC WHERE I.INFLUENCERID = PACC.INFLID GROUP BY I.INFLUENCERID ORDER BY NRFOLLOWING DESC LIMIT "+limit+";";
 
     client.query(dbRequest, (err, dbResult) => {
         var dbResults = dbResult["rows"];
@@ -1058,4 +1068,3 @@ app.get("/db/get_avg_age_usrs_click", (req, res) => {
 
 //For testing
 module.exports = app;
-
