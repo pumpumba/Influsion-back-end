@@ -447,11 +447,12 @@ var self = module.exports = {
         var dbRequest = "INSERT INTO USRFLWINFL (FLWRID, INFLID) VALUES (" + userID + "," + influencerID + ");";
 
         databaseClient.query(dbRequest, (err, dbResult) => {
-            var dbResults = dbResult;
-            if (dbResults != undefined && dbResults["rowCount"] == 1) {
+
+            if (dbResult != undefined) {
+                var dbResults = dbResult;
                 dbResults["createSuccess"] = true;
             } else {
-                dbResults = {};
+                var dbResults = err;
                 dbResults["createSuccess"] = false;
             }
             callback(dbResults);
