@@ -303,7 +303,7 @@ app.post("/db/create_ad", (req, res) => {
     '" + inputObj.textdescription + "', \
     '" + inputObj.additionalinformation + "', \
     " + inputObj.showinpopularfeed + ", \
-    " + inputObj.read_more_url + ", \
+    '" + inputObj.read_more_url + "', \
     " + inputObj.showinfollowingfeed + ");";
 
     client.query(dbRequest, (err, dbResult) => {
