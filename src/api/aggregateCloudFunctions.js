@@ -587,6 +587,7 @@ var getFeedWithCorrectOrder = function(advertisements, promotedPosts, popularPos
     if((count + randLengthTillAd) < limit) {
       randAdOrPost = Math.floor(Math.random()*2);
       for(var i = currentStart;i<(randLengthTillAd+currentStart);i++) {
+        console.log(i);
         resultObj.push(popularPosts[i]);
         popularPostCount += 1;
         count += 1;
@@ -622,14 +623,14 @@ var getFeedWithCorrectOrder = function(advertisements, promotedPosts, popularPos
         }
       }
       if((10+currentCount) < limit) {
-        for(var i = randLengthTillAd+currentStart+1;i<(10+currentStart);i++) {
+        for(var i = randLengthTillAd+currentStart;i<(10+currentStart);i++) {
           resultObj.push(popularPosts[i]);
           popularPostCount += 1;
           count += 1;
         }
       }
       else {
-        for(var i = randLengthTillAd+currentStart+1;i<(currentStart+(limit-currentCount));i++) {
+        for(var i = randLengthTillAd+currentStart;i<(currentStart+(limit-currentCount));i++) {
           resultObj.push(popularPosts[i]);
           popularPostCount += 1;
           count += 1;
