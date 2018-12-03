@@ -447,3 +447,31 @@ SELECT (SELECT 1) AS ADID,
   FROM DATES
   GROUP BY DATEVISITED
   ORDER BY DATEVISITED ASC;
+
+WITH IMGS AS (
+  SELECT DISTINCT ON (PACC.INFLID) PACC.INFLID, json_build_object('platformaccounts',
+    json_agg(
+      json_build_object(
+        'actname',
+        PACC.actname,
+        'platform',
+        PACC.PLATFORM,
+        'imgurl',
+        PACC.IMGURL))) as IMG
+        FROM PLATFORMACCOUNT AS PACC
+        GROUP BY PACC.INFLID
+)
+SELECT COUNT(*) AS NRCLICKS, INFLUENCER.*, (SELECT json_build_object('platformaccounts',
+  json_agg(
+    json_build_object(
+      'actname',
+      PACC.actname,
+      'platform',
+      PACC.PLATFORM,
+      'imgurl',
+      PACC.IMGURL))) as IMG
+      FROM PLATFORMACCOUNT AS PACC
+      WHERE PACC.INFLID = INFLUENCER.INFLUENCERID
+      GROUP BY PACC.INFLID) FROM INFLUENCER
+      INNER JOIN USRVISIT ON INFLUENCER.INFLUENCERID = USRVISIT.INFLID
+      GROUP BY INFLUENCER.INFLUENCERID LIMIT 100;
