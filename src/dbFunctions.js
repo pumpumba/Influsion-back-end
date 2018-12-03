@@ -414,15 +414,30 @@ var self = module.exports = {
             if (dbResults != undefined && dbResults["rowCount"] == 1) {
                 dbResults["updateSuccess"] = true;
                 if(imageURL != undefined) {
-                    var dbQuery2 = "UPDATE INFLUENCER SET PICLINK = '"+ imageURL +"' WHERE INFLID = "+ influencerId +";";
+                    var dbQuery2 = "UPDATE INFLUENCER SET PICLINK = '"+ imageURL +"' WHERE INFLUENCERID = "+ influencerId +";";
+                    databaseClient.query(dbQuery2, (err, dbResult) => {
+                        var dbResults = dbResult;
+                        if (dbResults != undefined && dbResults["rowCount"] == 1) {
+                            dbResults["updateSuccess"] = true;
+                        } else {
+                            console.log("Failed: ");
+                            console.log(dbResult);
+                            dbResults = {};
+                            dbResults["updateSuccess"] = false;
+                        }
+                        callback(dbResults);
+                    });
+                }
+                else {
+                    callback(dbResults); 
                 }
             } else {
                 console.log("Failed: ");
                 console.log(dbResult);
                 dbResults = {};
                 dbResults["updateSuccess"] = false;
+                callback(dbResults);
             }
-            callback(dbResults);
         });
     },
     //makes a user unfollows an influencer
