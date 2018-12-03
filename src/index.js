@@ -581,9 +581,35 @@ app.get("/db/get_visits_over_time_for_ad", (req, res) => {
 app.get("/db/get_top_clicked_influencers", (req, res) => {
   var limit = req["query"]["limit"];
   if (limit != undefined) {
-    var dbRequest = "SELECT COUNT(*) AS NRCLICKS, INFLUENCER.* FROM USRVISIT INNER JOIN INFLUENCER ON INFLUENCER.INFLUENCERID = USRVISIT.INFLID GROUP BY INFLUENCER.INFLUENCERID LIMIT "+limit+";";
+    var dbRequest = "SELECT COUNT(*) AS NRCLICKS, INFLUENCER.*, (SELECT json_build_object('platformaccounts', \
+      json_agg( \
+        json_build_object( \
+          'actname', \
+          PACC.actname, \
+          'platform', \
+          PACC.PLATFORM, \
+          'imgurl', \
+          PACC.IMGURL))) as IMG \
+          FROM PLATFORMACCOUNT AS PACC \
+          WHERE PACC.INFLID = INFLUENCER.INFLUENCERID \
+          GROUP BY PACC.INFLID) FROM INFLUENCER \
+          INNER JOIN USRVISIT ON INFLUENCER.INFLUENCERID = USRVISIT.INFLID \
+          GROUP BY INFLUENCER.INFLUENCERID LIMIT "+limit+";";
   } else {
-    var dbRequest = "SELECT COUNT(*) AS NRCLICKS, INFLUENCER.* FROM USRVISIT INNER JOIN INFLUENCER ON INFLUENCER.INFLUENCERID = USRVISIT.INFLID GROUP BY INFLUENCER.INFLUENCERID;";
+    var dbRequest = "SELECT COUNT(*) AS NRCLICKS, INFLUENCER.*, (SELECT json_build_object('platformaccounts', \
+      json_agg( \
+        json_build_object( \
+          'actname', \
+          PACC.actname, \
+          'platform', \
+          PACC.PLATFORM, \
+          'imgurl', \
+          PACC.IMGURL))) as IMG \
+          FROM PLATFORMACCOUNT AS PACC \
+          WHERE PACC.INFLID = INFLUENCER.INFLUENCERID \
+          GROUP BY PACC.INFLID) FROM INFLUENCER \
+          INNER JOIN USRVISIT ON INFLUENCER.INFLUENCERID = USRVISIT.INFLID \
+          GROUP BY INFLUENCER.INFLUENCERID;";
   }
 
   client.query(dbRequest, (err, dbResult) => {
