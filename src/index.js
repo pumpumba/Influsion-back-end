@@ -296,13 +296,14 @@ app.post("/db/promote_post_popular", (req, res) =>  {
 // Create ad
 app.post("/db/create_ad", (req, res) => {
   var inputObj = req.body;
-  var dbRequest = "INSERT INTO TVOPERATORCONTENT(TITLE, TVOPERATORID, IMGURL, TEXTDESCRIPTION, ADDITIONALINFORMATION, SHOWINPOPULARFEED, SHOWINFOLLOWINGFEED) \
+  var dbRequest = "INSERT INTO TVOPERATORCONTENT(TITLE, TVOPERATORID, IMGURL, TEXTDESCRIPTION, ADDITIONALINFORMATION, SHOWINPOPULARFEED, READMOREURL, SHOWINFOLLOWINGFEED) \
     VALUES ('" + inputObj.title + "', \
     " + inputObj.tvoperatorid + ", \
     '" + inputObj.imgurl + "', \
     '" + inputObj.textdescription + "', \
     '" + inputObj.additionalinformation + "', \
     " + inputObj.showinpopularfeed + ", \
+    '" + inputObj.read_more_url + "', \
     " + inputObj.showinfollowingfeed + ");";
 
     client.query(dbRequest, (err, dbResult) => {
