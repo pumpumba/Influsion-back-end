@@ -322,18 +322,34 @@ app.post("/db/create_ad", (req, res) => {
 // Remove ad
 app.post("/db/remove_ad", (req, res) => {
   var inputObj = req.body;
-  var dbRequest = "DELETE FROM TVOPERATORCONTENT WHERE ADID = " + inputObj.id + ";";
-  client.query(dbRequest, (err, dbResult) => {
-      var dbResults = dbResult;
-      if (dbResults != undefined && dbResults != null) {
-          dbResults["deleteSuccess"] = true;
-      } else {
-          dbResults = {};
-          dbResults["deleteSuccess"] = false;
-      }
 
-      res.json(dbResults);
+  // Remove from TVOPERATORCONTENTCLICK first
+  var dbRequest1 = "DELETE FROM TVOPERATORCONTENTCLICK WHERE ADID =" + inputObj.id + ";";
+  client.query(dbRequest1, (err, dbResult1) => {
+      if (dbResult1 != undefined && dbResult1 != null) {
+
+        // Remove from TVOPERATORCONTENT
+        var dbRequest2 = "DELETE FROM TVOPERATORCONTENT WHERE ADID = " + inputObj.id + ";";
+        client.query(dbRequest2, (err, dbResult2) => {
+            var dbResults2 = dbResult2;
+            if (dbResults2 != undefined && dbResults2 != null) {
+                dbResults2["deleteSuccess"] = true;
+            } else {
+                dbResults2 = {};
+                dbResults2["deleteSuccess"] = false;
+            }
+
+            res.json(dbResults2);
+        });
+
+      } else {
+          dbResults1 = {};
+          dbResults1["deleteSuccess"] = false;
+          res.json(dbResults1);
+      }
   });
+
+
 });
 
 // Get ads
