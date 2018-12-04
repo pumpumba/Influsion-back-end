@@ -10,12 +10,12 @@ INSERT INTO LOCATION (LOCATIONNAME, LOCATIONTYPE) VALUES ('United States', 'COUN
 -- locationtype has to be inserted with caps!
 INSERT INTO LOCATION (LOCATIONNAME, LOCATIONTYPE, COUNTRYID) VALUES ('New York', 'CITY', (select locationid from location where location.locationname = 'United States'));
 INSERT INTO LOCATION (LOCATIONNAME, LOCATIONTYPE, COUNTRYID) VALUES ('Stockholm', 'CITY', (select locationid from location where location.locationname = 'Sweden'));
-INSERT INTO INFLUENCER (INFLUENCERNAME, REALNAME, AGE, PICLINK, SEX) VALUES ('Bill Gates', 'Bill Gates', 62, 'https://pbs.twimg.com/profile_images/988775660163252226/XpgonN0X_400x400.jpg', 'Male');
+--INSERT INTO INFLUENCER (INFLUENCERNAME, REALNAME, AGE, PICLINK, SEX) VALUES ('Bill Gates', 'Bill Gates', 62, 'https://pbs.twimg.com/profile_images/988775660163252226/XpgonN0X_400x400.jpg', 'Male');
 INSERT INTO INFLUENCER (INFLUENCERNAME, REALNAME, AGE, CITYID, COUNTRYID, SEX) VALUES ('Jockiboi', 'Joakim Lundell', 33, (select locationid from location where location.locationname = 'Stockholm'),(select locationid from location where location.locationname = 'Sweden'), 'Male');
 
 -- Add a platform account
-INSERT INTO PLATFORMACCOUNT(INFLID, ACTNAME, PLATFORM, NRFLWRS, MEMBERSINCE, ACTURL) VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE INFLUENCERNAME = 'Bill Gates'), 'BillG', 'instagram', 23121, (SELECT NOW()::date), 'instagram.com/BillG');
-INSERT INTO PLATFORMACCOUNT(INFLID, ACTNAME, PLATFORM, NRFLWRS, MEMBERSINCE, ACTURL) VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE INFLUENCERNAME = 'Bill Gates'), 'BillGates', 'twitter', 211121, (SELECT NOW()::date), 'twitter.com/BillG');
+--INSERT INTO PLATFORMACCOUNT(INFLID, ACTNAME, PLATFORM, NRFLWRS, MEMBERSINCE, ACTURL) VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE INFLUENCERNAME = 'Bill Gates'), 'BillG', 'instagram', 23121, (SELECT NOW()::date), 'instagram.com/BillG');
+--INSERT INTO PLATFORMACCOUNT(INFLID, ACTNAME, PLATFORM, NRFLWRS, MEMBERSINCE, ACTURL) VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE INFLUENCERNAME = 'Bill Gates'), 'BillGates', 'twitter', 211121, (SELECT NOW()::date), 'twitter.com/BillG');
 INSERT INTO PLATFORMACCOUNT(INFLID, ACTNAME, PLATFORM, NRFLWRS, MEMBERSINCE, ACTURL) VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE INFLUENCERNAME = 'Jockiboi'), 'Jockiboi', 'instagram', 23121, (SELECT NOW()::date), 'instagram.com/Jockiboi');
 -- added this to be able to add sample influencer promotion information.
 SELECT * FROM INFLUENCER;
@@ -28,30 +28,30 @@ INSERT INTO PROMOTION(TVOPERATORID, PROMOTIONNAME, PICTURE, POPULARFEED) VALUES 
 INSERT INTO PROMOTION(TVOPERATORID, PROMOTIONNAME, PICTURE, POPULARFEED) VALUES (1, 'Zenterio selected promotion', 'picture2.jpg', TRUE);
 INSERT INTO PROMOTION(TVOPERATORID, PROMOTIONNAME, PICTURE, FOLLOWINGFEED) VALUES (2, 'TV operator''s promotion', 'picture3.jpg', TRUE);
 --INSERT INTO INFLUENCERPROMOTED(INFLUENCERID, PROMOTIONID) VALUES (1,1);
-INSERT INTO INFLUENCERPROMOTED(INFLUENCERID, PROMOTIONID, PROMOTIONTYPE) VALUES (2,1, 'demotion');
+--INSERT INTO INFLUENCERPROMOTED(INFLUENCERID, PROMOTIONID, PROMOTIONTYPE) VALUES (2,1, 'demotion');
 --INSERT INTO INFLUENCERPROMOTED(INFLUENCERID, PROMOTIONID, PROMOTIONTYPE) VALUES (2,1, 'demotion');
 INSERT INTO INFLUENCERPROMOTED(INFLUENCERID, PROMOTIONID, PROMOTIONTYPE) VALUES (1,1, 'demotion');
 --INSERT INTO INFLUENCERPROMOTED(INFLUENCERID, PROMOTIONID, PROMOTIONTYPE) VALUES (1,1, 'promotion');
 INSERT INTO TAG (TAGNAME) VALUES ('metoo');
 INSERT INTO TAGPROMOTED(TAGID, PROMOTIONID, PROMOTIONTYPE) VALUES ((SELECT TAGID FROM TAG WHERE TAGNAME = 'metoo'),1, 'promotion');
 -- Update country of a specific influencer
-UPDATE INFLUENCER SET COUNTRYID = (select locationid from location where location.locationname = 'United States') WHERE INFLUENCERNAME = 'Bill Gates';
+--UPDATE INFLUENCER SET COUNTRYID = (select locationid from location where location.locationname = 'United States') WHERE INFLUENCERNAME = 'Bill Gates';
 
 
 
 -- INSERT a visit to a specific influencer
-INSERT INTO USRVISIT (USRID, INFLID, TYPEOFVISIT)
-    VALUES ((SELECT USRID FROM USR WHERE USRNAME = 'Filleboy'), (SELECT INFLUENCERID FROM INFLUENCER WHERE INFLUENCERNAME = 'Bill Gates'), 'instagrampost');
+--INSERT INTO USRVISIT (USRID, INFLID, TYPEOFVISIT)
+--    VALUES ((SELECT USRID FROM USR WHERE USRNAME = 'Filleboy'), (SELECT INFLUENCERID FROM INFLUENCER WHERE INFLUENCERNAME = 'Bill Gates'), 'instagrampost');
 
 --Insert that a user wants to follow a specific influencer
-INSERT INTO USRFLWINFL (FLWRID, INFLID)
-    VALUES (
-      (SELECT USRID
-        FROM USR
-        WHERE USRNAME = 'Filleboy'),
-      (SELECT INFLUENCERID
-        FROM INFLUENCER
-        WHERE INFLUENCERNAME = 'Bill Gates'));
+-- INSERT INTO USRFLWINFL (FLWRID, INFLID)
+--     VALUES (
+--       (SELECT USRID
+--         FROM USR
+--         WHERE USRNAME = 'Filleboy'),
+--       (SELECT INFLUENCERID
+--         FROM INFLUENCER
+--         WHERE INFLUENCERNAME = 'Bill Gates'));
         INSERT INTO USRFLWINFL (FLWRID, INFLID)
             VALUES (
               (SELECT USRID
@@ -118,8 +118,8 @@ SELECT * FROM INFLUENCERWITHPLATFORMACCOUNTS AS I
   ORDER BY INFLUENCERNAME;
 
 -- INSERT A USER into the DB
-INSERT INTO POST(INFLID, NRLIKES, PLATFORM, USRTXTCONTENT, POSTED, POSTURL, PLATFORMCONTENT)
-  VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE REALNAME = 'Bill Gates'), 1231, 'instagram', 'Chilliaang at the WEF. Cool', (SELECT NOW()), 'instagram.com/aasdq', NULL);
+--INSERT INTO POST(INFLID, NRLIKES, PLATFORM, USRTXTCONTENT, POSTED, POSTURL, PLATFORMCONTENT)
+--  VALUES ((SELECT INFLUENCERID FROM INFLUENCER WHERE REALNAME = 'Bill Gates'), 1231, 'instagram', 'Chilliaang at the WEF. Cool', (SELECT NOW()), 'instagram.com/aasdq', NULL);
 
 WITH B AS (
   SELECT I.INFLUENCERNAME, U.INFLID
@@ -131,31 +131,31 @@ SELECT B.INFLUENCERNAME, ARRAY(SELECT ACTNAME || ' : ' || PLATFORM
   WHERE INFLID = B.INFLID) FROM B;
 
 -- Select all influencers with their countries and include null values
-SELECT * FROM (
-    SELECT influencer.*, location.locationname AS Country FROM influencer
-    LEFT join location on
-    influencer.countryid = location.locationid
-    AND LOCATIONTYPE = 'COUNTRY' -- UNNECESSARY
-    and influencer.influencername = 'Bill Gates')
-    AS influencerWLocation;
+-- SELECT * FROM (
+--     SELECT influencer.*, location.locationname AS Country FROM influencer
+--     LEFT join location on
+--     influencer.countryid = location.locationid
+--     AND LOCATIONTYPE = 'COUNTRY' -- UNNECESSARY
+--     and influencer.influencername = 'Bill Gates')
+--     AS influencerWLocation;
 
 -- Select all influencers having countries and include countries
-SELECT * FROM (
-  SELECT influencer.*, location.locationname AS Country FROM influencer
-  inner join location on
-  influencer.countryid = location.locationid
-  AND LOCATIONTYPE = 'COUNTRY' -- UNNECESSARY
-  and influencer.influencername = 'Bill Gates')
-  AS influencerWLocation;
+-- SELECT * FROM (
+--   SELECT influencer.*, location.locationname AS Country FROM influencer
+--   inner join location on
+--   influencer.countryid = location.locationid
+--   AND LOCATIONTYPE = 'COUNTRY' -- UNNECESSARY
+--   and influencer.influencername = 'Bill Gates')
+--   AS influencerWLocation;
 
 -- Select all users from a specific country
-SELECT * FROM (
-  SELECT influencer.*, location.locationname AS Country FROM influencer
-  inner join location on
-  influencer.cityid = location.locationid
-  AND LOCATIONTYPE = 'CITY' -- UNNECESSARY
-  and influencer.influencername = 'Bill Gates')
-  AS influencerWLocation;
+-- SELECT * FROM (
+--   SELECT influencer.*, location.locationname AS Country FROM influencer
+--   inner join location on
+--   influencer.cityid = location.locationid
+--   AND LOCATIONTYPE = 'CITY' -- UNNECESSARY
+--   and influencer.influencername = 'Bill Gates')
+--   AS influencerWLocation;
 
 
 -- Get latest visits by which users to which influencers
@@ -173,10 +173,10 @@ SELECT u.usrname, i.INFLUENCERNAME, LATESTVISITS.visittime as lastVisited from u
 SELECT COUNT(*) AS NRVISITORS FROM USRVISIT;
 
 --- Count how many visits has been to a user
-SELECT COUNT(*) FROM USRVISIT WHERE USRVISIT.INFLID = (SELECT influencerID FROM Influencer where Influencer.REALNAME = 'Bill Gates');
+--SELECT COUNT(*) FROM USRVISIT WHERE USRVISIT.INFLID = (SELECT influencerID FROM Influencer where Influencer.REALNAME = 'Bill Gates');
 
 -- Count number of users following a specific
-SELECT COUNT(*) FROM USRVISIT WHERE USRVISIT.INFLID = (SELECT influencerID FROM Influencer where Influencer.REALNAME = 'Bill Gates');
+--SELECT COUNT(*) FROM USRVISIT WHERE USRVISIT.INFLID = (SELECT influencerID FROM Influencer where Influencer.REALNAME = 'Bill Gates');
 
 -- Retrieve all influencers and all their platform accounts based on id or name
 
