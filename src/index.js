@@ -541,7 +541,7 @@ app.post("/db/add_user_like", (req, res) => {
 app.get("/db/get_most_followed_users_clicked_promo", (req,res) => {
   var limit = req["query"]["limit"];
   var ad_id = req["query"]["ad_id"];
-  var dbRequest = "WITH USERSCLICKEDADV AS ( \
+  /*var dbRequest = "WITH USERSCLICKEDADV AS ( \
     SELECT DISTINCT(USRID)  \
     FROM TVOPERATORCONTENTCLICK  \
     WHERE ADID = "+ad_id+" \
@@ -555,7 +555,34 @@ app.get("/db/get_most_followed_users_clicked_promo", (req,res) => {
     WHERE USRFLWINFL.FLWRID IN(USERSCLICKEDADV.USRID) \
     GROUP BY INFLID \
     ORDER BY NRFOLLOWING \
-    DESC LIMIT "+limit+";"
+    DESC LIMIT "+limit+";"*/
+
+    var dbRequest = "WITH USERSCLICKEDADV AS ( \
+      SELECT DISTINCT(USRID) \
+      FROM TVOPERATORCONTENTCLICK \
+      WHERE ADID = "+ad_id+" \
+    ) \
+    SELECT INFLID, \
+    (SELECT INFLUENCER.INFLUENCERNAME \
+      FROM INFLUENCER \
+      WHERE INFLUENCER.INFLUENCERID = USRFLWINFL.INFLID) AS INFLUENCERNAME, (SELECT json_build_object('platformaccounts', \
+        json_agg( \
+          json_build_object( \
+            'actname', \
+            PACC.actname, \
+            'platform', \
+            PACC.PLATFORM, \
+            'imgurl', \
+            PACC.IMGURL))) as IMG \
+            FROM PLATFORMACCOUNT AS PACC \
+            WHERE PACC.INFLID = USRFLWINFL.INFLID \
+            GROUP BY PACC.INFLID) AS IMG, \
+      COUNT(*) AS NRFOLLOWING \
+      FROM USRFLWINFL, USERSCLICKEDADV \
+      WHERE USRFLWINFL.FLWRID IN(USERSCLICKEDADV.USRID) \
+      GROUP BY INFLID \
+      ORDER BY NRFOLLOWING \
+      DESC LIMIT "+limit+";";
 
     client.query(dbRequest, (err, dbResult) => {
 
