@@ -22,7 +22,7 @@ var self = module.exports = {
         res.json(filterSwitch(assetType, filterType));
         break;
       default:
-        res.json(["Nothing available"]);
+        res.json([]);
     }
   },
   //This is the aggregate/content call
