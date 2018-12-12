@@ -235,27 +235,27 @@ var getContentFromAsset = function (platform, assetType, assetTypes, filterTypes
 var filterSwitch = function (assetType, filterType) {
   switch (filterType) {
     case "search":
-      return (["<enter your influencers username>"]);
+      return ([]);
       break;
     case "influencer":
-      return (["<enter your influencers id>", "<enter your users ID>"]);
+      return ([]);
       break;
     case "user":
-      return (['<enter your user ID here>']);
+      return ([]);
       break;
     case "popular":
-      return (['<no entry needed>']);
+      return ([]);
       break;
     case "update":
       if (assetType != 'all') {
-        return (['<no entry needed>']);
+        return ([]);
       }
       else {
-        return (['<update is not available for asset type "all">']);
+        return ([]);
       }
       break;
     default:
-      return (["Nothing available"]);
+      return ([]);
   }
 };
 //The main content function
