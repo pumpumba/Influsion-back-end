@@ -32,11 +32,12 @@ var self = module.exports = {
     if (inputObj.filterType == undefined) {
       res.json({ errorMessage: "You need to provide a filterType" });
     }
-    var filterTypes = inputObj.filterType;
+    var filterTypes = [inputObj.filterType]
     if (inputObj.assetType == undefined) {
       res.json({ errorMessage: "You need to provide an assetType" });
     }
-    var assetTypes = inputObj.assetType;
+    var assetTypes = [inputObj.assetType]
+
     if (inputObj.filterValue == undefined) {
       var filterValue = "";
     } else {
@@ -57,6 +58,7 @@ var self = module.exports = {
     } else {
       var limit = parseInt(inputObj.limit, 10);
     }
+    filterValue = getValuesInFilterValue(filterValue)
     var resultObject = [];
     var currentAsset = 0;
     var currentFilter = 0;
@@ -66,6 +68,23 @@ var self = module.exports = {
       res.json(resultObject);
     });
   }
+};
+
+var getValuesInFilterValue = function(filterValue) {
+    var textLength = filterValue.length;
+    var start = 0;
+    var newFilterValues = []
+    for(var i = 0; i<textLength; i++) {
+      if(filterValue.substring(i, i + 1) == ' ') {
+        newFilterValues.push(filterValue.substring(start, i));
+        start = i + 1;
+      }
+    }
+    if(start != textLength) {
+      newFilterValues.push(filterValue.substring(start, textLength));
+    }
+    console.log(newFilterValues);
+    return newFilterValues;
 };
 
 
