@@ -83,7 +83,6 @@ var getValuesInFilterValue = function(filterValue) {
     if(start != textLength) {
       newFilterValues.push(filterValue.substring(start, textLength));
     }
-    console.log(newFilterValues);
     return newFilterValues;
 };
 
