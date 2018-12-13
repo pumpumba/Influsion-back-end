@@ -29,32 +29,69 @@ var self = module.exports = {
   content: function (req, res, databaseClient) {
     var inputObj = req.body;
     var context = inputObj.context;
+    console.log("The query!")
+    console.log(req["query"])
+    console.log("end of query")
     if (inputObj.filterType == undefined) {
-      res.json({ errorMessage: "You need to provide a filterType" });
+      if(req["query"]["filterType"] == undefined) {
+        res.json({ errorMessage: "You need to provide a filterType" });
+      }
+      else {
+        var filterTypes = [req["query"]["filterType"]]
+      }
     }
-    var filterTypes = [inputObj.filterType]
+    else {
+      var filterTypes = [inputObj.filterType]
+    }
     if (inputObj.assetType == undefined) {
-      res.json({ errorMessage: "You need to provide an assetType" });
+      if(req["query"]["assetType"] == undefined) {
+        res.json({ errorMessage: "You need to provide an assetType" });
+      }
+      else {
+        var assetTypes = [req["query"]["assetType"]]
+      }
     }
-    var assetTypes = [inputObj.assetType]
+    else {
+      var assetTypes = [inputObj.assetType]
+    }
 
     if (inputObj.filterValue == undefined) {
-      var filterValue = "";
+      if(req["query"]["filterValue"] == undefined) {
+        var filterValue = "";
+      }
+      else {
+        var filterValue = req["query"]["filterValue"]
+      }
     } else {
       var filterValue = inputObj.filterValue;
     }
     if (inputObj.context == undefined) {
-      var context = "";
+      if(req["query"]["context"] == undefined) {
+        var context = "";
+      }
+      else {
+        var context = req["query"]["context"]
+      }
     } else {
       var context = inputObj.context;
     }
     if (isNaN(inputObj.offset)) {
-      var offset = 0;
+      if(isNaN(req["query"]["offset"])) {
+        var offset = 0;
+      }
+      else {
+        var offset = parseInt(req["query"]["offset"], 10)
+      }
     } else {
       var offset = parseInt(inputObj.offset, 10);
     }
     if (isNaN(inputObj.limit)) {
-      var limit = 5;
+      if(isNaN(req["query"]["limit"])) {
+        var limit = 5;
+      }
+      else {
+        var limit = parseInt(req["query"]["limit"], 10)
+      }
     } else {
       var limit = parseInt(inputObj.limit, 10);
     }
