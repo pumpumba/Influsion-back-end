@@ -29,9 +29,6 @@ var self = module.exports = {
   content: function (req, res, databaseClient) {
     var inputObj = req.body;
     var context = inputObj.context;
-    console.log("The query!")
-    console.log(req["query"])
-    console.log("end of query")
     if (inputObj.filterType == undefined) {
       if(req["query"]["filterType"] == undefined) {
         res.json({ errorMessage: "You need to provide a filterType" });
